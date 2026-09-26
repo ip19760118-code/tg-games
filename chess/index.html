@@ -40,8 +40,30 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .status{text-align:center;font-size:15px;font-weight:600;min-height:24px;margin-bottom:8px;color:var(--accent);text-shadow:0 1px 4px rgba(0,0,0,0.5)}
 .status.warn{color:#ff6b6b}
 .caprow{display:flex;justify-content:space-between;min-height:22px;font-size:16px;letter-spacing:1px;margin:2px 4px;opacity:0.9}
-#board{display:grid;grid-template-columns:repeat(8,1fr);width:var(--bs);height:var(--bs);margin:6px auto;border-radius:8px;overflow:hidden;box-shadow:0 10px 30px var(--shadow),0 0 0 3px rgba(255,255,255,0.08)}
-.sq{position:relative;display:flex;align-items:center;justify-content:center;width:100%;height:100%}
+
+/* ИСПРАВЛЕНО: явная сетка 8×8 из равных долей — клетки всегда одинаковые */
+#board{
+  display:grid;
+  grid-template-columns:repeat(8,1fr);
+  grid-template-rows:repeat(8,1fr);
+  width:var(--bs);
+  height:var(--bs);
+  margin:6px auto;
+  border-radius:8px;
+  overflow:hidden;
+  box-shadow:0 10px 30px var(--shadow),0 0 0 3px rgba(255,255,255,0.08);
+}
+
+/* ИСПРАВЛЕНО: клетка растягивается на свою ячейку сетки, содержимое не влияет на размер */
+.sq{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-width:0;
+  min-height:0;
+  overflow:hidden;
+}
 .sq.light{background:var(--sq-light)}
 .sq.dark{background:var(--sq-dark)}
 .sq.sel{box-shadow:inset 0 0 0 4px rgba(124,255,196,0.9)}
@@ -253,7 +275,7 @@ function resetGame(){
   legalCache=[];
   playerSide=set.side; aiSide=playerSide==='w'?'b':'w';
   hidePromo(); endOverlay.classList.remove('show');
-  render(); updateStatus('Ваш ход' );
+  render(); updateStatus('Ваш ход');
   trackEvent('game_start',{ game_name:'chess', difficulty:set.diff, side:playerSide });
   if(turn!==playerSide) aiTurn();
 }
@@ -539,7 +561,6 @@ function render(){
     const p=board[idx];
     if(p){ const s=document.createElement('span'); s.className='pc '+p.c; s.textContent=GLYPH[p.t]; el.appendChild(s); }
   }
-  // съеденные фигуры
   let byP='',byA='';
   for(const m of moveLog){
     if(m.captured){
@@ -649,8 +670,8 @@ $('resetStatsBtn').onclick=()=>{ if(confirm('Сбросить статистик
 
 function displayStats(){ $('stW').textContent=stats.w; $('stL').textContent=stats.l; $('stD').textContent=stats.d; }
 function applyTheme(){
-  document.documentElement.setAttribute('data-theme', set.theme==='classic'? '' : set.theme);
   if(set.theme==='classic')document.documentElement.removeAttribute('data-theme');
+  else document.documentElement.setAttribute('data-theme', set.theme);
   const hdr={classic:'#101418',green:'#20301c',neon:'#14162a'}[set.theme]||'#101418';
   tgHeaderColor(hdr);
 }
