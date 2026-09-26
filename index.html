@@ -8,13 +8,8 @@
   <meta property="og:title" content="Игровой центр">
   <meta property="og:description" content="Мини-игры прямо в Telegram: выбирай, играй и делись рекордами с друзьями.">
 
-  <!-- УСКОРЕНИЕ: заранее готовим соединения с внешними доменами -->
-  <link rel="preconnect" href="https://telegram.org" crossorigin>
-  <link rel="dns-prefetch" href="https://telegram.org">
-  <link rel="preconnect" href="https://www.googletagmanager.com">
-  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Google Analytics (async — не блокирует отрисовку) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -26,58 +21,23 @@
     });
   </script>
 
-  <!-- WATCHDOG: если что-то зависло, принудительно гасим splash через 5 сек -->
-  <script>
-    window.__splashTimer = setTimeout(function () {
-      var s = document.getElementById('splash');
-      if (s) s.classList.add('done');
-    }, 5000);
-  </script>
-
   <style>
     html, body {
       margin: 0; padding: 0; height: 100%; overflow: hidden;
       background: #070b16;
       font-family: system-ui, -apple-system, sans-serif;
-      touch-action: pan-y;
-      user-select: none;
-      overscroll-behavior: none;
+      touch-action: pan-y; user-select: none; overscroll-behavior: none;
     }
-
-    /* ===== SPLASH: рисуется мгновенно, без внешних ресурсов ===== */
-    #splash {
-      position: fixed; inset: 0; z-index: 999;
-      background: #070b16;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 14px;
-      transition: opacity .3s ease;
-      color: #eaf0ff;
-      font-family: system-ui, -apple-system, sans-serif;
-    }
-    #splash.done { opacity: 0; pointer-events: none; }
-    .sp-logo { font-size: 56px; animation: spBob 1.6s ease-in-out infinite; }
-    @keyframes spBob { 50% { transform: translateY(-8px); } }
-    .sp-title { font-size: 20px; font-weight: 700; color: #7cffc4; letter-spacing: .04em; }
-    .sp-loader {
-      width: 46px; height: 46px; border-radius: 50%;
-      border: 4px solid rgba(124,255,196,.2);
-      border-top-color: #7cffc4;
-      animation: spSpin .9s linear infinite;
-    }
-    @keyframes spSpin { to { transform: rotate(360deg); } }
-    .sp-hint { font-size: 13px; color: #6b7699; }
-    /* ===== /SPLASH ===== */
 
     .wrap {
       width: 100vw; height: 100vh;
       display: flex;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
       padding: 20px;
       padding-top: calc(20px + env(safe-area-inset-top));
       padding-bottom: calc(20px + env(safe-area-inset-bottom));
       box-sizing: border-box;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .panel {
@@ -88,6 +48,7 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
       text-align: center; color: #eaf0ff;
+      flex-shrink: 0;
     }
 
     h1 { margin: 0 0 6px; font-size: 32px; color: #7cffc4; }
@@ -106,6 +67,7 @@
       cursor: pointer; text-align: left;
       transition: transform 0.08s ease, background 0.15s ease;
       font-family: inherit; font-size: inherit;
+      touch-action: manipulation;
     }
 
     .game-btn:active {
@@ -132,14 +94,6 @@
   </style>
 </head>
 <body>
-  <!-- SPLASH: виден сразу, гаснет когда приложение готово -->
-  <div id="splash">
-    <div class="sp-logo">🎮</div>
-    <div class="sp-title">Игровой центр</div>
-    <div class="sp-loader"></div>
-    <div class="sp-hint">Загружаем игры…</div>
-  </div>
-
   <div class="wrap">
     <div class="panel">
 
@@ -195,6 +149,14 @@
         </span>
       </button>
 
+      <button class="game-btn" id="chessBtn">
+        <span class="game-emoji">♟️</span>
+        <span class="game-text">
+          <b>Шахматы</b>
+          <small>Полные правила шахмат против компьютера</small>
+        </span>
+      </button>
+
       <button class="game-btn disabled" disabled>
         <span class="game-emoji">🚧</span>
         <span class="game-text">
@@ -207,21 +169,8 @@
     </div>
   </div>
 
-  <!-- SDK перенесён В КОНЕЦ body: страница рисуется сразу, не дожидаясь его -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
   <script>
-    /* ===== Скрыть splash ===== */
-    function hideSplash() {
-      if (window.__splashTimer) { clearTimeout(window.__splashTimer); window.__splashTimer = null; }
-      var s = document.getElementById('splash');
-      if (s) {
-        s.classList.add('done');
-        setTimeout(function () { if (s && s.parentNode) s.parentNode.removeChild(s); }, 350);
-      }
-    }
-
-    const tg = window.Telegram && window.Telegram.WebApp;
+    const tg = window.Telegram?.WebApp;
 
     if (tg) {
       try {
@@ -233,14 +182,16 @@
       } catch (e) {}
     }
 
-    function trackEvent(name, params) {
-      try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {}
+    function trackEvent(name, params){
+      try {
+        if (typeof gtag === 'function') gtag('event', name, params);
+      } catch (e) {}
     }
 
     function openGame(url, gameName) {
       trackEvent('hub_game_click', { game_name: gameName });
       try {
-        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+        if (tg?.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
       } catch (e) {}
       location.href = url;
     }
@@ -251,13 +202,7 @@
     document.getElementById('dominoBtn').addEventListener('click', () => openGame('./domino/', 'domino'));
     document.getElementById('shooterBtn').addEventListener('click', () => openGame('./shooter/', 'shooter'));
     document.getElementById('fruitSamuraiBtn').addEventListener('click', () => openGame('./fruit-samurai/', 'fruit_samurai'));
-
-    /* Splash гаснем, как только основной код отработал (страница отрисована) */
-    requestAnimationFrame(function () {
-      requestAnimationFrame(hideSplash);
-    });
-    if (document.readyState === 'complete') hideSplash();
-    else window.addEventListener('load', hideSplash);
+    document.getElementById('chessBtn').addEventListener('click', () => openGame('./chess/', 'chess'));
   </script>
 </body>
 </html>
