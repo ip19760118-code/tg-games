@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Дурак</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
+<script>
+  window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}
+  gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<style>
+:root{--bg1:#0d1b2a;--bg2:#1b263b;--bg3:#070d15;--panel:rgba(20,32,48,.88);--text:#e0e1dd;--accent:#ffd166;--red:#e63946;--felt:#14532d;--cw:clamp(46px,11.5vw,64px)}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.wrap{max-width:760px;width:100%;background:var(--panel);border-radius:24px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
+.header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.title{font-size:20px;font-weight:700}
+.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
+.hbtn:active{transform:scale(.95)}
+.room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
+.room-bar .code{font-family:monospace;letter-spacing:2px;font-size:15px;color:var(--accent);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:6px;font-weight:700}
+.rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+.rbtn.danger{border-color:rgba(255,80,80,.4);color:#ff9a9a}
+.players-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.chip{display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 9px;font-size:11px}
+.chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
+.chip .dot{width:7px;height:7px;border-radius:50%;background:#57c85b;box-shadow:0 0 5px #57c85b}
+.chip .dot.off{background:#777;box-shadow:none}
+.felt{background:radial-gradient(ellipse at center,#1d7a3f,#14532d 70%);border-radius:18px;padding:10px;min-height:200px;position:relative;box-shadow:inset 0 2px 12px rgba(0,0,0,.5);display:flex;gap:10px;align-items:flex-start}
+.deckbox{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:4px;margin-right:calc(var(--cw) * 0.62)}
+.deckpile{position:relative;width:var(--cw);height:calc(var(--cw)*1.4)}
+.trumpcard{position:absolute;right:calc(var(--cw) * -0.42);top:50%;width:calc(var(--cw) * 1.15);height:calc(var(--cw) * 1.6);transform:translateY(-50%) rotate(90deg)}
+.trumpcard .corner{font-size:calc(var(--cw) * .34)}
+.trumpcard .center{font-size:calc(var(--cw) * .6)}
+.deckcount{font-size:12px;font-weight:700;color:#fff;text-shadow:0 1px 3px #000}
+.trumpbadge{font-size:12px;font-weight:700;color:#fff;background:rgba(0,0,0,.35);border-radius:12px;padding:2px 8px}
+.table{flex:1;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;align-content:flex-start;min-height:120px}
+.pair{position:relative;width:var(--cw);height:calc(var(--cw)*1.55)}
+.pair .def{position:absolute;left:10px;top:14px;transform:rotate(12deg)}
+.card{width:var(--cw);height:calc(var(--cw)*1.4);border-radius:8px;background:linear-gradient(160deg,#fff,#e8e8e8);box-shadow:0 3px 8px rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;border:1px solid #bbb}
+.card.red{color:var(--red)}
+/* ИСПРАВЛЕНО: крести теперь тёмно-зелёные для лучшей видимости */
+.card.club{color:#1a6b1a}
+.card.black{color:#111}
+.card .corner{position:absolute;font-size:calc(var(--cw)*.28);line-height:1.1;text-align:center;font-weight:900}
+.card .corner.tl{top:4px;left:5px}
+.card .corner.br{bottom:4px;right:5px;transform:rotate(180deg)}
+/* ИСПРАВЛЕНО: центральная масть крупнее и жирнее */
+.card .center{font-size:calc(var(--cw)*.52);font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.card.back{background:repeating-linear-gradient(45deg,#1d3557,#1d3557 4px,#274b7a 4px,#274b7a 8px);border-color:#0e1c30}
+.card.back .corner,.card.back .center{display:none}
+.card.clickable{cursor:pointer;transition:transform .12s}
+.card.clickable:active{transform:translateY(-6px) scale(1.04)}
+.card.dim{opacity:.45}
+.card.hi{box-shadow:0 0 0 3px var(--accent),0 3px 8px rgba(0,0,0,.45)}
+.status{text-align:center;font-size:14px;font-weight:600;margin:8px 0;min-height:20px;color:var(--accent)}
+.status.warn{color:#ff8f8f}
+.hand{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;min-height:calc(var(--cw)*1.45);padding:4px}
+.actions{display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn:active{transform:scale(.96)}
+.btn:disabled{opacity:.35;cursor:not-allowed}
+.btn.primary{background:linear-gradient(135deg,#ffd166,#f4a261);color:#201505;border:none}
+.btn.danger{border-color:rgba(255,80,80,.5);color:#ff9a9a}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.cardbox h2{font-size:24px;margin-bottom:8px}
+.cardbox .sub{opacity:.85;margin-bottom:14px;font-size:14px}
+.cardbox .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+.hubbtn{position:absolute;top:12px;left:12px}
+.mode-choice{display:flex;flex-direction:column;gap:10px;margin:10px 0}
+.mode-btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:16px;padding:13px;cursor:pointer;font-family:inherit;text-align:left;display:flex;gap:12px;align-items:center}
+.mode-btn .icon{font-size:28px}
+.mode-btn b{display:block;font-size:15px}
+.mode-btn small{font-size:12px;opacity:.75}
+.mode-btn.primary{border-color:var(--accent);background:rgba(255,209,102,.1)}
+.seg{display:flex;gap:6px;justify-content:center;margin:8px 0}
+.seg b{flex:1;max-width:90px;text-align:center;font-size:13px;font-weight:600;border:1px solid rgba(255,255,255,.25);border-radius:8px;padding:8px 2px;cursor:pointer}
+.seg b.on{background:var(--accent);color:#201505;border-color:var(--accent)}
+.code-input{display:flex;gap:8px;justify-content:center;margin:12px 0}
+.code-input input{width:130px;font-size:20px;text-align:center;padding:7px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:var(--text);font-family:monospace;letter-spacing:4px;text-transform:uppercase}
+.lobby-list{display:flex;flex-direction:column;gap:7px;margin:10px 0;text-align:left}
+.lobby-list .row{display:flex;justify-content:space-between;background:rgba(0,0,0,.2);border-radius:10px;padding:7px 12px;font-size:13px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <button class="hbtn" id="hubBtn">← В меню игр</button>
+    <div class="title">🃏 ДУРАК</div>
+    <button class="hbtn" id="rulesBtn">📖</button>
+  </div>
+  <div class="room-bar" id="roomBar" style="display:none">
+    <div>Комната: <span class="code" id="roomCode">------</span> · <span id="roomCount">0/4</span></div>
+    <div style="display:flex;gap:6px">
+      <button class="rbtn" id="inviteBtn">📤 Пригласить</button>
+      <button class="rbtn" id="copyBtn">🔢 Код</button>
+      <button class="rbtn danger" id="leaveBtn">🚪 Выйти</button>
+    </div>
+  </div>
+  <div class="players-bar" id="playersBar"></div>
+  <div class="felt">
+    <div class="deckbox">
+      <div class="deckpile" id="deckPile"></div>
+      <div class="deckcount" id="deckCount">0</div>
+      <div class="trumpbadge" id="trumpBadge">—</div>
+    </div>
+    <div class="table" id="tableEl"></div>
+  </div>
+  <div class="status" id="statusEl">Выбери режим</div>
+  <div class="hand" id="handEl"></div>
+  <div class="actions">
+    <button class="btn primary" id="bitoBtn" style="display:none">✅ Бито</button>
+    <button class="btn danger" id="takeBtn" style="display:none">📥 Взять</button>
+    <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
+    <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
+  </div>
+</div>
+
+<div class="overlay" id="modeOverlay">
+  <div class="cardbox">
+    <button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button>
+    <h2>🃏 Дурак</h2>
+    <div class="sub">Подкидной · 36 карт</div>
+    <div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div>
+    <div class="mode-choice">
+      <button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери количество игроков выше</small></div></button>
+      <button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока</small></div></button>
+      <button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button>
+    </div>
+    <div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div>
+    <div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div>
+  </div>
+</div>
+
+<div class="overlay" id="lobbyOverlay">
+  <div class="cardbox">
+    <h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2>
+    <div class="sub">Ожидание игроков (2–4)</div>
+    <div class="lobby-list" id="lobbyList"></div>
+    <div class="btns">
+      <button class="btn" id="lobbyInvite">📤 Пригласить</button>
+      <button class="btn primary" id="lobbyStart">▶ Начать</button>
+      <button class="btn" id="lobbyLeave">🚪 Выйти</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="endOverlay">
+  <div class="cardbox">
+    <h2 id="endTitle">🏁</h2>
+    <div class="sub" id="endSub"></div>
+    <div class="btns" id="endBtns"></div>
+  </div>
+</div>
+
+<div class="overlay" id="rulesOverlay">
+  <div class="cardbox" style="text-align:left">
+    <h2 style="text-align:center">📖 Правила</h2>
+    <div class="sub" style="line-height:1.5">
+      • Козырь — масть последней карты колоды.<br>
+      • Первый ход — у младшего козыря.<br>
+      • Атакующий кладёт карту, защищающийся бьёт её старшей картой той же масти или козырем.<br>
+      • Подкидывать можно карты тех рангов, что уже на столе (макс. 6 пар и не больше руки защищающегося).<br>
+      • «Бито» — все карты отбиты, уходят в сброс; защищавшийся становится атакующим.<br>
+      • «Взять» — защищающийся забирает стол и пропускает ход атаки: вдвоём следующий раунд снова «под него», втроём-вчетвером атакует следующий после взявшего.<br>
+      • После раунда все добирают из колоды до 6 карт (защищающийся последним).<br>
+      • Проигравший — последний с картами на руках («дурак»).
+    </div>
+    <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div>
+  </div>
+</div>
+
+<script>
+/* ========== FIREBASE ========== */
+let fbDb=null;
+try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
+/* ========== TELEGRAM ========== */
+const tg=window.Telegram?.WebApp;
+if(tg){try{tg.ready();tg.expand();tg.disableVerticalSwipes&&tg.disableVerticalSwipes();}catch(e){}}
+function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else h.impactOccurred('light');}catch(e){}}
+function goToHub(){location.href='../';}
+if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{if(rulesOverlay.classList.contains('show')){rulesOverlay.classList.remove('show');return;}if(lobbyOverlay.classList.contains('show')){leaveRoom();modeOverlay.classList.add('show');return;}if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return;}goToHub();});}
+/* ========== GA ========== */
+function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
+(function(){try{const k='durak_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'durak',source:(window.Telegram?.WebApp?.initDataUnsafe?.user)?'telegram':'browser'});}}catch(e){}})();
+/* ========== ЗВУК ========== */
+let AC=null;
+function ensureAudio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.resume)AC.resume();}
+function tone(f0,f1,d,tp,v){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d);}
+const sPlay=()=>tone(500,320,.08,'triangle',.15);
+const sBeat=()=>tone(700,500,.09,'triangle',.16);
+const sTake=()=>tone(250,120,.2,'sawtooth',.14);
+const sBito=()=>tone(600,900,.15,'sine',.15);
+const sWin=()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.18,'triangle',.15),i*110));};
+const sLose=()=>{[400,350,300,250].forEach((f,i)=>setTimeout(()=>tone(f,f,.2,'sawtooth',.1),i*130));};
+/* ========== КАРТЫ / ДВИЖОК ========== */
+const RANKS=['6','7','8','9','10','В','Д','К','Т'];
+const SUITS={s:'♠',h:'♥',d:'♦',c:'♣'};
+const RED={h:1,d:1};
+const CLUB={c:1};
+const MAX_PLAYERS=4;
+const $=id=>document.getElementById(id);
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function mkDeck(){const d=[];for(const r of RANKS)for(const k in SUITS)d.push(r+k);return shuffle(d);}
+function rankOf(c){return c.slice(0,-1);}
+function suitOf(c){return c.slice(-1);}
+function cval(c){return RANKS.indexOf(rankOf(c));}
+function cbeats(d,a,trump){if(suitOf(d)===trump&&suitOf(a)!==trump)return true;return suitOf(d)===suitOf(a)&&cval(d)>cval(a);}
+function removeOne(arr,c){const i=arr.indexOf(c);if(i>-1)arr.splice(i,1);return arr;}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function nextWithCards(order,uid,hands){const i=order.indexOf(uid);for(let k=1;k<=order.length;k++){const u=order[(i+k)%order.length];if((hands[u]||[]).length>0)return u;}return null;}
+function dealState(order){
+  const deck=mkDeck();const hands={};order.forEach(u=>hands[u]=[]);
+  for(let i=0;i<6*order.length;i++)hands[order[i%order.length]].push(deck.pop());
+  const trumpCard=deck[0],trump=suitOf(trumpCard);
+  let att=null,best=99;
+  for(const u of order){for(const c of hands[u]){if(suitOf(c)===trump&&cval(c)<best){best=cval(c);att=u;}}if(att)break;}
+  if(!att){let bv=99;for(const u of order)for(const c of hands[u]){if(cval(c)<bv){bv=cval(c);att=u;}}}
+  const def=nextWithCards(order,att,hands);
+  return {order,deck,hands,trump,trumpCard,table:[],discard:0,attacker:att,defender:def,phase:'add',roundLimit:null,result:null,turnAt:Date.now()};
+}
+function tableRanks(s){const r=new Set();s.table.forEach(p=>{r.add(rankOf(p.a));if(p.d)r.add(rankOf(p.d));});return r;}
+function canAddCard(s,uid,card,first){
+  if(s.table.length>=6)return false;
+  if(s.roundLimit!=null&&s.table.length>=s.roundLimit)return false;
+  if(first)return true;
+  return tableRanks(s).has(rankOf(card));
+}
+function curActor(s){return s.phase==='attack'?s.defender:s.attacker;}
+function actAttack(s,uid,card){
+  if(s.phase!=='add'||uid!==s.attacker)return null;
+  if(!canAddCard(s,uid,card,s.table.length===0))return null;
+  const ns=clone(s);removeOne(ns.hands[uid],card);
+  if(ns.table.length===0)ns.roundLimit=Math.min(6,ns.hands[ns.defender].length);
+  ns.table.push({a:card,d:null});ns.phase='attack';ns.turnAt=Date.now();return ns;
+}
+function actBeat(s,uid,card,ti){
+  if(s.phase!=='attack'||uid!==s.defender)return null;
+  if(s.table[ti].d)return null;
+  if(!cbeats(card,s.table[ti].a,s.trump))return null;
+  const ns=clone(s);removeOne(ns.hands[uid],card);ns.table[ti].d=card;
+  ns.phase=ns.table.every(p=>p.d)?'add':'attack';ns.turnAt=Date.now();return ns;
+}
+function actTake(s,uid){if(s.phase!=='attack'||uid!==s.defender)return null;const ns=clone(s);ns.phase='taking';ns.turnAt=Date.now();return ns;}
+function actAddTaking(s,uid,card){if(s.phase!=='taking'||uid!==s.attacker)return null;if(!canAddCard(s,uid,card,false))return null;const ns=clone(s);removeOne(ns.hands[uid],card);ns.table.push({a:card,d:null});ns.turnAt=Date.now();return ns;}
+function actFinishTake(s,uid){
+  if(s.phase!=='taking'||uid!==s.attacker)return null;
+  const ns=clone(s);const cards=[];ns.table.forEach(p=>{cards.push(p.a);if(p.d)cards.push(p.d);});
+  ns.hands[ns.defender]=ns.hands[ns.defender].concat(cards);
+  return resolveRound(ns,true);
+}
+function actBito(s,uid){
+  if(s.phase!=='add'||uid!==s.attacker)return null;
+  if(!s.table.length||!s.table.every(p=>p.d))return null;
+  const ns=clone(s);ns.discard+=ns.table.length*2;ns.table=[];
+  return resolveRound(ns,false);
+}
+function drawSeq(s){const o=s.order,i=o.indexOf(s.attacker),seq=[];for(let k=0;k<o.length;k++)seq.push(o[(i+k)%o.length]);const di=seq.indexOf(s.defender);if(di>-1){seq.splice(di,1);seq.push(s.defender);}return seq.filter(u=>s.hands[u].length>0);}
+function resolveRound(s,took){
+  s.table=[];s.roundLimit=null;
+  for(const u of drawSeq(s)){while(s.hands[u].length<6&&s.deck.length)s.hands[u].push(s.deck.pop());}
+  if(!s.deck.length)s.trumpCard=null;
+  const active=s.order.filter(u=>s.hands[u].length>0);
+  if(active.length<=1){s.result={loser:active[0]||null,at:Date.now()};s.phase='end';s.turnAt=Date.now();return s;}
+  let na = took ? nextWithCards(s.order, s.defender, s.hands) : s.defender;
+  if(!na) na = active[0];
+  let nd = nextWithCards(s.order, na, s.hands);
+  if(!nd || nd===na){ nd = active.find(u=>u!==na) || na; }
+  s.attacker=na;s.defender=nd;s.phase='add';s.turnAt=Date.now();
+  return s;
+}
+/* ========== СОСТОЯНИЕ ПРИЛОЖЕНИЯ ========== */
+let onlineMode=false,roomCode=null,myUid=null,myName=null,roomRef=null,roomData=null,shownEndAt=null;
+let G=null,botCount=2,botTimer=null;
+function getUid(){let u=localStorage.getItem('durak_uid');if(!u){u='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('durak_uid',u);}return u;}
+function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=localStorage.getItem('durak_name');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('durak_name',n);}return n;}
+function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
+function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);return u.toString();}
+function S(){return onlineMode?(roomData&&roomData.state):G;}
+function myHand(){const s=S();if(!s)return[];return s.hands[onlineMode?myUid:'p0']||[];}
+function iAmActor(){const s=S();if(!s||s.result)return false;return curActor(s)===(onlineMode?myUid:'p0');}
+function nameOf(uid){if(!onlineMode)return uid==='p0'?'Вы':('Бот '+uid.slice(1));const p=(roomData.players||{})[uid];return p?p.name:'?';}
+function playersList(){const s=S();if(!s)return[];return s.order.map(u=>({uid:u,name:nameOf(u),n:(s.hands[u]||[]).length,connected:onlineMode?!!(roomData.presence&&roomData.presence[u]):true,loses:onlineMode?((roomData.loses||{})[u]||0):0}));}
+/* ========== ОНЛАЙН ========== */
+async function createRoom(){
+  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
+  myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
+  try{
+    await roomRef.set({game:'durak',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[],players:{},presence:{},loses:{},state:null,lastMove:null});
+    await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;arr.push(myUid);return arr;});
+    await roomRef.child('players/'+myUid).set({name:myName});
+    onlineMode=true;$('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
+    modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_created',{game_name:'durak'});
+  }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}
+}
+async function joinRoom(code){
+  if(!fbDb){alert('Firebase не загружен.');return;}
+  myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
+  try{
+    const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
+    const r=snap.val();if(r.game!=='durak'){alert('Это комната другой игры.');return;}
+    if(r.status!=='waiting'){alert('Игра уже идёт.');return;}
+    if((r.order||[]).length>=MAX_PLAYERS){alert('Комната заполнена.');return;}
+    let ok=true;
+    await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;if(arr.length>=MAX_PLAYERS){ok=false;return undefined;}arr.push(myUid);return arr;},(e,c)=>{ok=c;});
+    if(!ok){alert('Комната заполнена.');return;}
+    await roomRef.child('players/'+myUid).set({name:myName});
+    onlineMode=true;$('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
+    modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_joined',{game_name:'durak'});
+  }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}
+}
+function subscribeRoom(){
+  roomRef.on('value',snap=>{
+    roomData=snap.val();
+    if(!roomData){setStatus('❌ Комната закрыта');leaveRoom();return;}
+    $('roomCount').textContent=(roomData.order||[]).length+'/'+MAX_PLAYERS;
+    if(roomData.status==='waiting')showLobby();else lobbyOverlay.classList.remove('show');
+    renderAll();
+    const s=roomData.state;
+    if(s&&s.result&&s.result.at!==shownEndAt){shownEndAt=s.result.at;showEnd();}
+    if(s&&roomData.status==='playing')setStatus(statusText(s));
+  });
+  const p=roomRef.child('presence/'+myUid);p.set({name:myName,at:Date.now()});p.onDisconnect().remove();
+  startWatchdog();
+}
+function leaveRoom(){onlineMode=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
+function showLobby(){
+  lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
+  const list=$('lobbyList');list.innerHTML='';
+  playersList().forEach((p,i)=>{const r=document.createElement('div');r.className='row';r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.uid===myUid?' (вы)':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';list.appendChild(r);});
+  for(let i=playersList().length;i<MAX_PLAYERS;i++){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— свободно —</span><span>⚪</span>';list.appendChild(r);}
+  $('lobbyStart').style.display=(roomData.host===myUid)?'inline-flex':'none';
+  $('lobbyStart').disabled=playersList().length<2;
+}
+$('lobbyStart').onclick=()=>{if(roomData.host!==myUid)return;const order=roomData.order;if(order.length<2)return;const st=dealState(order);roomRef.update({state:st,status:'playing',lastMove:{name:myName,action:'deal',at:Date.now()}});trackEvent('game_start',{game_name:'durak',mode:'online',players:order.length});};
+$('lobbyInvite').onclick=shareInvite;
+$('lobbyLeave').onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};
+$('inviteBtn').onclick=shareInvite;
+$('copyBtn').onclick=()=>{navigator.clipboard?.writeText(roomCode);setStatus('Код '+roomCode+' скопирован');};
+$('leaveBtn').onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};
+function shareInvite(){const url=inviteLink(roomCode);const text='🃏 Дурак онлайн! Комната '+roomCode+'\n'+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else{navigator.clipboard?.writeText(url);alert('Ссылка скопирована');}}
+function withLoses(ns){if(ns.result&&ns.result.loser&&roomRef){const l=Object.assign({},(roomData&&roomData.loses)||{});l[ns.result.loser]=(l[ns.result.loser]||0)+1;roomRef.child('loses').update(l);}return ns;}
+async function writeState(ns,action){if(ns.result)ns=withLoses(ns);await roomRef.update({state:ns,lastMove:{name:myName,action,at:Date.now()}});}
+let watchdog=null;
+function startWatchdog(){
+  if(watchdog)clearInterval(watchdog);
+  watchdog=setInterval(()=>{
+    if(!onlineMode||!roomData||roomData.status!=='playing'||roomData.host!==myUid)return;
+    const s=roomData.state;if(!s||s.result)return;
+    const a=curActor(s);
+    if(roomData.presence&&roomData.presence[a])return;
+    if(Date.now()-(s.turnAt||0)<30000)return;
+    let ns=null;
+    if(s.phase==='attack')ns=actTake(s,a);
+    else if(s.phase==='taking')ns=actFinishTake(s,a);
+    else{
+      if(!s.table.length){const h=(s.hands[a]||[]).slice().sort(sortHand(s.trump));ns=h.length?actAttack(s,a,h[0]):null;}
+      else ns=actBito(s,a);
+    }
+    if(ns){if(ns.result)ns=withLoses(ns);roomRef.update({state:ns,lastMove:{name:nameOf(a),action:'автоход (нет связи)',at:Date.now()}});}
+  },5000);
+}
+/* ========== ОФЛАЙН ========== */
+function startOffline(n){
+  onlineMode=false;G=null;
+  const order=['p0'];for(let i=1;i<n;i++)order.push('b'+i);
+  G=dealState(order);
+  modeOverlay.classList.remove('show');endOverlay.classList.remove('show');
+  renderAll();setStatus(statusText(G));
+  trackEvent('game_start',{game_name:'durak',mode:'ai',players:n});
+  maybeBot();
+}
+function sortHand(trump){return (a,b)=>{const av=(suitOf(a)===trump?100:0)+cval(a),bv=(suitOf(b)===trump?100:0)+cval(b);return av-bv;};}
+function maybeBot(){
+  if(onlineMode||!G||G.result)return;
+  const a=curActor(G);
+  if(a==='p0')return;
+  if(botTimer)clearTimeout(botTimer);
+  botTimer=setTimeout(()=>{
+    botStep(a);
+    renderAll();
+    if(G&&!G.result){setStatus(statusText(G));maybeBot();}
+    else if(G&&G.result)showEnd();
+  },800);
+}
+function botStep(uid){
+  const s=G;const hand=s.hands[uid];
+  if(s.phase==='add'&&uid===s.attacker){
+    if(!s.table.length){const sorted=hand.slice().sort(sortHand(s.trump));const ns=actAttack(s,uid,sorted[0]);if(ns){G=ns;sPlay();}return;}
+    if(s.table.every(p=>p.d)){
+      const ranks=tableRanks(s);const cands=hand.filter(c=>ranks.has(rankOf(c))&&canAddCard(s,uid,c,false)).sort(sortHand(s.trump));
+      const low=cands.find(c=>cval(c)<=3);
+      if(low&&s.table.length<(s.roundLimit||6)){const ns=actAttack(s,uid,low);if(ns){G=ns;sPlay();return;}}
+      const ns=actBito(s,uid);if(ns){G=ns;sBito();}
+    }
+    return;
+  }
+  if(s.phase==='attack'&&uid===s.defender){
+    const ti=s.table.findIndex(p=>!p.d);if(ti<0)return;
+    const at=s.table[ti].a;
+    const cands=hand.filter(c=>cbeats(c,at,s.trump)).sort((a,b)=>((suitOf(a)===s.trump)?100:0)+cval(a)-(((suitOf(b)===s.trump)?100:0)+cval(b)));
+    if(cands.length){const ns=actBeat(s,uid,cands[0],ti);if(ns){G=ns;sBeat();}return;}
+    const ns=actTake(s,uid);if(ns){G=ns;sTake();}
+    return;
+  }
+  if(s.phase==='taking'&&uid===s.attacker){
+    const ranks=tableRanks(s);const cands=hand.filter(c=>ranks.has(rankOf(c))&&canAddCard(s,uid,c,false)).sort(sortHand(s.trump));
+    const low=cands.find(c=>cval(c)<=3);
+    if(low&&s.table.length<(s.roundLimit||6)){const ns=actAddTaking(s,uid,low);if(ns){G=ns;sPlay();return;}}
+    const ns=actFinishTake(s,uid);if(ns){G=ns;sTake();}
+  }
+}
+/* ========== РЕНДЕР ========== */
+function cardEl(c,faceDown,clickable,hi,dim){
+  const d=document.createElement('div');
+  const suit=suitOf(c);
+  const isRed=RED[suit];
+  const isClub=CLUB[suit];
+  d.className='card '+(faceDown?'back':(isRed?'red':(isClub?'club':'black')))+(clickable?' clickable':'')+(hi?' hi':'')+(dim?' dim':'');
+  if(!faceDown){d.innerHTML='<span class="corner tl">'+rankOf(c)+'<br>'+SUITS[suit]+'</span><span class="center">'+SUITS[suit]+'</span><span class="corner br">'+rankOf(c)+'<br>'+SUITS[suit]+'</span>';}
+  return d;
+}
+function statusText(s){
+  if(!s)return 'Выбери режим';
+  if(s.result)return s.result.loser?('🤡 Дурак: '+esc(nameOf(s.result.loser))):'🤝 Ничья';
+  const a=curActor(s),me=onlineMode?myUid:'p0';
+  if(s.phase==='attack')return (a===me)?'🛡 Отбейся или возьми':'🛡 '+esc(nameOf(a))+' отбивается...';
+  if(s.phase==='taking')return (a===me)?'📥 Подкинь и заверши':'📥 '+esc(nameOf(a))+' берёт карты...';
+  return (a===me)?'⚔️ Твой ход: атакуй':'⚔️ Ходит '+esc(nameOf(a));
+}
+function setStatus(t,w){const e=$('statusEl');e.innerHTML=t;e.classList.toggle('warn',!!w);}
+function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function renderAll(){
+  const s=S();
+  const bar=$('playersBar');bar.innerHTML='';
+  if(s){playersList().forEach(p=>{const chip=document.createElement('span');chip.className='chip'+(curActor(s)===p.uid&&!s.result?' turn':'');chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+' · 🂠'+p.n+(onlineMode?' · 🤡'+p.loses:'');bar.appendChild(chip);});}
+  const dp=$('deckPile');dp.innerHTML='';
+  if(s&&s.deck&&s.deck.length){
+    if(s.trumpCard){const t=cardEl(s.trumpCard,false,false);t.classList.add('trumpcard');dp.appendChild(t);}
+    const back=cardEl('',true,false);back.style.position='absolute';back.style.left='0';back.style.top='0';dp.appendChild(back);
+    $('deckCount').textContent=s.deck.length;
+    $('trumpBadge').innerHTML='Козырь: <span style="color:'+(RED[s.trump]?'#ff8fa3':'#fff')+'">'+SUITS[s.trump]+'</span>';
+  }else{$('deckCount').textContent='0';$('trumpBadge').textContent=s?('Козырь: '+SUITS[s.trump]):'—';}
+  const tb=$('tableEl');tb.innerHTML='';
+  if(s)s.table.forEach(p=>{const pr=document.createElement('div');pr.className='pair';pr.appendChild(cardEl(p.a,false,false));if(p.d){const d=cardEl(p.d,false,false);d.classList.add('def');pr.appendChild(d);}tb.appendChild(pr);});
+  if(s&&!s.table.length){const em=document.createElement('div');em.style.cssText='color:rgba(255,255,255,.35);font-size:13px;align-self:center';em.textContent='стол пуст';tb.appendChild(em);}
+  const hEl=$('handEl');hEl.innerHTML='';
+  const hand=myHand().slice().sort(sortHand(s?s.trump:'s'));
+  const myTurn=iAmActor();
+  hand.forEach(c=>{
+    const legal=myTurn&&isLegalNow(s,c);
+    const el=cardEl(c,false,myTurn&&!s.result,legal&&myTurn,!legal&&myTurn);
+    el.addEventListener('click',()=>onHandClick(c));
+    hEl.appendChild(el);
+  });
+  if(!hand.length&&s&&!s.result){const em=document.createElement('span');em.style.cssText='opacity:.4;font-size:13px;align-self:center';em.textContent='нет карт';hEl.appendChild(em);}
+  const me=onlineMode?myUid:'p0';
+  const isAtt=s&&s.attacker===me,isDef=s&&s.defender===me;
+  $('bitoBtn').style.display=(myTurn&&isAtt&&s.phase==='add'&&s.table.length&&s.table.every(p=>p.d))?'inline-flex':'none';
+  $('takeBtn').style.display=(myTurn&&isDef&&s.phase==='attack')?'inline-flex':'none';
+  $('finishBtn').style.display=(myTurn&&isAtt&&s.phase==='taking')?'inline-flex':'none';
+  $('menuBtn').style.display=(s&&!s.result)?'inline-flex':'none';
+  if(s&&!s.result&&!onlineMode)setStatus(statusText(s));
+  if(s&&s.result&&!endOverlay.classList.contains('show')&&shownEndAt!==s.result.at)showEnd();
+}
+function isLegalNow(s,c){
+  if(!s||s.result)return false;
+  const me=onlineMode?myUid:'p0';
+  if(s.phase==='add'&&s.attacker===me)return canAddCard(s,me,c,s.table.length===0);
+  if(s.phase==='taking'&&s.attacker===me)return canAddCard(s,me,c,false);
+  if(s.phase==='attack'&&s.defender===me){const ti=s.table.findIndex(p=>!p.d);return ti>-1&&cbeats(c,s.table[ti].a,s.trump);}
+  return false;
+}
+function onHandClick(c){
+  ensureAudio();
+  const s=S();if(!s||s.result)return;
+  const me=onlineMode?myUid:'p0';
+  if(!iAmActor()){setStatus('⏳ Сейчас не твой ход',true);return;}
+  if(s.phase==='add'&&s.attacker===me){
+    if(!canAddCard(s,me,c,s.table.length===0)){setStatus('❌ Эту карту нельзя подкинуть',true);return;}
+    const ns=actAttack(s,me,c);if(!ns)return;
+    if(onlineMode)writeState(ns,'атака '+c);else{G=ns;sPlay();renderAll();maybeBot();}
+    return;
+  }
+  if(s.phase==='attack'&&s.defender===me){
+    const ti=s.table.findIndex(p=>!p.d);if(ti<0)return;
+    if(!cbeats(c,s.table[ti].a,s.trump)){setStatus('❌ Эта карта не бьёт '+s.table[ti].a,true);return;}
+    const ns=actBeat(s,me,c,ti);if(!ns)return;
+    if(onlineMode)writeState(ns,'отбой '+c);else{G=ns;sBeat();renderAll();maybeBot();}
+    return;
+  }
+  if(s.phase==='taking'&&s.attacker===me){
+    if(!canAddCard(s,me,c,false)){setStatus('❌ Нельзя подкинуть',true);return;}
+    const ns=actAddTaking(s,me,c);if(!ns)return;
+    if(onlineMode)writeState(ns,'подкинул '+c);else{G=ns;sPlay();renderAll();maybeBot();}
+  }
+}
+$('bitoBtn').onclick=()=>{const s=S();if(!s)return;const me=onlineMode?myUid:'p0';const ns=actBito(s,me);if(!ns)return;sBito();if(onlineMode)writeState(ns,'бито');else{G=ns;renderAll();maybeBot();}};
+$('takeBtn').onclick=()=>{const s=S();if(!s)return;const me=onlineMode?myUid:'p0';const ns=actTake(s,me);if(!ns)return;sTake();if(onlineMode)writeState(ns,'беру');else{G=ns;renderAll();maybeBot();}};
+$('finishBtn').onclick=()=>{const s=S();if(!s)return;const me=onlineMode?myUid:'p0';const ns=actFinishTake(s,me);if(!ns)return;if(onlineMode)writeState(ns,'завершил взятие');else{G=ns;sTake();renderAll();maybeBot();}};
+$('menuBtn').onclick=()=>{if(confirm('Выйти в меню игр? Партия будет прервана.')){if(onlineMode)leaveRoom();goToHub();}};
+function showEnd(){
+  const s=S();if(!s||!s.result)return;
+  const me=onlineMode?myUid:'p0';
+  let title,sub;
+  if(s.result.loser===me){title='🤡 Вы дурак';sub='Карты остались у вас на руках';sLose();tgHaptic('error');}
+  else if(s.result.loser===null){title='🤝 Ничья';sub='Карты кончились у всех';}
+  else{title='🏆 Вы победили!';sub='Дурак: '+esc(nameOf(s.result.loser));sWin();tgHaptic('success');}
+  $('endTitle').textContent=title;$('endSub').innerHTML=sub;
+  const b=$('endBtns');b.innerHTML='';
+  if(onlineMode){
+    if(roomData&&roomData.host===myUid){const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Реванш';r.onclick=()=>{const st=dealState(roomData.order);shownEndAt=null;roomRef.update({state:st,status:'playing',lastMove:{name:myName,action:'deal',at:Date.now()}});endOverlay.classList.remove('show');};b.appendChild(r);}
+    else{const w=document.createElement('div');w.style.cssText='font-size:12px;opacity:.8;width:100%';w.textContent='⏳ Хост готовит реванш...';b.appendChild(w);}
+    const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareInvite;b.appendChild(sh);
+    const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=()=>{leaveRoom();endOverlay.classList.remove('show');modeOverlay.classList.add('show');};b.appendChild(lv);
+  }else{
+    const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Ещё партию';r.onclick=()=>{endOverlay.classList.remove('show');startOffline(botCount);};b.appendChild(r);
+    const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню игр';h.onclick=goToHub;b.appendChild(h);
+  }
+  endOverlay.classList.add('show');
+  trackEvent('game_end',{game_name:'durak',mode:onlineMode?'online':'ai',loser:s.result.loser===me?'player':(s.result.loser?'other':'draw')});
+}
+/* ========== МЕНЮ ========== */
+$('hubBtn').onclick=()=>{if(onlineMode)leaveRoom();goToHub();};
+$('modeHubBtn').onclick=goToHub;
+$('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');
+$('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
+document.querySelectorAll('#botsSeg b').forEach(b=>b.onclick=()=>{document.querySelectorAll('#botsSeg b').forEach(x=>x.classList.remove('on'));b.classList.add('on');botCount=+b.dataset.n;});
+$('modeAi').onclick=()=>{ensureAudio();startOffline(botCount);};
+$('modeHost').onclick=async()=>{ensureAudio();await createRoom();};
+$('modeJoin').onclick=()=>{$('joinBox').style.display='flex';$('joinActions').style.display='flex';$('joinInput').value='';$('joinInput').focus();};
+$('joinCancel').onclick=()=>{$('joinBox').style.display='none';$('joinActions').style.display='none';};
+$('joinGo').onclick=async()=>{const c=$('joinInput').value.trim().toUpperCase();if(c.length!==6){alert('Введи 6 символов');return;}await joinRoom(c);};
+/* ========== СТАРТ ========== */
+(function init(){
+  const r=new URL(location.href).searchParams.get('room');
+  if(r&&r.length===6)joinRoom(r);
+  else modeOverlay.classList.add('show');
+  renderAll();
+})();
+</script>
+</body>
+</html>
