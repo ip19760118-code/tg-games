@@ -276,7 +276,7 @@ function resolveRound(s,took){
 }
 /* ========== СОСТОЯНИЕ ПРИЛОЖЕНИЯ ========== */
 let onlineMode=false,roomCode=null,myUid=null,myName=null,roomRef=null,roomData=null,shownEndAt=null;
-let G=null,botCount=2,botTimer=null;
+let G=null,botCount=2,botTimer=null,seated=false;
 function getUid(){let u=localStorage.getItem('durak_uid');if(!u){u='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('durak_uid',u);}return u;}
 function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=localStorage.getItem('durak_name');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('durak_name',n);}return n;}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
@@ -285,8 +285,6 @@ function S(){return onlineMode?(roomData&&roomData.state):G;}
 function myHand(){const s=S();if(!s)return[];return s.hands[onlineMode?myUid:'p0']||[];}
 function iAmActor(){const s=S();if(!s||s.result)return false;return curActor(s)===(onlineMode?myUid:'p0');}
 function nameOf(uid){if(!onlineMode)return uid==='p0'?'Вы':('Бот '+uid.slice(1));const p=(roomData&&roomData.players||{})[uid];return p?p.name:'?';}
-/* ИСПРАВЛЕНО: список игроков берётся из комнаты (order/players/presence),
-   а не из игрового состояния — поэтому работает и в лобби до старта партии */
 function playersList(){
   if(onlineMode){
     if(!roomData)return[];
@@ -304,6 +302,47 @@ function playersList(){
   if(!G)return[];
   return G.order.map(uid=>({uid,name:nameOf(uid),n:(G.hands[uid]||[]).length,connected:true,loses:0,host:uid==='p0'}));
 }
+/* ========== НОВОЕ: восстановление места за столом ========== */
+function setPresence(){
+  if(!roomRef||!myUid)return;
+  const p=roomRef.child('presence/'+myUid);
+  p.set({name:myName,at:Date.now()});
+  p.onDisconnect().remove();
+}
+function ensureSeat(){
+  if(!roomData||!onlineMode||seated)return;
+  const order=roomData.order||[];
+  if(order.includes(myUid)){ seated=true; setPresence(); return; }
+  /* 1) Ищем своё старое место по имени среди отключившихся */
+  const match=order.find(uid=>{
+    const p=(roomData.players||{})[uid];
+    return p&&p.name===myName&&!(roomData.presence&&roomData.presence[uid]);
+  });
+  if(match){
+    myUid=match;
+    localStorage.setItem('durak_uid',myUid);
+    seated=true;
+    setPresence();
+    return;
+  }
+  /* 2) Партия ещё не началась — просто занимаем место заново */
+  if(roomData.status==='waiting'){
+    roomRef.child('order').transaction(a=>{
+      const arr=Array.isArray(a)?a:[];
+      if(arr.includes(myUid))return arr;
+      if(arr.length>=MAX_PLAYERS)return undefined;
+      arr.push(myUid);return arr;
+    },(err,committed)=>{
+      if(committed){
+        roomRef.child('players/'+myUid).set({name:myName});
+        seated=true;setPresence();
+      }
+    });
+    return;
+  }
+  /* 3) Партия идёт, место занято кем-то активным — сообщаем */
+  setStatus('❌ Твоё место в партии занято или потеряно. Выйди и попроси хоста создать новую комнату.',true);
+}
 /* ========== ОНЛАЙН ========== */
 async function createRoom(){
   if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
@@ -312,7 +351,7 @@ async function createRoom(){
     await roomRef.set({game:'durak',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[],players:{},presence:{},loses:{},state:null,lastMove:null});
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;arr.push(myUid);return arr;});
     await roomRef.child('players/'+myUid).set({name:myName});
-    onlineMode=true;$('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
+    onlineMode=true;seated=true;$('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_created',{game_name:'durak'});
   }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}
 }
@@ -322,13 +361,13 @@ async function joinRoom(code){
   try{
     const snap=await roomRef.once('value');if(!snap.exists()){alert('Комната не найдена: '+roomCode);return;}
     const r=snap.val();if(r.game!=='durak'){alert('Это комната другой игры.');return;}
-    if(r.status!=='waiting'){alert('Игра уже идёт.');return;}
+    if(r.status!=='waiting'){alert('Игра уже идёт. Попроси хоста создать новую комнату или дождись реванша.');return;}
     if((r.order||[]).length>=MAX_PLAYERS){alert('Комната заполнена.');return;}
     let ok=true;
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;if(arr.length>=MAX_PLAYERS){ok=false;return undefined;}arr.push(myUid);return arr;},(e,c)=>{ok=c;});
     if(!ok){alert('Комната заполнена.');return;}
     await roomRef.child('players/'+myUid).set({name:myName});
-    onlineMode=true;$('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
+    onlineMode=true;seated=true;$('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_joined',{game_name:'durak'});
   }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}
 }
@@ -337,16 +376,16 @@ function subscribeRoom(){
     roomData=snap.val();
     if(!roomData){setStatus('❌ Комната закрыта');leaveRoom();return;}
     $('roomCount').textContent=(roomData.order||[]).length+'/'+MAX_PLAYERS;
+    ensureSeat();
     if(roomData.status==='waiting')showLobby();else lobbyOverlay.classList.remove('show');
     renderAll();
     const s=roomData.state;
     if(s&&s.result&&s.result.at!==shownEndAt){shownEndAt=s.result.at;showEnd();}
-    if(s&&roomData.status==='playing')setStatus(statusText(s));
   });
-  const p=roomRef.child('presence/'+myUid);p.set({name:myName,at:Date.now()});p.onDisconnect().remove();
+  setPresence();
   startWatchdog();
 }
-function leaveRoom(){onlineMode=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
+function leaveRoom(){onlineMode=false;seated=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
 function showLobby(){
   lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
   const list=$('lobbyList');list.innerHTML='';
@@ -452,7 +491,7 @@ function cardEl(c,faceDown,clickable,hi,dim){
   return d;
 }
 function statusText(s){
-  if(!s)return 'Выбери режим';
+  if(!s)return onlineMode?'Ожидание старта...':'Выбери режим';
   if(s.result)return s.result.loser?('🤡 Дурак: '+esc(nameOf(s.result.loser))):'🤝 Ничья';
   const a=curActor(s),me=onlineMode?myUid:'p0';
   if(s.phase==='attack')return (a===me)?'🛡 Отбейся или возьми':'🛡 '+esc(nameOf(a))+' отбивается...';
@@ -498,7 +537,8 @@ function renderAll(){
   $('takeBtn').style.display=(myTurn&&isDef&&s.phase==='attack')?'inline-flex':'none';
   $('finishBtn').style.display=(myTurn&&isAtt&&s.phase==='taking')?'inline-flex':'none';
   $('menuBtn').style.display=(s&&!s.result)?'inline-flex':'none';
-  if(s&&!s.result&&!onlineMode)setStatus(statusText(s));
+  /* ИСПРАВЛЕНО: статус обновляется и в онлайн-режиме */
+  if(s&&!s.result)setStatus(statusText(s));
   if(s&&s.result&&!endOverlay.classList.contains('show')&&shownEndAt!==s.result.at)showEnd();
 }
 function isLegalNow(s,c){
