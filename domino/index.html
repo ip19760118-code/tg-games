@@ -5,13 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover" />
 <title>Домино</title>
 
-<!-- Telegram Mini App SDK -->
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-<!-- ============================================================ -->
-<!-- GOOGLE ANALYTICS 4                                           -->
-<!-- ЗАМЕНИ G-XXXXXXXXXX НА СВОЙ ID В ДВУХ МЕСТАХ НИЖЕ            -->
-<!-- ============================================================ -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -22,7 +17,9 @@
     'page_path': location.pathname
   });
 </script>
-<!-- ============ КОНЕЦ БЛОКА GOOGLE ANALYTICS ================== -->
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <style>
 :root{--bg1:#1a3a1a;--bg2:#2d5e2d;--bg3:#0f2a0f;--card:#fcf9f0;--border:#d0c8b0;--text:#f5f0d7;--shadow:rgba(0,0,0,0.8);--accent:#f5c542;--panel:rgba(30,70,30,0.7);--label:#9bb88a;--score:#fff5d6;--btn-bg:rgba(255,255,255,0.06);--btn-border:rgba(255,255,255,0.12);--btn-text:#e8e0c8;--msg:#e8ddc0}
@@ -30,22 +27,104 @@
 [data-theme="dark"]{--bg1:#1a1a2e;--bg2:#2a2a4a;--bg3:#0e0e1a;--card:#2a2a3a;--border:#4a4a5e;--text:#e0d8c8;--shadow:rgba(0,0,0,0.7);--accent:#6a9ad8;--panel:rgba(20,20,40,0.85);--label:#8a8aaa;--score:#e0d8c8;--btn-bg:rgba(255,255,255,0.06);--btn-border:rgba(255,255,255,0.12);--btn-text:#e0d8c8;--msg:#c8c0b0}
 *{box-sizing:border-box;user-select:none}body{margin:0;min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;display:flex;justify-content:center;align-items:flex-start;padding:12px;padding-top:calc(12px + env(safe-area-inset-top));padding-bottom:calc(12px + env(safe-area-inset-bottom));transition:background 0.3s,color 0.3s}
 .game-container{max-width:1100px;width:100%;background:var(--panel);backdrop-filter:blur(4px);border-radius:48px;padding:20px 24px 24px;box-shadow:0 20px 60px var(--shadow),inset 0 1px 3px rgba(255,255,255,0.1);border:1px solid rgba(120,180,100,0.25);transition:background 0.3s}
-
 .btn-hub{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text);opacity:0.7;padding:6px 14px;border-radius:40px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s;font-family:inherit;letter-spacing:0.3px}
 .btn-hub:hover{opacity:1;background:rgba(255,255,255,0.06)}
 .btn-hub:active{transform:scale(0.96)}
+.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:12px}.title{font-size:26px;font-weight:700;color:var(--text);text-shadow:0 2px 8px var(--shadow)}.scores{display:flex;gap:20px;background:rgba(0,0,0,0.25);padding:4px 16px;border-radius:40px;backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,0.08)}.score-item{display:flex;align-items:center;gap:6px;color:var(--text);font-size:15px;font-weight:500}.score-item .value{font-weight:700;font-size:20px;color:var(--score);min-width:24px;text-align:center}.game-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;color:var(--text);font-size:15px}.turn-badge{background:rgba(255,215,80,0.2);border:1px solid var(--accent);color:var(--accent);padding:3px 14px;border-radius:30px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:border-color 0.3s}.turn-badge .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.7)}}.bank-info{background:rgba(0,0,0,0.2);padding:3px 14px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);color:var(--text)}
 
-.header{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px 16px;margin-bottom:12px}.title{font-size:26px;font-weight:700;color:var(--text);text-shadow:0 2px 8px var(--shadow)}.scores{display:flex;gap:20px;background:rgba(0,0,0,0.25);padding:4px 16px;border-radius:40px;backdrop-filter:blur(2px);border:1px solid rgba(255,255,255,0.08)}.score-item{display:flex;align-items:center;gap:6px;color:var(--text);font-size:15px;font-weight:500}.score-item .value{font-weight:700;font-size:20px;color:var(--score);min-width:24px;text-align:center}.game-info{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:8px;color:var(--text);font-size:15px}.turn-badge{background:rgba(255,215,80,0.2);border:1px solid var(--accent);color:var(--accent);padding:3px 14px;border-radius:30px;font-size:14px;font-weight:600;display:inline-flex;align-items:center;gap:6px;transition:border-color 0.3s}.turn-badge .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.3;transform:scale(0.7)}}.bank-info{background:rgba(0,0,0,0.2);padding:3px 14px;border-radius:30px;border:1px solid rgba(255,255,255,0.08);color:var(--text)}.board-wrapper{background:rgba(0,0,0,0.2);border-radius:24px;padding:16px 12px;margin:6px 0 10px;border:1px solid rgba(255,255,255,0.04);min-height:100px;position:relative;display:flex;justify-content:center;align-items:center;overflow:visible}#boardCanvas{display:block;border-radius:6px;background:transparent;max-width:100%;height:auto}.tile{position:relative;display:inline-block;border-radius:6px;box-shadow:0 4px 12px var(--shadow),inset 0 1px 3px rgba(255,255,255,0.2);transition:transform 0.15s,box-shadow 0.15s;flex-shrink:0;background:var(--card);border:1px solid var(--border);cursor:default}.tile canvas{display:block;border-radius:6px;width:100%;height:auto}.tile.face-down{background:#2a2a3a;border-color:#3a3a4a;box-shadow:0 2px 8px var(--shadow)}.tile.face-down canvas{background:#2a2a3a}.tile.clickable{cursor:pointer}.tile.clickable:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 28px var(--shadow),inset 0 1px 3px rgba(255,255,255,0.3);z-index:5}.tile.clickable:active{transform:translateY(0px) scale(0.97)}.tile.disabled{opacity:0.4;cursor:not-allowed}.tile.disabled:hover{transform:none;box-shadow:0 2px 8px var(--shadow)}
+/* Панель комнаты */
+.room-bar{background:rgba(0,0,0,0.25);border:1px solid rgba(255,215,80,0.25);border-radius:16px;padding:8px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;color:var(--text)}
+.room-bar .code{font-weight:700;font-family:monospace;letter-spacing:2px;font-size:16px;color:var(--accent);background:rgba(0,0,0,0.3);padding:3px 8px;border-radius:6px}
+.room-actions{display:flex;gap:6px;flex-wrap:wrap}
+.room-actions .rbtn{background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:var(--text);border-radius:20px;padding:4px 10px;font-size:12px;cursor:pointer;font-family:inherit}
+.room-actions .rbtn:active{transform:scale(0.95)}
+.room-actions .rbtn.danger{border-color:rgba(255,80,80,0.4);color:#ff9a9a}
 
-.tile.pending{transform:translateY(-6px) scale(1.06);box-shadow:0 0 0 3px var(--accent),0 10px 24px var(--shadow);z-index:6}
+/* Панель игроков */
+.players-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
+.players-bar .chip{display:inline-flex;align-items:center;gap:6px;background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:4px 10px;font-size:12px;color:var(--text)}
+.players-bar .chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
+.players-bar .chip .dot{width:8px;height:8px;border-radius:50%;background:#57c85b;box-shadow:0 0 6px #57c85b}
+.players-bar .chip .dot.off{background:#777;box-shadow:none}
+.players-bar .chip .wins{opacity:0.7}
 
-.end-dot{position:absolute;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;background:rgba(255,215,80,0.18);border:2px solid var(--accent);cursor:pointer;z-index:20;display:none;align-items:center;justify-content:center;animation:dotPulse 0.9s infinite alternate;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.board-wrapper{background:rgba(0,0,0,0.2);border-radius:24px;padding:16px 12px;margin:6px 0 10px;border:1px solid rgba(255,255,255,0.04);min-height:100px;position:relative;display:flex;justify-content:center;align-items:center;overflow:visible}
+#boardCanvas{display:block;border-radius:6px;background:transparent;max-width:100%;height:auto}
+.tile{position:relative;display:inline-block;border-radius:6px;box-shadow:0 4px 12px var(--shadow),inset 0 1px 3px rgba(255,255,255,0.2);transition:transform 0.15s,box-shadow 0.15s;flex-shrink:0;background:var(--card);border:1px solid var(--border);cursor:default}
+.tile canvas{display:block;border-radius:6px;width:100%;height:auto}
+.tile.face-down{background:#2a2a3a;border-color:#3a3a4a;box-shadow:0 2px 8px var(--shadow)}
+.tile.face-down canvas{background:#2a2a3a}
+.tile.clickable{cursor:pointer}
+.tile.clickable:hover{transform:translateY(-4px) scale(1.05);box-shadow:0 8px 28px var(--shadow),inset 0 1px 3px rgba(255,255,255,0.3);z-index:5}
+.tile.clickable:active{transform:translateY(0px) scale(0.97)}
+.tile.disabled{opacity:0.4;cursor:not-allowed}
+.tile.disabled:hover{transform:none;box-shadow:0 2px 8px var(--shadow)}
+.tile.pending{transform:translateY(-6px) scale(1.05);box-shadow:0 0 0 3px var(--accent),0 10px 24px var(--shadow);z-index:6}
+.end-dot{position:absolute;width:38px;height:38px;margin:-19px 0 0 -19px;border-radius:50%;background:rgba(255,215,80,0.18);border:2px solid var(--accent);cursor:pointer;z-index:20;display:none;align-items:center;justify-content:center;animation:dotPulse 0.9s infinite alternate;touch-action:manipulation}
 .end-dot.show{display:flex}
 .end-dot::after{content:'';width:14px;height:14px;border-radius:50%;background:var(--accent);box-shadow:0 0 12px var(--accent)}
 @keyframes dotPulse{from{box-shadow:0 0 0 0 rgba(255,215,80,.45)}to{box-shadow:0 0 0 12px rgba(255,215,80,0)}}
-
-.hand-section{margin:4px 0}.hand-header{display:flex;justify-content:space-between;align-items:center;padding:0 4px 4px 6px;color:var(--text);font-size:13px;font-weight:500}.hand-header .count{background:rgba(0,0,0,0.2);padding:0 10px;border-radius:20px;font-size:12px;color:var(--text)}.hand{display:flex;flex-wrap:wrap;gap:4px;padding:4px 2px;min-height:56px;align-items:center;justify-content:center;background:rgba(0,0,0,0.08);border-radius:14px;border:1px solid rgba(255,255,255,0.04)}.hand .empty-msg{color:rgba(255,255,255,0.2);font-size:13px;font-weight:300}.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 4px}.btn{background:var(--btn-bg);border:1px solid var(--btn-border);color:var(--btn-text);padding:8px 20px;border-radius:40px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.1s,box-shadow 0.2s;backdrop-filter:blur(2px);display:inline-flex;align-items:center;gap:6px;letter-spacing:0.3px;box-shadow:0 2px 8px var(--shadow)}.btn:hover:not(:disabled){background:rgba(255,255,255,0.14);transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow)}.btn:active:not(:disabled){transform:translateY(0px)}.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none}.btn-primary{background:#c9a84c;border-color:#e0c060;color:#1a2a1a;box-shadow:0 2px 12px rgba(200,170,60,0.25)}.btn-primary:hover:not(:disabled){background:#dbc060;box-shadow:0 4px 20px rgba(200,170,60,0.35)}.btn-secondary{background:rgba(80,120,80,0.3);border-color:rgba(120,180,100,0.2)}.btn-secondary:hover:not(:disabled){background:rgba(80,140,80,0.4)}.message{text-align:center;padding:6px 0 2px;font-size:15px;font-weight:500;color:var(--msg);min-height:30px;letter-spacing:0.2px;text-shadow:0 1px 6px var(--shadow)}.end-overlay{display:none;position:absolute;inset:-20px -20px -20px -20px;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);border-radius:28px;justify-content:center;align-items:center;z-index:30;flex-direction:column;gap:12px;padding:20px}.end-overlay.show{display:flex}.end-overlay .big{font-size:28px;font-weight:700;color:var(--text);text-shadow:0 4px 20px var(--shadow);text-align:center}.end-overlay .sub{font-size:18px;color:var(--text);text-align:center}.end-overlay .btn{margin-top:6px}.board-wrapper{position:relative}.hand-scroll{overflow-x:auto;overflow-y:visible;padding:2px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}.hand-scroll::-webkit-scrollbar{height:4px}.hand-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,0.2);border-radius:10px}.hand-scroll::-webkit-scrollbar-thumb{background:rgba(200,180,140,0.3);border-radius:10px}.hand-scroll .hand{flex-wrap:nowrap;justify-content:flex-start;padding:4px 6px;min-height:50px}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:100;justify-content:center;align-items:center}.modal.show{display:flex}.modal-content{background:var(--panel);border-radius:32px;padding:28px 32px;max-width:420px;width:90%;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 60px var(--shadow);color:var(--text);max-height:90vh;overflow-y:auto}.modal-content h2{font-size:24px;margin:0 0 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:12px}.setting-group{margin-bottom:18px}.setting-group label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}.setting-group select,.setting-group input[type="range"]{width:100%;padding:6px;border-radius:12px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-size:14px}.setting-group .range-labels{display:flex;justify-content:space-between;font-size:12px;color:var(--text);opacity:0.7}.setting-group input[type="checkbox"]{width:20px;height:20px;margin-right:8px;accent-color:var(--accent)}.stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)}.stat-row .label{font-weight:500}.modal-close{text-align:center;margin-top:16px}.btn-close{background:var(--btn-bg);border:1px solid var(--btn-border);color:var(--btn-text);padding:8px 32px;border-radius:40px;font-size:15px;cursor:pointer}.switch-label{display:flex;align-items:center;gap:8px;cursor:pointer}@media(max-width:700px){.game-container{padding:16px 14px;border-radius:32px}.title{font-size:22px}.scores{gap:12px;padding:4px 12px}.score-item{font-size:13px}.score-item .value{font-size:18px;min-width:20px}.game-info{font-size:13px}.turn-badge{font-size:12px;padding:2px 12px}.bank-info{font-size:12px;padding:2px 12px}.board-wrapper{padding:12px 8px;min-height:80px}.hand{padding:4px;min-height:48px;gap:3px}.btn{padding:6px 16px;font-size:13px}.message{font-size:14px}.modal-content{padding:20px 16px}.end-overlay .big{font-size:22px}.end-overlay .sub{font-size:16px}.end-dot{width:44px;height:44px;margin:-22px 0 0 -22px}.end-dot::after{width:16px;height:16px}}
+.hand-section{margin:4px 0}
+.hand-header{display:flex;justify-content:space-between;align-items:center;padding:0 4px 4px 6px;color:var(--text);font-size:13px;font-weight:500}
+.hand-header .count{background:rgba(0,0,0,0.2);padding:0 10px;border-radius:20px;font-size:12px;color:var(--text)}
+.hand{display:flex;flex-wrap:wrap;gap:4px;padding:4px 2px;min-height:56px;align-items:center;justify-content:center;background:rgba(0,0,0,0.08);border-radius:14px;border:1px solid rgba(255,255,255,0.04)}
+.hand .empty-msg{color:rgba(255,255,255,0.2);font-size:13px;font-weight:300}
+.opp-row{display:flex;align-items:center;gap:8px;width:100%;padding:2px 4px}
+.opp-row .opp-name{font-size:12px;color:var(--text);min-width:90px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.opp-row .opp-tiles{display:flex;gap:3px;flex-wrap:wrap}
+.controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:10px 0 4px}
+.btn{background:var(--btn-bg);border:1px solid var(--btn-border);color:var(--btn-text);padding:8px 20px;border-radius:40px;font-size:14px;font-weight:600;cursor:pointer;transition:background 0.2s,transform 0.1s,box-shadow 0.2s;backdrop-filter:blur(2px);display:inline-flex;align-items:center;gap:6px;letter-spacing:0.3px;box-shadow:0 2px 8px var(--shadow)}
+.btn:hover:not(:disabled){background:rgba(255,255,255,0.14);transform:translateY(-2px);box-shadow:0 6px 20px var(--shadow)}
+.btn:active:not(:disabled){transform:translateY(0px)}
+.btn:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+.btn-primary{background:#c9a84c;border-color:#e0c060;color:#1a2a1a;box-shadow:0 2px 12px rgba(200,170,60,0.25)}
+.btn-primary:hover:not(:disabled){background:#dbc060;box-shadow:0 4px 20px rgba(200,170,60,0.35)}
+.btn-secondary{background:rgba(80,120,80,0.3);border-color:rgba(120,180,100,0.2)}
+.btn-secondary:hover:not(:disabled){background:rgba(80,140,80,0.4)}
+.message{text-align:center;padding:6px 0 2px;font-size:15px;font-weight:500;color:var(--msg);min-height:30px;letter-spacing:0.2px;text-shadow:0 1px 6px var(--shadow)}
+.end-overlay{display:none;position:absolute;inset:-20px;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);border-radius:28px;justify-content:center;align-items:center;z-index:30;flex-direction:column;gap:12px;padding:20px}
+.end-overlay.show{display:flex}
+.end-overlay .big{font-size:28px;font-weight:700;color:var(--text);text-shadow:0 4px 20px var(--shadow);text-align:center}
+.end-overlay .sub{font-size:18px;color:var(--text);text-align:center}
+.end-overlay .btn{margin-top:6px}
+.hand-scroll{overflow-x:auto;overflow-y:visible;padding:2px;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+.hand-scroll::-webkit-scrollbar{height:4px}
+.hand-scroll::-webkit-scrollbar-track{background:rgba(0,0,0,0.2);border-radius:10px}
+.hand-scroll::-webkit-scrollbar-thumb{background:rgba(200,180,140,0.3);border-radius:10px}
+.hand-scroll .hand{flex-wrap:nowrap;justify-content:flex-start;padding:4px 6px;min-height:50px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);backdrop-filter:blur(5px);z-index:120;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.card{background:var(--panel);border:1px solid rgba(255,255,255,0.12);border-radius:24px;padding:24px;max-width:420px;width:100%;text-align:center;box-shadow:0 20px 60px var(--shadow);position:relative;color:var(--text)}
+.card h2{font-size:26px;margin-bottom:8px}
+.card .sub{opacity:0.85;margin-bottom:14px;font-size:15px}
+.card .btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.card-hub-btn{position:absolute;top:12px;left:12px}
+.mode-choice{display:flex;flex-direction:column;gap:12px;margin:10px 0}
+.mode-btn{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);color:var(--text);border-radius:18px;padding:14px;cursor:pointer;font-family:inherit;text-align:left;display:flex;gap:14px;align-items:center}
+.mode-btn:active{transform:scale(0.98)}
+.mode-btn .icon{font-size:30px}
+.mode-btn .txt b{display:block;font-size:16px}
+.mode-btn .txt small{font-size:13px;opacity:0.75}
+.mode-btn.primary{border-color:var(--accent);background:rgba(255,215,80,0.1)}
+.code-input{display:flex;gap:8px;justify-content:center;margin:14px 0}
+.code-input input{width:140px;font-size:22px;text-align:center;padding:8px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.2);border-radius:10px;color:var(--text);font-family:monospace;letter-spacing:4px;text-transform:uppercase}
+.lobby-list{display:flex;flex-direction:column;gap:8px;margin:12px 0;text-align:left}
+.lobby-list .row{display:flex;justify-content:space-between;background:rgba(0,0,0,0.2);border-radius:10px;padding:8px 12px;font-size:14px}
+.lobby-list .row .seat{opacity:0.7}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:130;justify-content:center;align-items:center}
+.modal.show{display:flex}
+.modal-content{background:var(--panel);border-radius:32px;padding:28px 32px;max-width:420px;width:90%;border:1px solid rgba(255,255,255,0.1);box-shadow:0 20px 60px var(--shadow);color:var(--text);max-height:90vh;overflow-y:auto}
+.modal-content h2{font-size:24px;margin:0 0 16px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:12px}
+.setting-group{margin-bottom:18px}
+.setting-group label{display:block;font-weight:600;font-size:14px;margin-bottom:4px}
+.setting-group select,.setting-group input[type="range"]{width:100%;padding:6px;border-radius:12px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:var(--text);font-size:14px}
+.setting-group .range-labels{display:flex;justify-content:space-between;font-size:12px;opacity:0.7}
+.setting-group input[type="checkbox"]{width:20px;height:20px;margin-right:8px;accent-color:var(--accent)}
+.stat-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,0.05)}
+.modal-close{text-align:center;margin-top:16px}
+.btn-close{background:var(--btn-bg);border:1px solid var(--btn-border);color:var(--btn-text);padding:8px 32px;border-radius:40px;font-size:15px;cursor:pointer}
+.switch-label{display:flex;align-items:center;gap:8px;cursor:pointer}
+@media(max-width:700px){.game-container{padding:16px 14px;border-radius:32px}.title{font-size:22px}.scores{gap:12px;padding:4px 12px}.score-item{font-size:13px}.score-item .value{font-size:18px;min-width:20px}.game-info{font-size:13px}.turn-badge{font-size:12px;padding:2px 12px}.bank-info{font-size:12px;padding:2px 12px}.board-wrapper{padding:12px 8px;min-height:80px}.hand{padding:4px;min-height:48px;gap:3px}.btn{padding:6px 16px;font-size:13px}.message{font-size:14px}.modal-content{padding:20px 16px}.end-overlay .big{font-size:22px}.end-overlay .sub{font-size:16px}.end-dot{width:44px;height:44px;margin:-22px 0 0 -22px}}
 </style>
 </head>
 <body>
@@ -58,15 +137,25 @@
 <div class="score-item"><span>💻</span><span>Компьютер</span><span class="value" id="computerScore">0</span></div>
 </div>
 </div>
+
+<div class="room-bar" id="roomBar" style="display:none">
+  <div>Комната: <span class="code" id="roomCode">------</span> · <span id="roomPlayersCount">0/4</span></div>
+  <div class="room-actions" id="roomActions"></div>
+</div>
+
+<div class="players-bar" id="playersBar" style="display:none"></div>
+
 <div class="game-info">
 <div class="turn-badge" id="turnBadge"><span class="pulse"></span><span id="turnText">Ваш ход</span></div>
 <div class="bank-info">🃏 В банке: <span id="bankCount">0</span></div>
 <button class="btn btn-secondary" style="padding:4px 14px;font-size:13px" id="settingsBtn">⚙️</button>
 </div>
+
 <div class="hand-section">
-<div class="hand-header"><span>💻 Компьютер</span><span class="count" id="computerCount">7</span></div>
+<div class="hand-header"><span id="computerLabel">💻 Компьютер</span><span class="count" id="computerCount">7</span></div>
 <div class="hand-scroll"><div class="hand" id="computerHand"></div></div>
 </div>
+
 <div class="board-wrapper">
 <canvas id="boardCanvas"></canvas>
 <div class="end-dot" id="dotLeft"></div>
@@ -74,13 +163,15 @@
 <div class="end-overlay" id="endOverlay">
 <div class="big" id="endTitle">🏆 Игра окончена!</div>
 <div class="sub" id="endSub">Победитель: ...</div>
-<button class="btn btn-primary" id="endNewGameBtn">🔄 Новая игра</button>
+<div class="btns" id="endBtns"></div>
 </div>
 </div>
+
 <div class="hand-section">
 <div class="hand-header"><span>🧑 Ваши кости</span><span class="count" id="playerCount">7</span></div>
 <div class="hand-scroll"><div class="hand" id="playerHand"></div></div>
 </div>
+
 <div class="controls">
 <button class="btn btn-secondary" id="drawBtn">📥 Взять</button>
 <button class="btn btn-secondary" id="passBtn">⏭ Пропустить</button>
@@ -88,595 +179,550 @@
 </div>
 <div class="message" id="message">🎯 Нажмите на кость, чтобы сыграть</div>
 </div>
-<!-- модалка настроек -->
+
+<!-- Выбор режима -->
+<div class="overlay" id="modeOverlay">
+  <div class="card">
+    <button class="btn-hub card-hub-btn" id="modeHubBtn">← В меню игр</button>
+    <h2>🎲 Домино</h2>
+    <div class="sub">Выбери режим</div>
+    <div class="mode-choice">
+      <button class="mode-btn" id="modeAi"><div class="icon">💻</div><div class="txt"><b>Против компьютера</b><small>3 уровня сложности</small></div></button>
+      <button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div class="txt"><b>Создать комнату</b><small>Онлайн: 2–4 игрока</small></div></button>
+      <button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div class="txt"><b>Зайти по коду</b><small>Комната уже создана</small></div></button>
+    </div>
+    <div class="code-input" id="joinCodeBox" style="display:none"><input id="joinCodeInput" maxlength="6" placeholder="ABC123" /></div>
+    <div class="btns" id="joinCodeActions" style="display:none">
+      <button class="btn" id="joinCancel">Отмена</button>
+      <button class="btn btn-primary" id="joinGo">Войти</button>
+    </div>
+  </div>
+</div>
+
+<!-- Лобби -->
+<div class="overlay" id="lobbyOverlay">
+  <div class="card">
+    <h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2>
+    <div class="sub">Ожидание игроков (2–4). Поделись ссылкой или кодом.</div>
+    <div class="lobby-list" id="lobbyList"></div>
+    <div class="btns">
+      <button class="btn" id="lobbyInvite">📤 Пригласить</button>
+      <button class="btn btn-primary" id="lobbyStart">▶ Начать игру</button>
+      <button class="btn btn-secondary" id="lobbyLeave">🚪 Выйти</button>
+    </div>
+  </div>
+</div>
+
+<!-- Настройки -->
 <div class="modal" id="settingsModal">
 <div class="modal-content">
 <h2>⚙️ Настройки</h2>
-<div class="setting-group">
-<label>Уровень сложности</label>
-<select id="difficultySelect"><option value="easy">Легко</option><option value="medium" selected>Средне</option><option value="hard">Сложно</option></select>
-</div>
-<div class="setting-group">
-<label>Громкость звука</label>
-<input type="range" id="volumeSlider" min="0" max="100" value="50" />
-<div class="range-labels"><span>0%</span><span>100%</span></div>
-</div>
-<div class="setting-group">
-<label>Тема</label>
-<select id="themeSelect"><option value="green">Зелёная</option><option value="light">Светлая</option><option value="dark">Тёмная</option></select>
-</div>
-<div class="setting-group">
-<label class="switch-label"><input type="checkbox" id="openTiles" /> Игра с открытыми костями (показывать кости ПК)</label>
-</div>
-<div class="setting-group">
-<label>📊 Статистика</label>
-<div id="statsDisplay"><div class="stat-row"><span class="label">Всего партий:</span><span id="totalGames">0</span></div><div class="stat-row"><span class="label">Побед игрока:</span><span id="playerWins">0</span></div><div class="stat-row"><span class="label">Побед компьютера:</span><span id="computerWins">0</span></div><div class="stat-row"><span class="label">Ничьих:</span><span id="draws">0</span></div></div>
-<button class="btn btn-secondary" style="margin-top:8px;width:100%" id="resetStatsBtn">Сбросить статистику</button>
-</div>
+<div class="setting-group"><label>Уровень сложности (одиночная)</label>
+<select id="difficultySelect"><option value="easy">Легко</option><option value="medium" selected>Средне</option><option value="hard">Сложно</option></select></div>
+<div class="setting-group"><label>Громкость звука</label>
+<input type="range" id="volumeSlider" min="0" max="100" value="50" /><div class="range-labels"><span>0%</span><span>100%</span></div></div>
+<div class="setting-group"><label>Тема</label>
+<select id="themeSelect"><option value="green">Зелёная</option><option value="light">Светлая</option><option value="dark">Тёмная</option></select></div>
+<div class="setting-group"><label class="switch-label"><input type="checkbox" id="openTiles" /> Открытые кости ПК <b style="font-weight:400;opacity:.7">(только одиночная игра)</b></label></div>
+<div class="setting-group"><label>📊 Статистика (одиночная)</label>
+<div id="statsDisplay"><div class="stat-row"><span>Всего партий:</span><span id="totalGames">0</span></div><div class="stat-row"><span>Побед игрока:</span><span id="playerWins">0</span></div><div class="stat-row"><span>Побед компьютера:</span><span id="computerWins">0</span></div><div class="stat-row"><span>Ничьих:</span><span id="draws">0</span></div></div>
+<button class="btn btn-secondary" style="margin-top:8px;width:100%" id="resetStatsBtn">Сбросить статистику</button></div>
 <div class="modal-close"><button class="btn-close" id="closeSettingsBtn">Закрыть</button></div>
 </div>
 </div>
+
 <script>
-/* ================== TELEGRAM MINI APP ================== */
-const tg = window.Telegram?.WebApp;
+/* ================== FIREBASE ================== */
+let fbDb=null;
+try{
+  firebase.initializeApp({
+    apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",
+    authDomain:"tg-games-69c06.firebaseapp.com",
+    databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",
+    projectId:"tg-games-69c06",
+    storageBucket:"tg-games-69c06.firebasestorage.app",
+    messagingSenderId:"797878618357",
+    appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"
+  });
+  fbDb=firebase.database();
+}catch(e){console.error('Firebase init error:',e);}
 
-if (tg) {
-  try {
-    tg.ready();
-    tg.expand();
-    if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
-  } catch (e) {}
-}
+/* ================== TELEGRAM ================== */
+const tg=window.Telegram?.WebApp;
+if(tg){try{tg.ready();tg.expand();if(typeof tg.disableVerticalSwipes==='function')tg.disableVerticalSwipes();}catch(e){}}
+function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else if(t==='medium')h.impactOccurred('medium');else h.impactOccurred('light');}catch(e){}}
+function goToHub(){tgHaptic('light');location.href='../';}
+function tgHeaderColor(c){try{if(tg&&tg.setHeaderColor)tg.setHeaderColor(c);if(tg&&tg.setBackgroundColor)tg.setBackgroundColor(c);}catch(e){}}
 
-function tgHaptic(type) {
-  try {
-    const h = tg?.HapticFeedback;
-    if (!h) return;
-    if (type === 'success') h.notificationOccurred('success');
-    else if (type === 'error') h.notificationOccurred('error');
-    else if (type === 'warning') h.notificationOccurred('warning');
-    else if (type === 'heavy') h.impactOccurred('heavy');
-    else if (type === 'medium') h.impactOccurred('medium');
-    else h.impactOccurred('light');
-  } catch (e) {}
-}
+/* ================== GA ================== */
+function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
+(function(){try{const k='domino_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'domino',source:(window.Telegram?.WebApp?.initDataUnsafe?.user)?'telegram':'browser'});}}catch(e){}})();
 
-function goToHub() {
-  tgHaptic('light');
-  location.href = '../';
-}
-
-function tgHeaderColor(color) {
-  try {
-    if (tg && typeof tg.setHeaderColor === 'function') tg.setHeaderColor(color);
-    if (tg && typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor(color);
-  } catch (e) {}
-}
-
-function backButtonHandler() {
-  try {
-    if (settingsModal.classList.contains('show')) {
-      settingsModal.classList.remove('show');
-      return;
-    }
-  } catch (e) {}
-  goToHub();
-}
-
-if (tg?.BackButton) {
-  tg.BackButton.show();
-  tg.BackButton.onClick(backButtonHandler);
-}
-
-/* ---------- GOOGLE ANALYTICS ---------- */
-function trackEvent(name, params) {
-  try {
-    if (typeof gtag === 'function') {
-      gtag('event', name, params);
-    }
-  } catch (e) {}
-}
-
-(function trackGameOpen() {
-  try {
-    const key = 'domino_session_tracked';
-    if (!sessionStorage.getItem(key)) {
-      sessionStorage.setItem(key, '1');
-      let source = 'browser';
-      const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
-      if (tgUser) source = 'telegram';
-      trackEvent('game_open', { game_name: 'domino', source: source });
-    }
-  } catch (e) {}
-})();
-/* ====================================== */
-
+/* ================== БАЗА ================== */
 let W=70,H=35,GAP=2;
 function updateTileSize(){const w=window.innerWidth;if(w<=425){W=56;H=28;GAP=2;}else{W=70;H=35;GAP=2;}}
 updateTileSize();
-
 const VALUES=[0,1,2,3,4,5,6],ALL_TILES=[];for(let i=0;i<=6;i++)for(let j=i;j<=6;j++)ALL_TILES.push([i,j]);
-const DOT_PATTERNS={
-0:[],
-1:[[1,1]],
-2:[[0,0],[2,2]],
-3:[[0,0],[1,1],[2,2]],
-4:[[0,0],[2,0],[0,2],[2,2]],
-5:[[0,0],[2,0],[0,2],[2,2],[1,1]],
-6:[[0,0],[1,0],[2,0],[0,2],[1,2],[2,2]]
-};
+/* МАКСИМУМ ИГРОКОВ = костей / 7 на игрока = 4 */
+const MAX_PLAYERS=Math.floor(ALL_TILES.length/7);
+const DOT_PATTERNS={0:[],1:[[1,1]],2:[[0,0],[2,2]],3:[[0,0],[1,1],[2,2]],4:[[0,0],[2,0],[0,2],[2,2]],5:[[0,0],[2,0],[0,2],[2,2],[1,1]],6:[[0,0],[1,0],[2,0],[0,2],[1,2],[2,2]]};
 
-const boardCanvas=document.getElementById('boardCanvas'),playerHandEl=document.getElementById('playerHand'),computerHandEl=document.getElementById('computerHand'),playerScoreEl=document.getElementById('playerScore'),computerScoreEl=document.getElementById('computerScore'),playerCountEl=document.getElementById('playerCount'),computerCountEl=document.getElementById('computerCount'),bankCountEl=document.getElementById('bankCount'),messageEl=document.getElementById('message'),turnTextEl=document.getElementById('turnText'),turnBadgeEl=document.getElementById('turnBadge'),drawBtn=document.getElementById('drawBtn'),passBtn=document.getElementById('passBtn'),newGameBtn=document.getElementById('newGameBtn'),endOverlay=document.getElementById('endOverlay'),endTitle=document.getElementById('endTitle'),endSub=document.getElementById('endSub'),endNewGameBtn=document.getElementById('endNewGameBtn'),settingsBtn=document.getElementById('settingsBtn'),settingsModal=document.getElementById('settingsModal'),closeSettingsBtn=document.getElementById('closeSettingsBtn'),difficultySelect=document.getElementById('difficultySelect'),volumeSlider=document.getElementById('volumeSlider'),themeSelect=document.getElementById('themeSelect'),totalGames=document.getElementById('totalGames'),playerWins=document.getElementById('playerWins'),computerWins=document.getElementById('computerWins'),draws=document.getElementById('draws'),resetStatsBtn=document.getElementById('resetStatsBtn'),openTilesCheck=document.getElementById('openTiles'),hubBtn=document.getElementById('hubBtn');
-let state={},audioCtx=null,volume=0.5;
-
-/* координаты концов цепочки для точек выбора */
+const $=id=>document.getElementById(id);
+const boardCanvas=$('boardCanvas'),playerHandEl=$('playerHand'),computerHandEl=$('computerHand'),computerLabel=$('computerLabel'),playerScoreEl=$('playerScore'),computerScoreEl=$('computerScore'),playerCountEl=$('playerCount'),computerCountEl=$('computerCount'),bankCountEl=$('bankCount'),messageEl=$('message'),turnTextEl=$('turnText'),turnBadgeEl=$('turnBadge'),drawBtn=$('drawBtn'),passBtn=$('passBtn'),newGameBtn=$('newGameBtn'),endOverlay=$('endOverlay'),endTitle=$('endTitle'),endSub=$('endSub'),endBtns=$('endBtns'),settingsBtn=$('settingsBtn'),settingsModal=$('settingsModal'),closeSettingsBtn=$('closeSettingsBtn'),difficultySelect=$('difficultySelect'),volumeSlider=$('volumeSlider'),themeSelect=$('themeSelect'),totalGames=$('totalGames'),playerWins=$('playerWins'),computerWins=$('computerWins'),draws=$('draws'),resetStatsBtn=$('resetStatsBtn'),openTilesCheck=$('openTiles'),hubBtn=$('hubBtn'),modeOverlay=$('modeOverlay'),lobbyOverlay=$('lobbyOverlay'),playersBar=$('playersBar');
+let state={},audioCtx=null;
 let boardEnds=null;
 
+/* ================== ОНЛАЙН-СОСТОЯНИЕ ================== */
+let onlineMode=false,roomCode=null,myUid=null,myName=null,roomRef=null,roomData=null,shownResultAt=null;
+function getUid(){let u=localStorage.getItem('domino_uid');if(!u){u='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('domino_uid',u);}return u;}
+function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}const s=localStorage.getItem('domino_name');if(s)return s;const n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('domino_name',n);return n;}
+function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
+function inviteLink(code){const u=new URL(location.href);u.searchParams.set('room',code);u.hash='';return u.toString();}
+function onlinePlayers(){if(!roomData)return[];const order=roomData.order||[];return order.map(uid=>({uid,name:(roomData.players&&roomData.players[uid]&&roomData.players[uid].name)||'?',connected:!!(roomData.presence&&roomData.presence[uid]),hand:(roomData.hands&&roomData.hands[uid])||[],wins:((roomData.scores||{})[uid]||0)}));}
+function turnUid(){const o=(roomData&&roomData.order)||[];return o[roomData.turnIndex||0];}
+function isHost(){return roomData&&roomData.host===myUid;}
+function isMyTurn(){return onlineMode&&roomData&&roomData.status==='playing'&&turnUid()===myUid;}
+function playerName(uid){const p=onlinePlayers().find(x=>x.uid===uid);return p?p.name:'?';}
+
+/* ================== ЗВУК ================== */
 function getVolume(){return parseFloat(volumeSlider.value)/100}
+function ensureAudioContext(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();}
+function playSound(type){const vol=getVolume();if(vol===0)return;ensureAudioContext();const ctx=audioCtx,now=ctx.currentTime;try{
+ if(type==='move'){const bs=ctx.sampleRate*0.08,buf=ctx.createBuffer(1,bs,ctx.sampleRate),d=buf.getChannelData(0);for(let i=0;i<bs;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(ctx.sampleRate*0.02));const n=ctx.createBufferSource();n.buffer=buf;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.3,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.08);n.connect(g);g.connect(ctx.destination);n.start(now);n.stop(now+0.08);const o=ctx.createOscillator();o.type='sine';o.frequency.value=180;const g2=ctx.createGain();g2.gain.setValueAtTime(vol*0.2,now);g2.gain.exponentialRampToValueAtTime(0.001,now+0.06);o.connect(g2);g2.connect(ctx.destination);o.start(now);o.stop(now+0.06);tgHaptic('medium');}
+ else if(type==='draw'){const o=ctx.createOscillator();o.type='triangle';o.frequency.value=800;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.15,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.04);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.04);tgHaptic('light');}
+ else if(type==='win'){[523,587,659,784,880,988,1175].forEach((f,i)=>{const o=ctx.createOscillator();o.type='square';o.frequency.value=f;const g=ctx.createGain();const s=now+i*0.12;g.gain.setValueAtTime(vol*0.08,s);g.gain.exponentialRampToValueAtTime(0.001,s+0.15);o.connect(g);g.connect(ctx.destination);o.start(s);o.stop(s+0.15);});tgHaptic('success');}
+ else if(type==='lose'){[523,494,466,440,392,370,349].forEach((f,i)=>{const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=f;const g=ctx.createGain();const s=now+i*0.15;g.gain.setValueAtTime(vol*0.06,s);g.gain.exponentialRampToValueAtTime(0.001,s+0.2);o.connect(g);g.connect(ctx.destination);o.start(s);o.stop(s+0.2);});tgHaptic('error');}
+ else if(type==='error'){const o=ctx.createOscillator();o.type='sawtooth';o.frequency.value=150;const g=ctx.createGain();g.gain.setValueAtTime(vol*0.12,now);g.gain.exponentialRampToValueAtTime(0.001,now+0.15);o.connect(g);g.connect(ctx.destination);o.start(now);o.stop(now+0.15);tgHaptic('error');}
+}catch(e){}}
 
-function ensureAudioContext(){
-  if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  if(audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-function playSound(type){
-  const vol = getVolume();
-  if(vol === 0) return;
-  ensureAudioContext();
-  const ctx = audioCtx;
-  const now = ctx.currentTime;
-
-  try{
-    if(type === 'move'){
-      const bufferSize = ctx.sampleRate * 0.08;
-      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
-      const data = buffer.getChannelData(0);
-      for(let i=0; i<bufferSize; i++){
-        data[i] = (Math.random()*2 - 1) * Math.exp(-i/(ctx.sampleRate*0.02));
-      }
-      const noise = ctx.createBufferSource();
-      noise.buffer = buffer;
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(vol*0.3, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now+0.08);
-      noise.connect(gain);
-      gain.connect(ctx.destination);
-      noise.start(now);
-      noise.stop(now+0.08);
-      const osc = ctx.createOscillator();
-      osc.type = 'sine';
-      osc.frequency.value = 180;
-      const g2 = ctx.createGain();
-      g2.gain.setValueAtTime(vol*0.2, now);
-      g2.gain.exponentialRampToValueAtTime(0.001, now+0.06);
-      osc.connect(g2);
-      g2.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now+0.06);
-      tgHaptic('medium');
-    }
-    else if(type === 'draw'){
-      const osc = ctx.createOscillator();
-      osc.type = 'triangle';
-      osc.frequency.value = 800;
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(vol*0.15, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now+0.04);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now+0.04);
-      tgHaptic('light');
-    }
-    else if(type === 'win'){
-      const notes = [523, 587, 659, 784, 880, 988, 1175];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = 'square';
-        osc.frequency.value = freq;
-        const gain = ctx.createGain();
-        const start = now + i * 0.12;
-        gain.gain.setValueAtTime(vol*0.08, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start+0.15);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start+0.15);
-      });
-      tgHaptic('success');
-    }
-    else if(type === 'lose'){
-      const notes = [523, 494, 466, 440, 392, 370, 349];
-      notes.forEach((freq, i) => {
-        const osc = ctx.createOscillator();
-        osc.type = 'sawtooth';
-        osc.frequency.value = freq;
-        const gain = ctx.createGain();
-        const start = now + i * 0.15;
-        gain.gain.setValueAtTime(vol*0.06, start);
-        gain.gain.exponentialRampToValueAtTime(0.001, start+0.2);
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-        osc.start(start);
-        osc.stop(start+0.2);
-      });
-      tgHaptic('error');
-    }
-    else if(type === 'error'){
-      const osc = ctx.createOscillator();
-      osc.type = 'sawtooth';
-      osc.frequency.value = 150;
-      const gain = ctx.createGain();
-      gain.gain.setValueAtTime(vol*0.12, now);
-      gain.gain.exponentialRampToValueAtTime(0.001, now+0.15);
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start(now);
-      osc.stop(now+0.15);
-      tgHaptic('error');
-    }
-  } catch(e){}
-}
-
+/* ================== ОТРИСОВКА КОСТЕЙ ================== */
 function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
+function drawHalf(ctx,n,xOff,yOff,width,height,dotRadius){const pad=width*0.1,cellW=(width-2*pad)/3,cellH=(height-2*pad)/3,pos=DOT_PATTERNS[n]||[];for(let[r,c]of pos){const x=xOff+pad+c*cellW+cellW/2,y=yOff+pad+r*cellH+cellH/2;ctx.beginPath();ctx.arc(x,y,dotRadius,0,Math.PI*2);ctx.fillStyle='#1a1a1a';ctx.shadowColor='rgba(0,0,0,0.15)';ctx.shadowBlur=2;ctx.fill();ctx.shadowBlur=0;}}
+function drawTile(ctx,cx,cy,w,h,left,right,faceUp=true,angle=0,vertical=false){ctx.save();ctx.translate(cx,cy);ctx.rotate(angle*Math.PI/180);ctx.translate(-w/2,-h/2);const r=6,dotR=Math.max(3,w*0.045);ctx.clearRect(0,0,w,h);
+ if(!faceUp){const g=ctx.createLinearGradient(0,0,w,h);g.addColorStop(0,'#3a3a4e');g.addColorStop(0.5,'#2a2a3a');g.addColorStop(1,'#1e1e2e');ctx.fillStyle=g;roundRect(ctx,0,0,w,h,r);ctx.fill();ctx.strokeStyle='#4a4a5e';ctx.lineWidth=1;roundRect(ctx,0,0,w,h,r);ctx.stroke();ctx.strokeStyle='rgba(255,255,255,0.04)';for(let i=-h;i<w+h;i+=8){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+h,h);ctx.stroke()}ctx.restore();return;}
+ const bg=ctx.createLinearGradient(0,0,w*0.2,h*0.8);bg.addColorStop(0,'#fffef8');bg.addColorStop(0.5,'#f5f0e6');bg.addColorStop(1,'#e8e0d0');ctx.fillStyle=bg;roundRect(ctx,0,0,w,h,r);ctx.fill();ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=8;ctx.shadowOffsetX=2;ctx.shadowOffsetY=3;ctx.strokeStyle='#b8ae96';ctx.lineWidth=1.5;roundRect(ctx,0,0,w,h,r);ctx.stroke();ctx.shadowBlur=0;ctx.shadowOffsetX=0;ctx.shadowOffsetY=0;
+ if(vertical){const hh=h/2;ctx.beginPath();ctx.moveTo(0,hh);ctx.lineTo(w,hh);ctx.strokeStyle='#b8ae96';ctx.lineWidth=1.2;ctx.stroke();drawHalf(ctx,left,0,0,w,hh,dotR);drawHalf(ctx,right,0,hh,w,hh,dotR);}
+ else{const hw=w/2;ctx.beginPath();ctx.moveTo(hw,0);ctx.lineTo(hw,h);ctx.strokeStyle='#b8ae96';ctx.lineWidth=1.2;ctx.stroke();drawHalf(ctx,left,0,0,hw,h,dotR);drawHalf(ctx,right,hw,0,hw,h,dotR);}
+ ctx.restore();}
+function createTile(l,r,faceUp=true,clickable=false,vertical=false){const div=document.createElement('div');div.className='tile'+(faceUp?'':' face-down')+(clickable?' clickable':'');const c=document.createElement('canvas');div.appendChild(c);const w=vertical?H:W,h=vertical?W:H;c.width=w;c.height=h;c.style.width=w+'px';c.style.height=h+'px';div._c=c;div._l=l;div._r=r;div._faceUp=faceUp;div._vertical=vertical;renderTile(div);return div;}
+function renderTile(div){const ctx=div._c.getContext('2d');drawTile(ctx,div._c.width/2,div._c.height/2,div._c.width,div._c.height,div._l,div._r,div._faceUp,0,div._vertical||false);}
 
-function drawHalf(ctx,n,xOff,yOff,width,height,dotRadius){
-  const pad=width*0.1;
-  const cellW=(width-2*pad)/3;
-  const cellH=(height-2*pad)/3;
-  const pos=DOT_PATTERNS[n]||[];
-  for(let [r,c] of pos){
-    const x=xOff+pad+c*cellW+cellW/2;
-    const y=yOff+pad+r*cellH+cellH/2;
-    ctx.beginPath();
-    ctx.arc(x,y,dotRadius,0,Math.PI*2);
-    ctx.fillStyle='#1a1a1a';
-    ctx.shadowColor='rgba(0,0,0,0.15)';
-    ctx.shadowBlur=2;
-    ctx.fill();
-    ctx.shadowBlur=0;
-  }
-}
-
-function drawTile(ctx,cx,cy,w,h,left,right,faceUp=true,angle=0,vertical=false){
-  ctx.save();
-  ctx.translate(cx,cy);
-  ctx.rotate(angle*Math.PI/180);
-  ctx.translate(-w/2,-h/2);
-  const r=6,dotR=Math.max(3,w*0.045);
-  ctx.clearRect(0,0,w,h);
-  if(!faceUp){
-    const g=ctx.createLinearGradient(0,0,w,h);
-    g.addColorStop(0,'#3a3a4e');
-    g.addColorStop(0.5,'#2a2a3a');
-    g.addColorStop(1,'#1e1e2e');
-    ctx.fillStyle=g;
-    roundRect(ctx,0,0,w,h,r);
-    ctx.fill();
-    ctx.strokeStyle='#4a4a5e';
-    ctx.lineWidth=1;
-    roundRect(ctx,0,0,w,h,r);
-    ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,0.04)';
-    ctx.lineWidth=1;
-    for(let i=-h;i<w+h;i+=8){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+h,h);ctx.stroke()}
-    ctx.restore();
-    return;
-  }
-  const bg=ctx.createLinearGradient(0,0,w*0.2,h*0.8);
-  bg.addColorStop(0,'#fffef8');
-  bg.addColorStop(0.5,'#f5f0e6');
-  bg.addColorStop(1,'#e8e0d0');
-  ctx.fillStyle=bg;
-  roundRect(ctx,0,0,w,h,r);
-  ctx.fill();
-  ctx.shadowColor='rgba(0,0,0,0.3)';
-  ctx.shadowBlur=8;
-  ctx.shadowOffsetX=2;
-  ctx.shadowOffsetY=3;
-  ctx.strokeStyle='#b8ae96';
-  ctx.lineWidth=1.5;
-  roundRect(ctx,0,0,w,h,r);
-  ctx.stroke();
-  ctx.shadowBlur=0;
-  ctx.shadowOffsetX=0;
-  ctx.shadowOffsetY=0;
-
-  if(vertical){
-    const halfH=h/2;
-    ctx.beginPath();
-    ctx.moveTo(0,halfH);
-    ctx.lineTo(w,halfH);
-    ctx.strokeStyle='#b8ae96';
-    ctx.lineWidth=1.2;
-    ctx.stroke();
-    drawHalf(ctx,left,0,0,w,halfH,dotR);
-    drawHalf(ctx,right,0,halfH,w,halfH,dotR);
-  }else{
-    const halfW=w/2;
-    ctx.beginPath();
-    ctx.moveTo(halfW,0);
-    ctx.lineTo(halfW,h);
-    ctx.strokeStyle='#b8ae96';
-    ctx.lineWidth=1.2;
-    ctx.stroke();
-    drawHalf(ctx,left,0,0,halfW,h,dotR);
-    drawHalf(ctx,right,halfW,0,halfW,h,dotR);
-  }
-  ctx.restore();
-}
-
-function createTile(l,r,faceUp=true,clickable=false,vertical=false){
-  const div=document.createElement('div');
-  div.className='tile'+(faceUp?'':' face-down')+(clickable?' clickable':'');
-  const c=document.createElement('canvas');
-  div.appendChild(c);
-  const w=vertical?H:W;
-  const h=vertical?W:H;
-  c.width=w;
-  c.height=h;
-  c.style.width=w+'px';
-  c.style.height=h+'px';
-  div._c=c;
-  div._l=l;
-  div._r=r;
-  div._faceUp=faceUp;
-  div._vertical=vertical;
-  renderTile(div);
-  return div;
-}
-
-function renderTile(div){
-  const ctx=div._c.getContext('2d');
-  const w=div._c.width;
-  const h=div._c.height;
-  const vertical=div._vertical||false;
-  drawTile(ctx,w/2,h/2,w,h,div._l,div._r,div._faceUp,0,vertical);
-}
-
-function initGame(){
-  trackEvent('game_start', {
-    game_name: 'domino',
-    difficulty: difficultySelect.value,
-    open_tiles: openTilesCheck.checked
-  });
-
-  cancelChoice();
-  let tiles=shuffle([...ALL_TILES]),ph=tiles.splice(0,7),ch=tiles.splice(0,7),by=tiles;let best=-1,bestTile=null,starter=null;for(let t of ph)if(t[0]==t[1]&&t[0]>best){best=t[0];bestTile=t}
-  for(let t of ch)if(t[0]==t[1]&&t[0]>best){best=t[0];bestTile=t;starter='computer'}
-  if(bestTile&&!starter)starter='player';if(!bestTile){let max=-1,mt=null,ow=null;for(let t of ph){let m=Math.max(t[0],t[1]);if(m>max){max=m;mt=t;ow='player'}}
-  for(let t of ch){let m=Math.max(t[0],t[1]);if(m>max){max=m;mt=t;ow='computer'}}
-  bestTile=mt;starter=ow}
-  let board=[],leftEnd,rightEnd,turn;if(starter==='player'){let idx=ph.findIndex(t=>t[0]==bestTile[0]&&t[1]==bestTile[1]);if(idx!==-1)ph.splice(idx,1);board=[bestTile];leftEnd=bestTile[0];rightEnd=bestTile[1];turn='computer'}else if(starter==='computer'){let idx=ch.findIndex(t=>t[0]==bestTile[0]&&t[1]==bestTile[1]);if(idx!==-1)ch.splice(idx,1);board=[bestTile];leftEnd=bestTile[0];rightEnd=bestTile[1];turn='player'}else{board=[];leftEnd=null;rightEnd=null;turn='player'}
-  state={boneyard:by,playerHand:ph,computerHand:ch,board,leftEnd,rightEnd,currentTurn:turn,playerScore:state.playerScore||0,computerScore:state.computerScore||0,gameOver:false,passCount:0,winner:null,turnLock:false,pending:null};endOverlay.classList.remove('show');render();updateMessage('🎯 Игра началась! '+(turn==='player'?'Ваш ход.':'Ход компьютера...'));if(turn==='computer')setTimeout(()=>computerTurn(),500)}
-function canPlayOnLeft(t){return state.board.length===0||t[0]==state.leftEnd||t[1]==state.leftEnd}
-function canPlayOnRight(t){return state.board.length===0||t[0]==state.rightEnd||t[1]==state.rightEnd}
+/* ================== ИГРОВАЯ ЛОГИКА (общая) ================== */
+function canPlayOnLeft(t){return state.board.length===0||t[0]===state.leftEnd||t[1]===state.leftEnd}
+function canPlayOnRight(t){return state.board.length===0||t[0]===state.rightEnd||t[1]===state.rightEnd}
 function getPlayableEnds(t){let e=[];if(canPlayOnLeft(t))e.push('left');if(canPlayOnRight(t))e.push('right');return e}
-function playTileOnLeft(t){let end=state.leftEnd;let placed;if(t[1]==end){placed=[t[0],t[1]];state.leftEnd=t[0]}else if(t[0]==end){placed=[t[1],t[0]];state.leftEnd=t[1]}else return false;state.board.unshift(placed);return true}
-function playTileOnRight(t){let end=state.rightEnd;let placed;if(t[0]==end){placed=[t[0],t[1]];state.rightEnd=t[1]}else if(t[1]==end){placed=[t[1],t[0]];state.rightEnd=t[0]}else return false;state.board.push(placed);return true}
+function playTileOnLeft(t){let end=state.leftEnd,placed;if(t[1]===end){placed=[t[0],t[1]];state.leftEnd=t[0]}else if(t[0]===end){placed=[t[1],t[0]];state.leftEnd=t[1]}else return false;state.board.unshift(placed);return true}
+function playTileOnRight(t){let end=state.rightEnd,placed;if(t[0]===end){placed=[t[0],t[1]];state.rightEnd=t[1]}else if(t[1]===end){placed=[t[1],t[0]];state.rightEnd=t[0]}else return false;state.board.push(placed);return true}
 function playTile(t,end){return end==='left'?playTileOnLeft(t):end==='right'?playTileOnRight(t):false}
 function getLegalMoves(hand){let m=[];for(let i=0;i<hand.length;i++){let e=getPlayableEnds(hand[i]);if(e.length)m.push({index:i,tile:hand[i],ends:e})}return m}
 function drawFromBoneyard(hand){if(!state.boneyard.length)return null;let t=state.boneyard.pop();hand.push(t);return t}
-function switchTurn(){if(state.gameOver)return;cancelChoice();state.currentTurn=state.currentTurn==='player'?'computer':'player';state.passCount=0;render();if(state.currentTurn==='computer'&&!state.gameOver){setTimeout(()=>computerTurn(),500)}if(state.currentTurn==='player'&&!state.gameOver){
-  const hasMoves=getLegalMoves(state.playerHand).length>0;
-  if(!hasMoves && state.boneyard.length===0){
-    updateMessage('⛔ У вас нет ходов. Нажмите "Пропустить".');
-  } else {
-    updateMessage('🎯 Ваш ход. Выберите кость.');
-  }
-}}
-function checkGameOver(){
-  if(state.gameOver)return true;
-  if(!state.playerHand.length){state.gameOver=true;state.winner='player';state.playerScore++;updateStats('player');endGame('🏆 Вы победили!','Вы выложили все кости!');return true}
-  if(!state.computerHand.length){state.gameOver=true;state.winner='computer';state.computerScore++;updateStats('computer');endGame('💻 Компьютер победил!','Компьютер выложил все кости.');return true}
-  let pm=getLegalMoves(state.playerHand),cm=getLegalMoves(state.computerHand);
-  if(!pm.length&&!cm.length&&!state.boneyard.length){
-    state.gameOver=true;
-    let pc=state.playerHand.length,cc=state.computerHand.length;
-    if(pc<cc){state.winner='player';state.playerScore++;updateStats('player');endGame('🏆 Вы победили!','У вас '+pc+' костей, у компьютера '+cc+'.')}
-    else if(cc<pc){state.winner='computer';state.computerScore++;updateStats('computer');endGame('💻 Компьютер победил!','У компьютера '+cc+' костей, у вас '+pc+'.')}
-    else{state.winner='draw';updateStats('draw');endGame('🤝 Ничья!','У обоих по '+pc+' костей.')}
-    return true;
-  }
-  return false;
-}
-function endGame(title,sub){
-  trackEvent('game_end', {
-    game_name: 'domino',
-    difficulty: difficultySelect.value,
-    winner: state.winner,
-    player_tiles_left: state.playerHand.length,
-    computer_tiles_left: state.computerHand.length,
-    bank_left: state.boneyard.length
-  });
+function pips(hand){let s=0;for(const t of hand)s+=t[0]+t[1];return s;}
 
-  cancelChoice();
-  state.gameOver=true;
-  endTitle.textContent=title;
-  endSub.textContent=sub;
-  endOverlay.classList.add('show');
-  if(state.winner==='player') playSound('win');
-  else if(state.winner==='computer') playSound('lose');
-  else playSound('draw');
-  render();
-  updateMessage('🏁 '+title);
-  playerScoreEl.textContent=state.playerScore;
-  computerScoreEl.textContent=state.computerScore;
-}
-function updateMessage(msg){state.message=msg;messageEl.innerHTML=msg}
+/* ---------- точки выбора конца ---------- */
+function showChoiceDots(){if(!boardEnds){cancelChoice();return}const dL=$('dotLeft'),dR=$('dotRight');dL.style.left=(boardCanvas.offsetLeft+boardEnds.left.x)+'px';dL.style.top=(boardCanvas.offsetTop+boardEnds.left.y)+'px';dR.style.left=(boardCanvas.offsetLeft+boardEnds.right.x)+'px';dR.style.top=(boardCanvas.offsetTop+boardEnds.right.y)+'px';dL.classList.add('show');dR.classList.add('show');}
+function cancelChoice(){if(state)state.pending=null;$('dotLeft').classList.remove('show');$('dotRight').classList.remove('show');}
+$('dotLeft').addEventListener('click',e=>{e.stopPropagation();if(!state.pending)return;const p=state.pending;if(onlineMode)playOnline(p.idx,'left');else finishPlayTile(p.idx,p.tile,'left');});
+$('dotRight').addEventListener('click',e=>{e.stopPropagation();if(!state.pending)return;const p=state.pending;if(onlineMode)playOnline(p.idx,'right');else finishPlayTile(p.idx,p.tile,'right');});
+document.addEventListener('click',e=>{if(!state.pending)return;if(e.target.closest('.end-dot')||e.target.closest('.tile'))return;cancelChoice();render();updateMessage('🎯 Ваш ход. Выберите кость.');});
 
-/* ================================================================ */
-/* ТОЧКИ ВЫБОРА СТОРОНЫ                                             */
-/* ================================================================ */
-function showChoiceDots(){
-  if(!boardEnds){cancelChoice();return}
-  const dL=document.getElementById('dotLeft'),dR=document.getElementById('dotRight');
-  dL.style.left=(boardCanvas.offsetLeft+boardEnds.left.x)+'px';
-  dL.style.top=(boardCanvas.offsetTop+boardEnds.left.y)+'px';
-  dR.style.left=(boardCanvas.offsetLeft+boardEnds.right.x)+'px';
-  dR.style.top=(boardCanvas.offsetTop+boardEnds.right.y)+'px';
-  dL.classList.add('show');
-  dR.classList.add('show');
-}
-
-function cancelChoice(){
-  if(state)state.pending=null;
-  document.getElementById('dotLeft').classList.remove('show');
-  document.getElementById('dotRight').classList.remove('show');
-}
-
-function finishPlayTile(idx,tile,end){
-  const hand=state.playerHand;
-  if(idx<0||idx>=hand.length)return;
-  hand.splice(idx,1);
-  playTile(tile,end);
-  state.passCount=0;
-  playSound('move');
-  cancelChoice();
-  render();
-  if(checkGameOver()){render();playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;return}
-  updateMessage('✅ Вы сыграли ['+tile[0]+'|'+tile[1]+'] '+(end==='left'?'слева':'справа'));
-  switchTurn();
-  playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;
-}
-
+/* ---------- офлайн-ход ---------- */
+function finishPlayTile(idx,tile,end){const hand=state.playerHand;if(idx<0||idx>=hand.length)return;hand.splice(idx,1);playTile(tile,end);state.passCount=0;playSound('move');cancelChoice();render();if(checkOfflineEnd()){render();return}updateMessage('✅ Вы сыграли ['+tile[0]+'|'+tile[1]+'] '+(end==='left'?'слева':'справа'));switchTurn();}
 function playerPlayTile(idx){
+  if(onlineMode){onlinePlayTile(idx);return;}
   if(state.gameOver||state.currentTurn!=='player'||state.turnLock){updateMessage('⏳ Сейчас не ваш ход.');return}
-  const hand=state.playerHand;
-  if(idx<0||idx>=hand.length)return;
-  const tile=hand[idx];
-
-  if(state.pending&&state.pending.idx===idx){
-    cancelChoice();
-    render();
-    updateMessage('🎯 Выбор отменён. Выберите кость.');
-    return;
-  }
-
+  const hand=state.playerHand;if(idx<0||idx>=hand.length)return;const tile=hand[idx];
+  if(state.pending&&state.pending.idx===idx){cancelChoice();render();updateMessage('🎯 Выбор отменён.');return}
   cancelChoice();
   const ends=getPlayableEnds(tile);
   if(!ends.length){playSound('error');updateMessage('❌ Эта кость не подходит.');return}
-
-  if(ends.length===2&&state.board.length>0){
-    state.pending={idx,tile};
-    render();
-    showChoiceDots();
-    updateMessage('👆 Кость подходит к двум концам — нажми на точку слева или справа от цепочки');
-    playSound('draw');
-    return;
-  }
-
+  if(ends.length===2&&state.board.length>0){state.pending={idx,tile};render();showChoiceDots();updateMessage('👆 Выбери конец цепочки');playSound('draw');return}
   finishPlayTile(idx,tile,ends[0]);
 }
-
-document.getElementById('dotLeft').addEventListener('click',(e)=>{
-  e.stopPropagation();
-  if(!state.pending)return;
-  const p=state.pending;
-  finishPlayTile(p.idx,p.tile,'left');
-});
-document.getElementById('dotRight').addEventListener('click',(e)=>{
-  e.stopPropagation();
-  if(!state.pending)return;
-  const p=state.pending;
-  finishPlayTile(p.idx,p.tile,'right');
-});
-
-document.addEventListener('click',(e)=>{
-  if(!state.pending)return;
-  if(e.target.closest('.end-dot')||e.target.closest('.tile'))return;
+function onlinePlayTile(idx){
+  if(!isMyTurn()){updateMessage('⏳ Сейчас не ваш ход.');return}
+  const hand=state.playerHand;if(idx<0||idx>=hand.length)return;const tile=hand[idx];
+  if(state.pending&&state.pending.idx===idx){cancelChoice();render();updateMessage('🎯 Выбор отменён.');return}
   cancelChoice();
-  render();
-  updateMessage('🎯 Ваш ход. Выберите кость.');
-});
-/* ================================================================ */
+  const ends=getPlayableEnds(tile);
+  if(!ends.length){playSound('error');updateMessage('❌ Эта кость не подходит.');return}
+  if(ends.length===2&&state.board.length>0){state.pending={idx,tile};render();showChoiceDots();updateMessage('👆 Выбери конец цепочки');playSound('draw');return}
+  playOnline(idx,ends[0]);
+}
+function playerDraw(){
+  if(onlineMode){drawOnline();return;}
+  if(state.gameOver||state.currentTurn!=='player'||state.turnLock){updateMessage('⏳ Сейчас не ваш ход.');return}
+  if(!state.boneyard.length){playSound('error');updateMessage('📭 Колода пуста. Нажмите "Пропустить".');return}
+  let t=drawFromBoneyard(state.playerHand);if(t){playSound('draw');updateMessage('📥 Вы взяли ['+t[0]+'|'+t[1]+']');render();const ends=getPlayableEnds(t);if(ends.length)updateMessage('📥 Взяли ['+t[0]+'|'+t[1]+'] — можно сыграть!');else{const m=getLegalMoves(state.playerHand);if(!m.length){updateMessage('📥 Взяли, ходов нет. Ход переходит.');setTimeout(()=>{if(!state.gameOver)switchTurn()},400)}else updateMessage('📥 Взяли. Ваш ход.')}render()}
+}
+function playerPass(){
+  if(onlineMode){passOnline();return;}
+  if(state.gameOver||state.currentTurn!=='player'||state.turnLock){updateMessage('⏳ Сейчас не ваш ход.');return}
+  if(getLegalMoves(state.playerHand).length){playSound('error');updateMessage('⚠️ У вас есть ходы! Сыграйте.');return}
+  if(state.boneyard.length){playSound('error');updateMessage('📥 Колода не пуста. Возьмите.');return}
+  state.passCount++;playSound('move');updateMessage('⏭ Вы пропустили.');if(checkOfflineEnd()){render();return}switchTurn();
+}
+function switchTurn(){if(state.gameOver)return;cancelChoice();state.currentTurn=state.currentTurn==='player'?'computer':'player';state.passCount=0;render();if(state.currentTurn==='computer'&&!state.gameOver){setTimeout(()=>computerTurn(),500)}if(state.currentTurn==='player'&&!state.gameOver){const hm=getLegalMoves(state.playerHand).length>0;if(!hm&&state.boneyard.length===0)updateMessage('⛔ У вас нет ходов. Нажмите "Пропустить".');else updateMessage('🎯 Ваш ход. Выберите кость.');}}
+function checkOfflineEnd(){
+  if(state.gameOver)return true;
+  if(!state.playerHand.length){state.gameOver=true;state.winner='player';state.playerScore++;updateStats('player');endOffline('🏆 Вы победили!','Вы выложили все кости!');return true}
+  if(!state.computerHand.length){state.gameOver=true;state.winner='computer';state.computerScore++;updateStats('computer');endOffline('💻 Компьютер победил!','Компьютер выложил все кости.');return true}
+  let pm=getLegalMoves(state.playerHand),cm=getLegalMoves(state.computerHand);
+  if(!pm.length&&!cm.length&&!state.boneyard.length){state.gameOver=true;const pc=state.playerHand.length,cc=state.computerHand.length;
+    if(pc<cc){state.winner='player';state.playerScore++;updateStats('player');endOffline('🏆 Вы победили!','У вас '+pc+' костей, у компьютера '+cc+'.')}
+    else if(cc<pc){state.winner='computer';state.computerScore++;updateStats('computer');endOffline('💻 Компьютер победил!','У компьютера '+cc+' костей, у вас '+pc+'.')}
+    else{state.winner='draw';updateStats('draw');endOffline('🤝 Ничья!','У обоих по '+pc+' костей.')}
+    return true}
+  return false;
+}
+function endOffline(title,sub){
+  trackEvent('game_end',{game_name:'domino',mode:'ai',difficulty:difficultySelect.value,winner:state.winner,player_tiles_left:state.playerHand.length,computer_tiles_left:state.computerHand.length,bank_left:state.boneyard.length});
+  cancelChoice();state.gameOver=true;endTitle.textContent=title;endSub.textContent=sub;
+  endBtns.innerHTML='<button class="btn btn-primary" id="endNew">🔄 Новая игра</button><button class="btn" id="endHub">🏠 В меню игр</button>';
+  $('endNew').onclick=()=>{endOverlay.classList.remove('show');initOfflineGame();};
+  $('endHub').onclick=goToHub;
+  endOverlay.classList.add('show');
+  if(state.winner==='player')playSound('win');else if(state.winner==='computer')playSound('lose');else playSound('draw');
+  render();updateMessage('🏁 '+title);playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;
+}
+function computerTurn(){if(state.gameOver||state.currentTurn!=='computer'||state.turnLock)return;state.turnLock=true;let hand=state.computerHand,moves=getLegalMoves(hand),diff=difficultySelect.value;
+ if(moves.length===0){if(state.boneyard.length){let t=drawFromBoneyard(hand);if(t){playSound('draw');render();let ends=getPlayableEnds(t);if(ends.length){let idx=hand.length-1,t2=hand[idx],e2=getPlayableEnds(t2),chosen=e2.includes('right')?'right':e2[0];hand.splice(idx,1);playTile(t2,chosen);state.passCount=0;playSound('move');render();updateMessage('💻 Компьютер взял и сыграл ['+t2[0]+'|'+t2[1]+']');if(checkOfflineEnd()){render();state.turnLock=false;return}switchTurn();state.turnLock=false;return}else{let m2=getLegalMoves(hand);if(m2.length===0){state.passCount++;playSound('move');if(checkOfflineEnd()){render();state.turnLock=false;return}updateMessage('💻 Компьютер взял, но не может сыграть. Пропускает.');switchTurn();state.turnLock=false;return}else{state.turnLock=false;computerTurn();return}}}}else{state.passCount++;playSound('move');if(checkOfflineEnd()){render();state.turnLock=false;return}updateMessage('💻 Компьютер пропускает.');switchTurn();state.turnLock=false;return}}
+ else{let chosenMove;if(diff==='easy')chosenMove=moves[Math.floor(Math.random()*moves.length)];else if(diff==='hard'){let bm=moves.filter(m=>m.ends.length===2);chosenMove=bm.length?bm.reduce((a,b)=>(a.tile[0]+a.tile[1])>(b.tile[0]+b.tile[1])?a:b):moves.reduce((a,b)=>(a.tile[0]+a.tile[1])>(b.tile[0]+b.tile[1])?a:b);}else chosenMove=moves.reduce((a,b)=>{let sa=a.tile[0]+a.tile[1]+(a.tile[0]===a.tile[1]?10:0)+(a.ends.includes('right')?2:0),sb=b.tile[0]+b.tile[1]+(b.tile[0]===b.tile[1]?10:0)+(b.ends.includes('right')?2:0);return sa>sb?a:b});
+  let tile=chosenMove.tile,idx=chosenMove.index,chosenEnd=chosenMove.ends.includes('right')?'right':chosenMove.ends[0];hand.splice(idx,1);playTile(tile,chosenEnd);state.passCount=0;playSound('move');render();updateMessage('💻 Компьютер сыграл ['+tile[0]+'|'+tile[1]+']');if(checkOfflineEnd()){render();state.turnLock=false;return}switchTurn();state.turnLock=false}}
 
-/* ВОССТАНОВЛЕНО: взятие кости из банка */
-function playerDraw(){if(state.gameOver||state.currentTurn!=='player'||state.turnLock){updateMessage('⏳ Сейчас не ваш ход.');return}if(!state.boneyard.length){playSound('error');updateMessage('📭 Колода пуста. Нажмите "Пропустить".');return}let t=drawFromBoneyard(state.playerHand);if(t){playSound('draw');updateMessage('📥 Вы взяли ['+t[0]+'|'+t[1]+']');render();let ends=getPlayableEnds(t);if(ends.length)updateMessage('📥 Взяли ['+t[0]+'|'+t[1]+'] — можно сыграть!');else{let m=getLegalMoves(state.playerHand);if(!m.length){updateMessage('📥 Взяли, ходов нет. Ход переходит.');setTimeout(()=>{if(!state.gameOver)switchTurn()},400)}else updateMessage('📥 Взяли. Ваш ход.')}render()}}
+/* ================== ОНЛАЙН: КОМНАТЫ ================== */
+async function createRoom(){
+  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return}
+  myUid=getUid();myName=getUserName();roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
+  try{
+    await roomRef.set({game:'domino',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[],players:{},presence:{},hands:{},boneyard:[],board:[],leftEnd:null,rightEnd:null,turnIndex:0,turnAt:Date.now(),passCount:0,scores:{},result:null,lastMove:null});
+    await roomRef.child('order').transaction(arr=>{const a=Array.isArray(arr)?arr:[];if(a.includes(myUid))return a;a.push(myUid);return a;});
+    await roomRef.child('players/'+myUid).set({name:myName});
+    onlineMode=true;
+    $('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
+    modeOverlay.classList.remove('show');
+    subscribeRoom();
+    trackEvent('room_created',{game_name:'domino',max_players:MAX_PLAYERS});
+  }catch(e){console.error(e);alert('Ошибка создания комнаты: '+e.message);}
+}
+async function joinRoom(code){
+  if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return}
+  myUid=getUid();myName=getUserName();roomCode=code.toUpperCase();roomRef=fbDb.ref('rooms/'+roomCode);
+  try{
+    const snap=await roomRef.once('value');
+    if(!snap.exists()){alert('Комната не найдена: '+roomCode);return}
+    const room=snap.val();
+    if(room.game!=='domino'){alert('Эта комната для другой игры.');return}
+    if(room.status!=='waiting'){alert('Игра уже идёт. Дождитесь новой партии или создайте свою комнату.');return}
+    if((room.order||[]).length>=MAX_PLAYERS){alert('Комната заполнена ('+MAX_PLAYERS+' игрока).');return}
+    let committed=true;
+    await roomRef.child('order').transaction(arr=>{const a=Array.isArray(arr)?arr:[];if(a.includes(myUid))return a;if(a.length>=MAX_PLAYERS){committed=false;return undefined;}a.push(myUid);return a;},(err,com)=>{committed=com;});
+    if(!committed){alert('Комната заполнена.');return}
+    await roomRef.child('players/'+myUid).set({name:myName});
+    onlineMode=true;
+    $('roomBar').style.display='flex';$('roomCode').textContent=roomCode;
+    modeOverlay.classList.remove('show');
+    subscribeRoom();
+    trackEvent('room_joined',{game_name:'domino'});
+  }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}
+}
+function subscribeRoom(){
+  if(!roomRef)return;
+  roomRef.on('value',snap=>{
+    roomData=snap.val();
+    if(!roomData){updateMessage('❌ Комната закрыта');leaveRoom();return}
+    $('roomCode').textContent=roomCode;
+    $('roomPlayersCount').textContent=(roomData.order||[]).length+'/'+MAX_PLAYERS;
+    if(roomData.status==='waiting'){showLobby();}
+    else{hideLobby();}
+    syncFromRoom();
+    render();
+    updateRoomActions();
+    if(roomData.status==='finished'&&roomData.result&&roomData.result.at!==shownResultAt){shownResultAt=roomData.result.at;showOnlineEnd();}
+    const lm=roomData.lastMove;
+    if(lm&&roomData.status==='playing'){
+      if(lm.action==='play')updateMessage('🎲 '+escapeHtml(lm.name)+' сыграл ['+lm.tile[0]+'|'+lm.tile[1]+']');
+      else if(lm.action==='draw')updateMessage('🎲 '+escapeHtml(lm.name)+' взял кость');
+      else if(lm.action==='pass')updateMessage('🎲 '+escapeHtml(lm.name)+' пропустил');
+      else if(lm.action==='pass-absent')updateMessage('🎲 '+escapeHtml(lm.name)+' отсутствует — автопас');
+    }
+  });
+  const pres=roomRef.child('presence/'+myUid);
+  pres.set({name:myName,at:Date.now()});
+  pres.onDisconnect().remove();
+  startWatchdog();
+}
+function syncFromRoom(){
+  if(!roomData)return;
+  state.board=roomData.board||[];
+  state.leftEnd=roomData.leftEnd!=null?roomData.leftEnd:null;
+  state.rightEnd=roomData.rightEnd!=null?roomData.rightEnd:null;
+  state.boneyard=(roomData.boneyard||[]).slice();
+  state.playerHand=((roomData.hands||{})[myUid]||[]).slice();
+  state.passCount=roomData.passCount||0;
+  state.gameOver=roomData.status==='finished';
+  state.currentTurn=isMyTurn()?'player':'computer';
+  state.pending=null;
+}
+function leaveRoom(){
+  onlineMode=false;
+  if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}
+  roomData=null;roomCode=null;shownResultAt=null;
+  $('roomBar').style.display='none';playersBar.style.display='none';
+  lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');
+  cancelChoice();
+}
+function showLobby(){
+  lobbyOverlay.classList.add('show');
+  $('lobbyCode').textContent=roomCode;
+  const list=$('lobbyList');list.innerHTML='';
+  onlinePlayers().forEach((p,i)=>{const row=document.createElement('div');row.className='row';row.innerHTML='<span>'+(i+1)+'. '+escapeHtml(p.name)+(p.uid===myUid?' (вы)':'')+'</span><span class="seat">'+(p.connected?'🟢':'⚪')+'</span>';list.appendChild(row);});
+  const slots=MAX_PLAYERS-onlinePlayers().length;
+  for(let i=0;i<slots;i++){const row=document.createElement('div');row.className='row';row.innerHTML='<span style="opacity:.5">— свободно —</span><span class="seat">⚪</span>';list.appendChild(row);}
+  $('lobbyStart').style.display=isHost()?'inline-flex':'none';
+  $('lobbyStart').disabled=onlinePlayers().length<2;
+}
+function hideLobby(){lobbyOverlay.classList.remove('show');}
+$('lobbyInvite').onclick=()=>{const url=inviteLink(roomCode);const text='🎲 Домино онлайн. Комната: '+roomCode+'\n'+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else{navigator.clipboard?.writeText(url);alert('Ссылка скопирована');}};
+$('lobbyStart').onclick=()=>{if(isHost()&&onlinePlayers().length>=2){dealNewRound();trackEvent('game_start',{game_name:'domino',mode:'online',players:onlinePlayers().length});}};
+$('lobbyLeave').onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};
 
-/* ВОССТАНОВЛЕНО: пропуск хода */
-function playerPass(){if(state.gameOver||state.currentTurn!=='player'||state.turnLock){updateMessage('⏳ Сейчас не ваш ход.');return}if(getLegalMoves(state.playerHand).length){playSound('error');updateMessage('⚠️ У вас есть ходы! Сыграйте.');return}if(state.boneyard.length){playSound('error');updateMessage('📥 Колода не пуста. Возьмите.');return}state.passCount++;playSound('move');updateMessage('⏭ Вы пропустили.');if(checkGameOver()){render();playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;return}switchTurn();}
+function dealNewRound(){
+  const order=roomData.order,n=order.length;
+  const tiles=shuffle(ALL_TILES.map(t=>t.slice()));
+  const hands={};order.forEach(uid=>hands[uid]=[]);
+  for(let i=0;i<7*n;i++)hands[order[i%n]].push(tiles.pop());
+  const boneyard=tiles;
+  let best=null,bestUid=null,bestVal=-1;
+  for(const uid of order)for(const t of hands[uid])if(t[0]===t[1]&&t[0]>bestVal){bestVal=t[0];best=t;bestUid=uid;}
+  if(!best){let mx=-1;for(const uid of order)for(const t of hands[uid]){const m=Math.max(t[0],t[1]);if(m>mx){mx=m;best=t;bestUid=uid;}}}
+  const hi=hands[bestUid].findIndex(t=>t[0]===best[0]&&t[1]===best[1]);hands[bestUid].splice(hi,1);
+  const starterIdx=order.indexOf(bestUid);
+  roomRef.update({
+    hands,boneyard,board:[best],leftEnd:best[0],rightEnd:best[1],
+    turnIndex:(starterIdx+1)%n,turnAt:Date.now(),passCount:0,status:'playing',result:null,
+    lastMove:{by:bestUid,name:playerName(bestUid),action:'start',tile:best,at:Date.now()}
+  });
+}
 
-/* ВОССТАНОВЛЕНО: ход компьютера */
-function computerTurn(){if(state.gameOver||state.currentTurn!=='computer'||state.turnLock)return;state.turnLock=true;let hand=state.computerHand;let moves=getLegalMoves(hand);let diff=difficultySelect.value;if(moves.length===0){if(state.boneyard.length){let t=drawFromBoneyard(hand);if(t){playSound('draw');render();let ends=getPlayableEnds(t);if(ends.length){let idx=hand.length-1,t2=hand[idx],e2=getPlayableEnds(t2);let chosen=e2.includes('right')?'right':e2[0];hand.splice(idx,1);playTile(t2,chosen);state.passCount=0;playSound('move');render();updateMessage('💻 Компьютер взял и сыграл ['+t2[0]+'|'+t2[1]+']');if(checkGameOver()){render();playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;state.turnLock=false;return}switchTurn();state.turnLock=false;return}else{let m2=getLegalMoves(hand);if(m2.length===0){state.passCount++;playSound('move');if(checkGameOver()){render();playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;state.turnLock=false;return}updateMessage('💻 Компьютер взял, но не может сыграть. Пропускает.');switchTurn();state.turnLock=false;return}else{state.turnLock=false;computerTurn();return}}}}else{state.passCount++;playSound('move');if(checkGameOver()){render();playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;state.turnLock=false;return}updateMessage('💻 Компьютер пропускает.');switchTurn();state.turnLock=false;return}}else{let chosenMove;if(diff==='easy'){chosenMove=moves[Math.floor(Math.random()*moves.length)]}else if(diff==='hard'){let blockMoves=moves.filter(m=>m.ends.length===2);if(blockMoves.length)chosenMove=blockMoves.reduce((a,b)=>(a.tile[0]+a.tile[1])>(b.tile[0]+b.tile[1])?a:b);else chosenMove=moves.reduce((a,b)=>(a.tile[0]+a.tile[1])>(b.tile[0]+b.tile[1])?a:b);}else{chosenMove=moves.reduce((a,b)=>{let sa=a.tile[0]+a.tile[1]+(a.tile[0]==a.tile[1]?10:0)+(a.ends.includes('right')?2:0);let sb=b.tile[0]+b.tile[1]+(b.tile[0]==b.tile[1]?10:0)+(b.ends.includes('right')?2:0);return sa>sb?a:b});}let tile=chosenMove.tile,idx=chosenMove.index;let chosenEnd=chosenMove.ends.includes('right')?'right':chosenMove.ends[0];hand.splice(idx,1);playTile(tile,chosenEnd);state.passCount=0;playSound('move');render();updateMessage('💻 Компьютер сыграл ['+tile[0]+'|'+tile[1]+']');if(checkGameOver()){render();playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore;state.turnLock=false;return}switchTurn();state.turnLock=false}}
+async function playOnline(idx,end){
+  if(!isMyTurn())return;
+  const hand=state.playerHand.slice();const tile=hand[idx];if(!tile)return;
+  let placed,L=state.leftEnd,R=state.rightEnd,newBoard;
+  if(end==='left'){if(tile[1]===L){placed=[tile[0],tile[1]];L=tile[0];}else if(tile[0]===L){placed=[tile[1],tile[0]];L=tile[1];}else return;newBoard=[placed].concat(state.board);}
+  else{if(tile[0]===R){placed=[tile[0],tile[1]];R=tile[1];}else if(tile[1]===R){placed=[tile[1],tile[0]];R=tile[0];}else return;newBoard=state.board.concat([placed]);}
+  hand.splice(idx,1);
+  const order=roomData.order,next=((roomData.turnIndex||0)+1)%order.length;
+  const upd={};
+  upd['hands/'+myUid]=hand;upd.board=newBoard;upd.leftEnd=L;upd.rightEnd=R;upd.turnIndex=next;upd.turnAt=Date.now();upd.passCount=0;
+  upd.lastMove={by:myUid,name:myName,tile:tile,action:'play',end:end,at:Date.now()};
+  if(hand.length===0){upd.status='finished';upd.result={winner:myUid,reason:'domino',at:Date.now()};upd['scores/'+myUid]=((roomData.scores||{})[myUid]||0)+1;}
+  await roomRef.update(upd);
+  playSound('move');cancelChoice();
+}
+async function drawOnline(){
+  if(!isMyTurn()){updateMessage('⏳ Сейчас не ваш ход.');return}
+  if(getLegalMoves(state.playerHand).length){playSound('error');updateMessage('⚠️ У вас есть ходы!');return}
+  if(!state.boneyard.length){playSound('error');updateMessage('📭 Банк пуст. Нажмите "Пропустить".');return}
+  const nb=state.boneyard.slice();const t=nb.pop();const hand=state.playerHand.concat([t]);
+  const upd={};upd['hands/'+myUid]=hand;upd.boneyard=nb;upd.turnAt=Date.now();upd.lastMove={by:myUid,name:myName,action:'draw',at:Date.now()};
+  await roomRef.update(upd);playSound('draw');
+}
+async function passOnline(){
+  if(!isMyTurn()){updateMessage('⏳ Сейчас не ваш ход.');return}
+  if(getLegalMoves(state.playerHand).length){playSound('error');updateMessage('⚠️ У вас есть ходы!');return}
+  if(state.boneyard.length){playSound('error');updateMessage('📥 Банк не пуст. Возьмите.');return}
+  const order=roomData.order,pc=(roomData.passCount||0)+1;
+  const upd={};upd.passCount=pc;upd.turnIndex=((roomData.turnIndex||0)+1)%order.length;upd.turnAt=Date.now();upd.lastMove={by:myUid,name:myName,action:'pass',at:Date.now()};
+  if(pc>=order.length){
+    const hands=roomData.hands||{};let best=null,bp=Infinity,tie=false;
+    for(const uid of order){const p=pips(hands[uid]||[]);if(p<bp){bp=p;best=uid;tie=false;}else if(p===bp)tie=true;}
+    upd.status='finished';upd.result={winner:tie?null:best,reason:'blocked',at:Date.now()};
+    if(!tie)upd['scores/'+best]=((roomData.scores||{})[best]||0)+1;
+  }
+  await roomRef.update(upd);playSound('move');
+}
+function showOnlineEnd(){
+  const res=roomData.result;cancelChoice();
+  let title,sub;
+  if(res.winner===myUid){title='🏆 Вы победили!';sub=res.reason==='domino'?'Вы выложили все кости!':'У вас меньше всех очков';playSound('win');tgHaptic('success');}
+  else if(res.winner===null){title='🤝 Ничья';sub='Партия заблокирована, очки равны';playSound('draw');}
+  else{title='🏁 Победил '+escapeHtml(playerName(res.winner));sub=res.reason==='domino'?'Выложил все кости':'Меньше всех очков';playSound('lose');tgHaptic('error');}
+  endTitle.textContent=title;endSub.textContent=sub;
+  endBtns.innerHTML='';
+  if(isHost()){const b=document.createElement('button');b.className='btn btn-primary';b.textContent='🔄 Новая партия';b.onclick=()=>{dealNewRound();endOverlay.classList.remove('show');};endBtns.appendChild(b);}
+  else{const w=document.createElement('div');w.style.cssText='font-size:13px;opacity:.8;width:100%';w.textContent='⏳ Хост готовит новую партию...';endBtns.appendChild(w);}
+  const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareOnline;endBtns.appendChild(sh);
+  const lv=document.createElement('button');lv.className='btn btn-secondary';lv.textContent='🚪 Выйти';lv.onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};endBtns.appendChild(lv);
+  endOverlay.classList.add('show');
+  trackEvent('game_end',{game_name:'domino',mode:'online',winner:res.winner===myUid?'player':(res.winner===null?'draw':'other'),reason:res.reason});
+}
+function shareOnline(){const url=inviteLink(roomCode);const text='🎲 Домино онлайн! Комната '+roomCode+'. Присоединяйся: '+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else window.open('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text),'_blank');trackEvent('game_share',{game_name:'domino'});}
+function updateRoomActions(){
+  const box=$('roomActions');box.innerHTML='';
+  if(!onlineMode)return;
+  const sh=document.createElement('button');sh.className='rbtn';sh.textContent='📤 Пригласить';sh.onclick=()=>{const url=inviteLink(roomCode);const text='🎲 Домино. Комната: '+roomCode+'\n'+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else{navigator.clipboard?.writeText(url);alert('Ссылка скопирована');}};box.appendChild(sh);
+  const cb=document.createElement('button');cb.className='rbtn';cb.textContent='🔢 Код';cb.onclick=()=>{navigator.clipboard?.writeText(roomCode);updateMessage('Код '+roomCode+' скопирован');};box.appendChild(cb);
+  const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};box.appendChild(lb);
+}
+/* Хост-сторож: автопас за отключившегося */
+let watchdog=null;
+function startWatchdog(){
+  if(watchdog)clearInterval(watchdog);
+  watchdog=setInterval(()=>{
+    if(!onlineMode||!roomData||roomData.status!=='playing'||!isHost())return;
+    const tu=turnUid();const connected=!!(roomData.presence&&roomData.presence[tu]);
+    if(!connected&&Date.now()-(roomData.turnAt||0)>30000){
+      const order=roomData.order,pc=(roomData.passCount||0)+1;
+      const upd={};upd.passCount=pc;upd.turnIndex=((roomData.turnIndex||0)+1)%order.length;upd.turnAt=Date.now();upd.lastMove={by:tu,name:playerName(tu),action:'pass-absent',at:Date.now()};
+      if(pc>=order.length){const hands=roomData.hands||{};let best=null,bp=Infinity,tie=false;for(const uid of order){const p=pips(hands[uid]||[]);if(p<bp){bp=p;best=uid;tie=false;}else if(p===bp)tie=true;}upd.status='finished';upd.result={winner:tie?null:best,reason:'blocked',at:Date.now()};if(!tie)upd['scores/'+best]=((roomData.scores||{})[best]||0)+1;}
+      roomRef.update(upd);
+    }
+  },5000);
+}
 
-/* ВОССТАНОВЛЕНО: общий рендер */
-function render(){renderBoard();renderPlayerHand();renderComputerHand();updateCounts();updateTurnBadge();updateBankCount();updateScoreDisplay();updateButtons()}
+/* ================== РЕНДЕР ================== */
+function renderBoard(){const canvas=boardCanvas,ctx=canvas.getContext('2d'),board=state.board;
+ if(!board||!board.length){canvas.width=400;canvas.height=100;canvas.style.width='400px';canvas.style.height='100px';ctx.clearRect(0,0,400,100);ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🀄 Ожидание первой кости...',200,50);boardEnds=null;return}
+ const containerWidth=canvas.parentElement.clientWidth-32;const maxPerRow=Math.max(1,Math.floor((containerWidth+GAP)/(W+GAP)));const total=board.length;let positions=[],idx=0,y=0,dir=1,x_start=0;
+ while(idx<total){let count=Math.min(maxPerRow,total-idx);const rowY=y;for(let j=0;j<count;j++){const tile=board[idx+j];let x;if(dir===1)x=x_start+j*(W+GAP);else x=x_start-j*(W+GAP);let lv,rv;if(dir===1){lv=tile[0];rv=tile[1]}else{lv=tile[1];rv=tile[0]}positions.push({cx:x+W/2,cy:rowY+H/2,w:W,h:H,angle:0,left:lv,right:rv,dir:dir});}idx+=count;
+  if(idx<total){if(idx+1<total){const vt=board[idx],pi=idx-1,ni=idx+1,pr=board[pi][1],nl=board[ni][0];let lV,rV;if(vt[0]===pr&&vt[1]===nl){lV=pr;rV=nl}else if(vt[1]===pr&&vt[0]===nl){lV=pr;rV=nl}else{lV=vt[0];rV=vt[1]}let xv,yv;if(dir===1){xv=x_start+(count-1)*(W+GAP)+W;yv=rowY}else{xv=x_start-(count-1)*(W+GAP)-H;yv=rowY}positions.push({cx:xv+H/2,cy:yv+W/2,w:W,h:H,angle:90,left:lV,right:rV,dir:dir});y+=W+GAP;const od=dir;dir=-dir;if(od===1)x_start=xv+H-W;else x_start=xv;idx++;}
+   else{const lt=board[idx];let x;if(dir===1)x=x_start+count*(W+GAP);else x=x_start-count*(W+GAP);let lv,rv;if(dir===1){lv=lt[0];rv=lt[1]}else{lv=lt[1];rv=lt[0]}positions.push({cx:x+W/2,cy:rowY+H/2,w:W,h:H,angle:0,left:lv,right:rv,dir:dir});idx++;break;}}}
+ let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(let p of positions){let w=p.w,h=p.h;if(p.angle===90){w=p.h;h=p.w}const x=p.cx-w/2,yy=p.cy-h/2;if(x<minX)minX=x;if(x+w>maxX)maxX=x+w;if(yy<minY)minY=yy;if(yy+h>maxY)maxY=yy+h}
+ const tW=maxX-minX,tH=maxY-minY;canvas.width=tW;canvas.height=tH;canvas.style.width=tW+'px';canvas.style.height=tH+'px';
+ if(positions.length){const p0=positions[0],pN=positions[positions.length-1];boardEnds={left:{x:p0.cx-minX-p0.w/2-16,y:p0.cy-minY},right:{x:(pN.dir===-1?pN.cx-minX-pN.w/2-16:pN.cx-minX+pN.w/2+16),y:pN.cy-minY}};}else boardEnds=null;
+ if(state.pending)showChoiceDots();
+ ctx.clearRect(0,0,tW,tH);for(let p of positions)drawTile(ctx,p.cx-minX,p.cy-minY,p.w,p.h,p.left,p.right,true,p.angle,false);}
+function renderPlayerHand(){playerHandEl.innerHTML='';const hand=state.playerHand;if(!hand.length){const m=document.createElement('span');m.className='empty-msg';m.textContent='🃏 Нет костей';playerHandEl.appendChild(m);playerCountEl.textContent=0;return}
+ playerCountEl.textContent=hand.length;
+ const isTurn=onlineMode?isMyTurn():(state.currentTurn==='player'&&!state.gameOver);
+ for(let i=0;i<hand.length;i++){const t=hand[i],d=createTile(t[0],t[1],true,isTurn,true);
+  if(isTurn){const ends=getPlayableEnds(t);if(!ends.length)d.classList.add('disabled');if(state.pending&&state.pending.idx===i)d.classList.add('pending');
+   d.addEventListener('click',()=>{if(!d.classList.contains('disabled'))playerPlayTile(i);else{playSound('error');updateMessage('❌ Эта кость не подходит.')}});}
+  else d.classList.add('disabled');
+  playerHandEl.appendChild(d);}}
+/* ОНЛАЙН: кости соперников ВСЕГДА рубашкой вверх */
+function renderComputerHand(){computerHandEl.innerHTML='';
+ if(onlineMode){
+   computerLabel.textContent='👥 Соперники';
+   const opps=onlinePlayers().filter(p=>p.uid!==myUid);
+   let total=0;
+   if(!opps.length){const m=document.createElement('span');m.className='empty-msg';m.textContent='⏳ Ожидание игроков...';computerHandEl.appendChild(m);computerCountEl.textContent=0;return}
+   for(const o of opps){
+     total+=o.hand.length;
+     const row=document.createElement('div');row.className='opp-row';
+     const nm=document.createElement('span');nm.className='opp-name';nm.textContent=(turnUid()===o.uid?'▶ ':'')+o.name+(o.connected?'':' ⚪');row.appendChild(nm);
+     const box=document.createElement('div');box.className='opp-tiles';
+     const show=Math.min(o.hand.length,10);
+     for(let i=0;i<show;i++){box.appendChild(createTile(0,0,false,false,true));}
+     if(o.hand.length>10){const more=document.createElement('span');more.style.cssText='font-size:12px;color:var(--text);align-self:center';more.textContent='+'+(o.hand.length-10);box.appendChild(more);}
+     if(!o.hand.length){const e=document.createElement('span');e.className='empty-msg';e.textContent='🃏 0';box.appendChild(e);}
+     row.appendChild(box);computerHandEl.appendChild(row);
+   }
+   computerCountEl.textContent=total;
+ }else{
+   computerLabel.textContent='💻 Компьютер';
+   const hand=state.computerHand;
+   if(!hand.length){const m=document.createElement('span');m.className='empty-msg';m.textContent='🃏 Нет костей';computerHandEl.appendChild(m);computerCountEl.textContent=0;return}
+   computerCountEl.textContent=hand.length;
+   const open=openTilesCheck.checked;
+   for(const t of hand){const d=createTile(t[0],t[1],open,false,true);if(!open){d.classList.add('face-down');d._faceUp=false;renderTile(d);}else{d.style.opacity='0.85';d.style.filter='saturate(0.9)';}computerHandEl.appendChild(d);}
+ }}
+function renderPlayersBar(){
+  if(!onlineMode){playersBar.style.display='none';return}
+  playersBar.style.display='flex';playersBar.innerHTML='';
+  onlinePlayers().forEach(p=>{
+    const chip=document.createElement('span');chip.className='chip'+(turnUid()===p.uid&&roomData.status==='playing'?' turn':'');
+    chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+escapeHtml(p.name)+(p.uid===myUid?' (вы)':'')+' · 🁢'+p.hand.length+' · <span class="wins">🏆'+p.wins+'</span>';
+    playersBar.appendChild(chip);
+  });
+}
+function updateCounts(){playerCountEl.textContent=state.playerHand.length;if(!onlineMode)computerCountEl.textContent=(state.computerHand||[]).length;bankCountEl.textContent=state.boneyard.length}
+function updateTurnBadge(){
+  const pulse=turnBadgeEl.querySelector('.pulse');
+  if(onlineMode){
+    if(roomData&&roomData.status==='finished'){turnTextEl.textContent='🏁 Партия окончена';pulse.style.display='none';return}
+    pulse.style.display='inline-block';
+    if(isMyTurn()){turnTextEl.textContent='Ваш ход';turnBadgeEl.style.borderColor='#f5c542';}
+    else{turnTextEl.textContent='Ход: '+escapeHtml(playerName(turnUid()));turnBadgeEl.style.borderColor='#6a9ad8';}
+    return;
+  }
+  if(state.gameOver){turnTextEl.textContent='🏁 Игра окончена';turnBadgeEl.style.borderColor='#888';pulse.style.display='none';return}
+  pulse.style.display='inline-block';turnBadgeEl.style.borderColor='#f5c542';
+  if(state.currentTurn==='player'){turnTextEl.textContent='Ваш ход';turnBadgeEl.style.borderColor='#f5c542'}else{turnTextEl.textContent='Ход компьютера...';turnBadgeEl.style.borderColor='#6a9ad8'}
+}
+function updateButtons(){
+  const hasMoves=getLegalMoves(state.playerHand).length>0;
+  const bEmpty=!state.boneyard.length;
+  if(onlineMode){
+    const my=isMyTurn();
+    drawBtn.disabled=!my||bEmpty||hasMoves||!roomData||roomData.status!=='playing';
+    passBtn.disabled=!my||!bEmpty||hasMoves||!roomData||roomData.status!=='playing';
+    newGameBtn.style.display=(isHost()&&roomData&&roomData.status==='finished')?'inline-flex':'none';
+  }else{
+    const isTurn=state.currentTurn==='player'&&!state.gameOver;
+    drawBtn.disabled=!isTurn||bEmpty||state.gameOver;
+    passBtn.disabled=!isTurn||state.gameOver||hasMoves;
+    if(isTurn&&!hasMoves&&bEmpty)passBtn.disabled=false;
+    if(isTurn&&hasMoves)passBtn.disabled=true;
+    if(!isTurn||state.gameOver){drawBtn.disabled=true;passBtn.disabled=true}
+    newGameBtn.style.display='inline-flex';
+  }
+}
+function updateMessage(msg){state.message=msg;messageEl.innerHTML=msg}
+function render(){renderBoard();renderPlayerHand();renderComputerHand();renderPlayersBar();updateCounts();updateTurnBadge();updateBankCountSafe();updateButtons();}
+function updateBankCountSafe(){bankCountEl.textContent=state.boneyard.length}
+function escapeHtml(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 
-function renderBoard(){const canvas=boardCanvas,ctx=canvas.getContext('2d'),board=state.board;if(!board||!board.length){canvas.width=400;canvas.height=100;canvas.style.width='400px';canvas.style.height='100px';ctx.clearRect(0,0,400,100);ctx.fillStyle='rgba(255,255,255,0.25)';ctx.font='20px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('🀄 Ожидание первой кости...',200,50);boardEnds=null;return}const containerWidth=canvas.parentElement.clientWidth-32;const maxPerRow=Math.max(1,Math.floor((containerWidth+GAP)/(W+GAP)));const total=board.length;let positions=[],idx=0,y=0,dir=1,x_start=0;while(idx<total){let count=Math.min(maxPerRow,total-idx);const rowY=y;for(let j=0;j<count;j++){const tile=board[idx+j];let x;if(dir===1){x=x_start+j*(W+GAP);}else{x=x_start-j*(W+GAP);}let leftVal,rightVal;if(dir===1){leftVal=tile[0];rightVal=tile[1];}else{leftVal=tile[1];rightVal=tile[0];}positions.push({cx:x+W/2,cy:rowY+H/2,w:W,h:H,angle:0,left:leftVal,right:rightVal,dir:dir});}idx+=count;if(idx<total){if(idx+1<total){const vertTile=board[idx];const prevIdx=idx-1;const nextIdx=idx+1;const prevRight=board[prevIdx][1];const nextLeft=board[nextIdx][0];let leftVert,rightVert;if(vertTile[0]==prevRight&&vertTile[1]==nextLeft){leftVert=prevRight;rightVert=nextLeft;}else if(vertTile[1]==prevRight&&vertTile[0]==nextLeft){leftVert=prevRight;rightVert=nextLeft;}else{leftVert=vertTile[0];rightVert=vertTile[1];}let xv,yv;if(dir===1){xv=x_start+(count-1)*(W+GAP)+W;yv=rowY;}else{xv=x_start-(count-1)*(W+GAP)-H;yv=rowY;}positions.push({cx:xv+H/2,cy:yv+W/2,w:W,h:H,angle:90,left:leftVert,right:rightVert,dir:dir});y+=W+GAP;const oldDir=dir;dir=-dir;if(oldDir===1){x_start=xv+H-W;}else{x_start=xv;}idx++;}else{const lastTile=board[idx];let x;if(dir===1){x=x_start+count*(W+GAP);}else{x=x_start-count*(W+GAP);}let leftVal,rightVal;if(dir===1){leftVal=lastTile[0];rightVal=lastTile[1];}else{leftVal=lastTile[1];rightVal=lastTile[0];}positions.push({cx:x+W/2,cy:rowY+H/2,w:W,h:H,angle:0,left:leftVal,right:rightVal,dir:dir});idx++;break;}}}let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;for(let p of positions){let w=p.w,h=p.h;if(p.angle===90){w=p.h;h=p.w;}const x=p.cx-w/2,y=p.cy-h/2;if(x<minX)minX=x;if(x+w>maxX)maxX=x+w;if(y<minY)minY=y;if(y+h>maxY)maxY=y+h;}const totalW=maxX-minX,totalH=maxY-minY;canvas.width=totalW;canvas.height=totalH;canvas.style.width=totalW+'px';canvas.style.height=totalH+'px';
+/* ================== ОФЛАЙН-СТАРТ ================== */
+function initOfflineGame(){
+  trackEvent('game_start',{game_name:'domino',mode:'ai',difficulty:difficultySelect.value,open_tiles:openTilesCheck.checked});
+  cancelChoice();
+  let tiles=shuffle([...ALL_TILES]),ph=tiles.splice(0,7),ch=tiles.splice(0,7),by=tiles;let best=-1,bestTile=null,starter=null;
+  for(let t of ph)if(t[0]===t[1]&&t[0]>best){best=t[0];bestTile=t}
+  for(let t of ch)if(t[0]===t[1]&&t[0]>best){best=t[0];bestTile=t;starter='computer'}
+  if(bestTile&&!starter)starter='player';
+  if(!bestTile){let max=-1,mt=null,ow=null;for(let t of ph){let m=Math.max(t[0],t[1]);if(m>max){max=m;mt=t;ow='player'}}for(let t of ch){let m=Math.max(t[0],t[1]);if(m>max){max=m;mt=t;ow='computer'}}bestTile=mt;starter=ow}
+  let board=[],leftEnd,rightEnd,turn;
+  if(starter==='player'){let idx=ph.findIndex(t=>t[0]===bestTile[0]&&t[1]===bestTile[1]);if(idx!==-1)ph.splice(idx,1);board=[bestTile];leftEnd=bestTile[0];rightEnd=bestTile[1];turn='computer'}
+  else if(starter==='computer'){let idx=ch.findIndex(t=>t[0]===bestTile[0]&&t[1]===bestTile[1]);if(idx!==-1)ch.splice(idx,1);board=[bestTile];leftEnd=bestTile[0];rightEnd=bestTile[1];turn='player'}
+  else{board=[];leftEnd=null;rightEnd=null;turn='player'}
+  state={boneyard:by,playerHand:ph,computerHand:ch,board,leftEnd,rightEnd,currentTurn:turn,playerScore:state.playerScore||0,computerScore:state.computerScore||0,gameOver:false,passCount:0,winner:null,turnLock:false,pending:null};
+  endOverlay.classList.remove('show');render();
+  updateMessage('🎯 Игра началась! '+(turn==='player'?'Ваш ход.':'Ход компьютера...'));
+  if(turn==='computer')setTimeout(()=>computerTurn(),500);
+}
 
-if(positions.length){
-  const p0=positions[0],pN=positions[positions.length-1];
-  boardEnds={
-    left:{x:p0.cx-minX-p0.w/2-16,y:p0.cy-minY},
-    right:{x:(pN.dir===-1? pN.cx-minX-pN.w/2-16 : pN.cx-minX+pN.w/2+16),y:pN.cy-minY}
-  };
-}else{boardEnds=null}
-if(state.pending)showChoiceDots();
-
-ctx.clearRect(0,0,totalW,totalH);for(let p of positions){drawTile(ctx,p.cx-minX,p.cy-minY,p.w,p.h,p.left,p.right,true,p.angle,false);}}
-function renderPlayerHand(){playerHandEl.innerHTML='';let hand=state.playerHand;if(!hand.length){let m=document.createElement('span');m.className='empty-msg';m.textContent='🃏 Нет костей';playerHandEl.appendChild(m);return}let isTurn=state.currentTurn==='player'&&!state.gameOver;for(let i=0;i<hand.length;i++){let t=hand[i],d=createTile(t[0],t[1],true,isTurn,true);if(isTurn){let ends=getPlayableEnds(t);if(!ends.length)d.classList.add('disabled');if(state.pending&&state.pending.idx===i)d.classList.add('pending');d.addEventListener('click',()=>{if(!d.classList.contains('disabled'))playerPlayTile(i);else{playSound('error');updateMessage('❌ Эта кость не подходит.')}})}else d.classList.add('disabled');playerHandEl.appendChild(d)}}
-
-/* ИЗМЕНЕНО: по умолчанию кости ПК скрыты; чекбокс "открытые кости" показывает их */
-function renderComputerHand(){computerHandEl.innerHTML='';let hand=state.computerHand;if(!hand.length){let m=document.createElement('span');m.className='empty-msg';m.textContent='🃏 Нет костей';computerHandEl.appendChild(m);return}const open=openTilesCheck.checked;for(let t of hand){let d=createTile(t[0],t[1],open,false,true);if(!open){d.classList.add('face-down');d._faceUp=false;renderTile(d);}else{d.style.opacity='0.85';d.style.filter='saturate(0.9)';}computerHandEl.appendChild(d)}}
-function updateCounts(){playerCountEl.textContent=state.playerHand.length;computerCountEl.textContent=state.computerHand.length}
-function updateTurnBadge(){if(state.gameOver){turnTextEl.textContent='🏁 Игра окончена';turnBadgeEl.style.borderColor='#888';turnBadgeEl.querySelector('.pulse').style.display='none';return}turnBadgeEl.querySelector('.pulse').style.display='inline-block';turnBadgeEl.style.borderColor='#f5c542';if(state.currentTurn==='player'){turnTextEl.textContent='Ваш ход';turnBadgeEl.style.borderColor='#f5c542'}else{turnTextEl.textContent='Ход компьютера...';turnBadgeEl.style.borderColor='#6a9ad8'}}
-function updateBankCount(){bankCountEl.textContent=state.boneyard.length}
-function updateScoreDisplay(){playerScoreEl.textContent=state.playerScore;computerScoreEl.textContent=state.computerScore}
-function updateButtons(){let isTurn=state.currentTurn==='player'&&!state.gameOver,hand=state.playerHand,hasMoves=!!getLegalMoves(hand).length,bEmpty=!state.boneyard.length;drawBtn.disabled=!isTurn||bEmpty||state.gameOver;passBtn.disabled=!isTurn||state.gameOver||hasMoves;if(isTurn&&!hasMoves&&bEmpty)passBtn.disabled=false;if(isTurn&&hasMoves)passBtn.disabled=true;if(!isTurn||state.gameOver){drawBtn.disabled=true;passBtn.disabled=true}}
+/* ================== СТАТИСТИКА / НАСТРОЙКИ ================== */
 function loadStats(){try{let s=JSON.parse(localStorage.getItem('dominoStats'));if(!s)s={total:0,playerWins:0,computerWins:0,draws:0};return s}catch(e){return{total:0,playerWins:0,computerWins:0,draws:0}}}
 function saveStats(s){localStorage.setItem('dominoStats',JSON.stringify(s))}
 function updateStats(winner){let s=loadStats();s.total++;if(winner==='player')s.playerWins++;else if(winner==='computer')s.computerWins++;else if(winner==='draw')s.draws++;saveStats(s);displayStats()}
 function displayStats(){let s=loadStats();totalGames.textContent=s.total;playerWins.textContent=s.playerWins;computerWins.textContent=s.computerWins;draws.textContent=s.draws}
-function applyTheme(theme){
-  document.documentElement.setAttribute('data-theme',theme);
-  localStorage.setItem('dominoTheme',theme);
-  const headerColors = {
-    green: '#1a3a1a',
-    light: '#e8e0d0',
-    dark: '#0e0e1a'
-  };
-  tgHeaderColor(headerColors[theme] || '#1a3a1a');
-}
+function applyTheme(theme){document.documentElement.setAttribute('data-theme',theme);localStorage.setItem('dominoTheme',theme);const hc={green:'#1a3a1a',light:'#e8e0d0',dark:'#0e0e1a'};tgHeaderColor(hc[theme]||'#1a3a1a');}
 settingsBtn.addEventListener('click',()=>{settingsModal.classList.add('show');displayStats()});
 closeSettingsBtn.addEventListener('click',()=>settingsModal.classList.remove('show'));
-settingsModal.addEventListener('click',(e)=>{if(e.target===settingsModal)settingsModal.classList.remove('show')});
-difficultySelect.addEventListener('change',()=>{
-  localStorage.setItem('dominoDiff',difficultySelect.value);
-  trackEvent('settings_change', {
-    game_name: 'domino',
-    setting: 'difficulty',
-    value: difficultySelect.value
-  });
-});
+settingsModal.addEventListener('click',e=>{if(e.target===settingsModal)settingsModal.classList.remove('show')});
+difficultySelect.addEventListener('change',()=>{localStorage.setItem('dominoDiff',difficultySelect.value);trackEvent('settings_change',{game_name:'domino',setting:'difficulty',value:difficultySelect.value});});
 volumeSlider.addEventListener('input',()=>{localStorage.setItem('dominoVol',volumeSlider.value)});
-themeSelect.addEventListener('change',()=>{
-  applyTheme(themeSelect.value);
-  trackEvent('settings_change', {
-    game_name: 'domino',
-    setting: 'theme',
-    value: themeSelect.value
-  });
-});
-/* ИЗМЕНЕНО: чекбокс "Игра с открытыми костями" */
-openTilesCheck.addEventListener('change',()=>{
-  localStorage.setItem('dominoOpen',openTilesCheck.checked?'true':'false');
-  if(!state.gameOver)render();
-  trackEvent('settings_change', {
-    game_name: 'domino',
-    setting: 'open_tiles',
-    value: openTilesCheck.checked
-  });
-});
+themeSelect.addEventListener('change',()=>{applyTheme(themeSelect.value);trackEvent('settings_change',{game_name:'domino',setting:'theme',value:themeSelect.value});});
+openTilesCheck.addEventListener('change',()=>{localStorage.setItem('dominoOpen',openTilesCheck.checked?'true':'false');if(!state.gameOver&&!onlineMode)render();trackEvent('settings_change',{game_name:'domino',setting:'open_tiles',value:openTilesCheck.checked});});
 resetStatsBtn.addEventListener('click',()=>{if(confirm('Сбросить статистику?')){saveStats({total:0,playerWins:0,computerWins:0,draws:0});displayStats()}});
-
-hubBtn.addEventListener('click', goToHub);
-
-/* ИЗМЕНЕНО: ключ dominoOpen, по умолчанию выключено = кости скрыты */
-(function loadSettings(){let diff=localStorage.getItem('dominoDiff');if(diff)difficultySelect.value=diff;let vol=localStorage.getItem('dominoVol');if(vol)volumeSlider.value=vol;let theme=localStorage.getItem('dominoTheme');if(theme){themeSelect.value=theme;applyTheme(theme)}else applyTheme('green');let open=localStorage.getItem('dominoOpen');openTilesCheck.checked=(open==='true');displayStats()})();
-drawBtn.addEventListener('click',playerDraw);passBtn.addEventListener('click',playerPass);newGameBtn.addEventListener('click',()=>{if(state.gameOver)endOverlay.classList.remove('show');initGame()});endNewGameBtn.addEventListener('click',()=>{endOverlay.classList.remove('show');initGame()});
-state={playerScore:0,computerScore:0,pending:null};initGame();let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{updateTileSize();if(!state.gameOver)render()},300)});
+hubBtn.addEventListener('click',()=>{if(onlineMode)leaveRoom();goToHub();});
+$('modeHubBtn').addEventListener('click',goToHub);
+$('modeAi').onclick=()=>{modeOverlay.classList.remove('show');onlineMode=false;$('roomBar').style.display='none';playersBar.style.display='none';initOfflineGame();};
+$('modeHost').onclick=async()=>{await createRoom();};
+$('modeJoin').onclick=()=>{$('joinCodeBox').style.display='flex';$('joinCodeActions').style.display='flex';$('joinCodeInput').value='';$('joinCodeInput').focus();};
+$('joinCancel').onclick=()=>{$('joinCodeBox').style.display='none';$('joinCodeActions').style.display='none';};
+$('joinGo').onclick=async()=>{const c=$('joinCodeInput').value.trim().toUpperCase();if(c.length!==6){alert('Введи 6 символов');return}await joinRoom(c);};
+drawBtn.addEventListener('click',playerDraw);
+passBtn.addEventListener('click',playerPass);
+newGameBtn.addEventListener('click',()=>{if(onlineMode){if(isHost()&&roomData&&roomData.status==='finished'){dealNewRound();endOverlay.classList.remove('show');}}else{endOverlay.classList.remove('show');initOfflineGame();}});
+if(tg&&tg.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{try{if(settingsModal.classList.contains('show')){settingsModal.classList.remove('show');return}if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return}if(lobbyOverlay.classList.contains('show')){leaveRoom();modeOverlay.classList.add('show');return}}catch(e){}goToHub();});}
+(function loadSettings(){let d=localStorage.getItem('dominoDiff');if(d)difficultySelect.value=d;let v=localStorage.getItem('dominoVol');if(v)volumeSlider.value=v;let t=localStorage.getItem('dominoTheme');if(t){themeSelect.value=t;applyTheme(t)}else applyTheme('green');let o=localStorage.getItem('dominoOpen');openTilesCheck.checked=(o==='true');displayStats();})();
+state={playerScore:0,computerScore:0,pending:null,board:[],boneyard:[],playerHand:[],computerHand:[]};
+render();
+(function initStart(){const urlRoom=new URL(location.href).searchParams.get('room');if(urlRoom&&urlRoom.length===6){joinRoom(urlRoom);}else{modeOverlay.classList.add('show');}})();
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{updateTileSize();if(!state.gameOver||onlineMode)render()},300)});
 </script>
 </body>
 </html>
