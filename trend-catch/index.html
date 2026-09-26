@@ -1,0 +1,1576 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Trend Catch</title>
+
+  <!-- Telegram Mini App SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- ============================================================ -->
+  <!-- GOOGLE ANALYTICS 4                                           -->
+  <!-- ЗАМЕНИ G-XXXXXXXXXX НА СВОЙ ID В ДВУХ МЕСТАХ НИЖЕ            -->
+  <!-- ============================================================ -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZD8QE6XKTR', {
+      'page_title': document.title,
+      'page_path': location.pathname
+    });
+  </script>
+  <!-- ============ КОНЕЦ БЛОКА GOOGLE ANALYTICS ================== -->
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      background: #070b16;
+      font-family: system-ui, -apple-system, sans-serif;
+      touch-action: none;
+      user-select: none;
+      overscroll-behavior: none;
+    }
+
+    #wrap {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    canvas {
+      width: min(100vw, calc(100vh * 9 / 16));
+      height: min(100vh, calc(100vw * 16 / 9));
+      display: block;
+      touch-action: none;
+    }
+
+    #overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      background: rgba(5, 8, 18, 0.72);
+      text-align: center;
+      padding: 20px;
+      padding-top: max(20px, env(safe-area-inset-top));
+      padding-bottom: max(20px, env(safe-area-inset-bottom));
+      box-sizing: border-box;
+      z-index: 20;
+      backdrop-filter: blur(6px);
+    }
+
+    #overlay.hidden {
+      display: none;
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      color: #7cffc4;
+      letter-spacing: 0.4px;
+    }
+
+    p {
+      margin: 7px 0;
+      line-height: 1.4;
+      color: #eaf0ff;
+      font-size: 15px;
+    }
+
+    .subtle {
+      opacity: 0.75;
+      font-size: 13px;
+    }
+
+    .legend {
+      display: flex;
+      gap: 14px;
+      margin: 16px 0;
+      font-size: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend span {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 10px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .dot.good {
+      background: rgba(34, 255, 142, 0.22);
+      border: 2px solid #22ff8e;
+    }
+
+    .dot.bad {
+      background: rgba(255, 77, 99, 0.22);
+      border: 2px solid #ff4d63;
+    }
+
+    .dot.bonus {
+      background: rgba(255, 216, 77, 0.22);
+      border: 2px solid #ffd84d;
+    }
+
+    .btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 16px;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 14px;
+      font-size: 17px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.08s ease, filter 0.15s ease;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-easy {
+      background: linear-gradient(135deg, #00ff88, #00c86f);
+      color: #04110a;
+    }
+
+    .btn-normal {
+      background: linear-gradient(135deg, #ffb703, #ff9500);
+      color: #201300;
+    }
+
+    .btn-hard {
+      background: linear-gradient(135deg, #ff5d5d, #ff2e2e);
+      color: white;
+    }
+
+    .btn-endless {
+      background: linear-gradient(135deg, #8b5cf6, #3b82f6);
+      color: white;
+    }
+
+    .btn-restart {
+      background: linear-gradient(135deg, #7cffc4, #33d6ff);
+      color: #061019;
+      margin-top: 12px;
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.09);
+      color: #eaf0ff;
+      border: 1px solid rgba(255,255,255,0.10);
+      margin-top: 8px;
+    }
+
+    .btn-back {
+      background: rgba(255, 255, 255, 0.12);
+      color: #eaf0ff;
+      border: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 12px;
+      font-size: 15px;
+      padding: 10px 14px;
+    }
+
+    .settings-row {
+      display: flex;
+      gap: 10px;
+      width: 100%;
+      max-width: 300px;
+      margin-top: 12px;
+    }
+
+    .settings-row button {
+      flex: 1;
+      padding: 12px;
+      font-size: 15px;
+      margin-top: 0;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #stats {
+      font-size: 18px;
+      margin: 10px 0 2px;
+      font-weight: 800;
+      color: #7cffc4;
+      line-height: 1.45;
+    }
+
+    .panel {
+      width: 100%;
+      max-width: 360px;
+      padding: 22px 18px;
+      border-radius: 22px;
+      background: rgba(255,255,255,0.045);
+      border: 1px solid rgba(255,255,255,0.07);
+      box-shadow: 0 24px 70px rgba(0,0,0,0.25);
+    }
+
+    .stats-list {
+      text-align: left;
+      font-size: 15px;
+      line-height: 1.7;
+      color: #eaf0ff;
+      margin: 12px 0;
+    }
+
+    .stats-list b {
+      color: #7cffc4;
+    }
+
+    .stats-separator {
+      height: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game"></canvas>
+
+    <div id="overlay">
+      <div id="startScreen" class="panel">
+        <button class="btn-back" id="backBtnStart">← В меню игр</button>
+        <h1>Trend Catch</h1>
+        <p>Лови тренды, собирай бонусы и избегай инфошум.</p>
+
+        <div class="legend">
+          <span><span class="dot good"></span> Лови</span>
+          <span><span class="dot bad"></span> Не лови</span>
+          <span><span class="dot bonus"></span> Бонус</span>
+        </div>
+
+        <p class="subtle">Управление: зажми и перетаскивай корзину пальцем или мышью.</p>
+
+        <div class="btn-group">
+          <button class="btn-easy" data-diff="easy">Легко · 60 сек</button>
+          <button class="btn-normal" data-diff="normal">Средне · 45 сек</button>
+          <button class="btn-hard" data-diff="hard">Сложно · 30 сек</button>
+          <button class="btn-endless" data-diff="endless">Бесконечно · без времени</button>
+        </div>
+
+        <div class="settings-row">
+          <button class="btn-secondary" id="soundBtn">🔊 Звук: классика</button>
+          <button class="btn-secondary" id="statsBtn">📊 Статистика</button>
+        </div>
+      </div>
+
+      <div id="gameOverScreen" class="panel hidden">
+        <button class="btn-back" id="backBtnGameOver">← В меню игр</button>
+        <h1>Игра окончена</h1>
+        <div id="stats"></div>
+        <button class="btn-restart" id="restartBtn">Сыграть ещё раз</button>
+        <button class="btn-secondary" id="shareBtn">Поделиться результатом</button>
+        <button class="btn-secondary" id="gameOverStatsBtn">Статистика</button>
+        <button class="btn-secondary" id="changeDiffBtn">Выбрать другой уровень</button>
+      </div>
+
+      <div id="statsScreen" class="panel hidden">
+        <button class="btn-back" id="backBtnStats">← В меню игр</button>
+        <h1>Статистика</h1>
+        <div id="statsInfo" class="stats-list"></div>
+        <button class="btn-secondary" id="statsBackBtn">Назад</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Инициализация Telegram Mini App
+    const tg = window.Telegram?.WebApp;
+
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+
+        if (typeof tg.setHeaderColor === 'function') {
+          tg.setHeaderColor('#070b16');
+        }
+
+        if (typeof tg.setBackgroundColor === 'function') {
+          tg.setBackgroundColor('#070b16');
+        }
+
+        if (typeof tg.disableVerticalSwipes === 'function') {
+          tg.disableVerticalSwipes();
+        }
+      } catch (e) {
+        // Telegram может быть недоступен в обычном браузере — это нормально
+      }
+    }
+
+    /* ---------- ПОМОЩНИК ДЛЯ СОБЫТИЙ GOOGLE ANALYTICS ---------- */
+    function trackEvent(name, params) {
+      try {
+        if (typeof gtag === 'function') {
+          gtag('event', name, params);
+        }
+      } catch (e) {}
+    }
+
+    /* ---------- СОБЫТИЕ: ОТКРЫТИЕ ИГРЫ (1 раз за сессию) ---------- */
+    (function trackGameOpen() {
+      try {
+        const key = 'trendcatch_session_tracked';
+        if (!sessionStorage.getItem(key)) {
+          sessionStorage.setItem(key, '1');
+
+          let source = 'browser';
+          const tgUser = window.Telegram?.WebApp?.initDataUnsafe?.user;
+          if (tgUser) source = 'telegram';
+
+          trackEvent('game_open', {
+            game_name: 'trend_catch',
+            source: source
+          });
+        }
+      } catch (e) {}
+    })();
+
+    // Сюда потом можно вставить прямую ссылку вида:
+    // 'https://t.me/YOUR_BOT_USERNAME/trendcatch'
+    const APP_URL_FOR_SHARE = '';
+
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    const overlay = document.getElementById('overlay');
+    const startScreen = document.getElementById('startScreen');
+    const gameOverScreen = document.getElementById('gameOverScreen');
+    const statsScreen = document.getElementById('statsScreen');
+
+    const statsDiv = document.getElementById('stats');
+    const statsInfo = document.getElementById('statsInfo');
+
+    const restartBtn = document.getElementById('restartBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const changeDiffBtn = document.getElementById('changeDiffBtn');
+
+    const soundBtn = document.getElementById('soundBtn');
+    const statsBtn = document.getElementById('statsBtn');
+    const gameOverStatsBtn = document.getElementById('gameOverStatsBtn');
+    const statsBackBtn = document.getElementById('statsBackBtn');
+
+    // Кнопки возврата в меню
+    const backBtnStart = document.getElementById('backBtnStart');
+    const backBtnGameOver = document.getElementById('backBtnGameOver');
+    const backBtnStats = document.getElementById('backBtnStats');
+
+    const SOUND_ORDER = ['classic', 'retro', 'soft', 'off'];
+
+    const SOUND_LABELS = {
+      off: '🔇 Звук: выкл',
+      classic: '🔊 Звук: классика',
+      retro: '🎮 Звук: ретро',
+      soft: '🎵 Звук: мягкий'
+    };
+
+    const SOUND_THEMES = {
+      off: null,
+      classic: {
+        good: { freq: 650, endFreq: 980, duration: 0.12, type: 'sine', gain: 0.055 },
+        bad: { freq: 200, endFreq: 85, duration: 0.22, type: 'sawtooth', gain: 0.050 },
+        click: { freq: 500, endFreq: 650, duration: 0.06, type: 'triangle', gain: 0.035 },
+        gameover: { freq: 320, endFreq: 85, duration: 0.55, type: 'triangle', gain: 0.050 },
+        bonus: { notes: [660, 880, 1100], duration: 0.12, type: 'triangle', gain: 0.050 }
+      },
+      retro: {
+        good: { freq: 520, endFreq: 780, duration: 0.10, type: 'square', gain: 0.030 },
+        bad: { freq: 160, endFreq: 70, duration: 0.24, type: 'sawtooth', gain: 0.040 },
+        click: { freq: 700, endFreq: 900, duration: 0.05, type: 'square', gain: 0.025 },
+        gameover: { freq: 320, endFreq: 60, duration: 0.60, type: 'square', gain: 0.035 },
+        bonus: { notes: [520, 660, 780], duration: 0.11, type: 'square', gain: 0.030 }
+      },
+      soft: {
+        good: { freq: 420, endFreq: 640, duration: 0.16, type: 'sine', gain: 0.035 },
+        bad: { freq: 180, endFreq: 100, duration: 0.25, type: 'sine', gain: 0.040 },
+        click: { freq: 350, endFreq: 420, duration: 0.07, type: 'sine', gain: 0.025 },
+        gameover: { freq: 240, endFreq: 80, duration: 0.65, type: 'sine', gain: 0.040 },
+        bonus: { notes: [392, 523, 659], duration: 0.15, type: 'sine', gain: 0.035 }
+      }
+    };
+
+    const DIFF_LABELS = {
+      easy: 'Легко',
+      normal: 'Средне',
+      hard: 'Сложно',
+      endless: 'Бесконечно'
+    };
+
+    function loadSettings() {
+      let sound = 'classic';
+
+      try {
+        const savedSound = localStorage.getItem('trendCatchSound_v1');
+
+        if (['off', 'classic', 'retro', 'soft'].includes(savedSound)) {
+          sound = savedSound;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      return { sound };
+    }
+
+    let settings = loadSettings();
+
+    function saveSettings() {
+      try {
+        localStorage.setItem('trendCatchSound_v1', settings.sound);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function loadStats() {
+      const defaults = {
+        games: 0,
+        totalScore: 0,
+        totalGood: 0,
+        totalBad: 0,
+        totalBonuses: 0,
+        totalTimePlayed: 0,
+        bestScores: {
+          easy: 0,
+          normal: 0,
+          hard: 0,
+          endless: 0
+        }
+      };
+
+      let result = {
+        ...defaults,
+        bestScores: { ...defaults.bestScores }
+      };
+
+      try {
+        const raw = localStorage.getItem('trendCatchStats_v1');
+
+        if (raw) {
+          const parsed = JSON.parse(raw);
+
+          result = {
+            ...defaults,
+            ...parsed,
+            bestScores: {
+              ...defaults.bestScores,
+              ...(parsed.bestScores || {})
+            }
+          };
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      // На всякий случай подтягиваем старые рекорды, если они были
+      ['easy', 'normal', 'hard', 'endless'].forEach((key) => {
+        try {
+          const old = Number(localStorage.getItem(`trendBest_${key}`) || 0);
+
+          if (old > result.bestScores[key]) {
+            result.bestScores[key] = old;
+          }
+        } catch (e) {
+          // ignore
+        }
+      });
+
+      return result;
+    }
+
+    let stats = loadStats();
+
+    function saveStats() {
+      try {
+        localStorage.setItem('trendCatchStats_v1', JSON.stringify(stats));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    let W = 360;
+    let H = 640;
+
+    let bgGradient = null;
+    let particles = [];
+
+    let layout = {
+      basketCenterY: H - 140,
+      catchTop: H - 180,
+      catchBottom: H - 108,
+      catchLineY: H - 110,
+      glowY: H - 152
+    };
+
+    let statsReturn = 'start';
+    let audioCtx = null;
+
+    const DIFFICULTIES = {
+      easy: {
+        label: 'easy',
+        time: 60,
+        lives: 5,
+        baseSpeed: 85,
+        speedMult: 2.0,
+        maxSpeed: 320,
+        spawnRate: 0.85,
+        minSpawn: 0.45,
+        badChance: 0.15,
+        badChanceMax: 0.30,
+        bonusChance: 0.06
+      },
+      normal: {
+        label: 'normal',
+        time: 45,
+        lives: 3,
+        baseSpeed: 110,
+        speedMult: 3.0,
+        maxSpeed: 420,
+        spawnRate: 0.72,
+        minSpawn: 0.38,
+        badChance: 0.24,
+        badChanceMax: 0.38,
+        bonusChance: 0.05
+      },
+      hard: {
+        label: 'hard',
+        time: 30,
+        lives: 2,
+        baseSpeed: 150,
+        speedMult: 4.5,
+        maxSpeed: 520,
+        spawnRate: 0.55,
+        minSpawn: 0.32,
+        badChance: 0.34,
+        badChanceMax: 0.48,
+        bonusChance: 0.04
+      },
+      endless: {
+        label: 'endless',
+        time: null,
+        lives: 3,
+        baseSpeed: 100,
+        speedMult: 2.2,
+        maxSpeed: 430,
+        spawnRate: 0.78,
+        minSpawn: 0.36,
+        badChance: 0.22,
+        badChanceMax: 0.42,
+        bonusChance: 0.06
+      }
+    };
+
+    const ITEM_STYLES = {
+      good: {
+        ring: '#22ff8e',
+        glow: 'rgba(34, 255, 142, 0.55)',
+        disc: 'rgba(4, 16, 12, 0.90)'
+      },
+      bad: {
+        ring: '#ff4d63',
+        glow: 'rgba(255, 77, 99, 0.55)',
+        disc: 'rgba(24, 5, 10, 0.90)'
+      },
+      bonus: {
+        ring: '#ffd84d',
+        glow: 'rgba(255, 216, 77, 0.70)',
+        disc: 'rgba(24, 17, 3, 0.92)'
+      }
+    };
+
+    const state = {
+      running: false,
+      diff: DIFFICULTIES.normal,
+      diffName: 'normal',
+      score: 0,
+      lives: 3,
+      time: 45,
+      elapsed: 0,
+      spawnTimer: 0,
+      items: [],
+      playerX: W / 2,
+      targetX: W / 2,
+      dragging: false,
+      flash: 0,
+      flashColor: 'rgba(255,255,255,0)'
+    };
+
+    const goodTypes = [
+      { emoji: '📈', points: 1, weight: 24 },
+      { emoji: '🔥', points: 1, weight: 24 },
+      { emoji: '🐸', points: 1, weight: 18 },
+      { emoji: '🤖', points: 2, weight: 14 },
+      { emoji: '🚀', points: 3, weight: 8 }
+    ];
+
+    const badTypes = [
+      { emoji: '💩' },
+      { emoji: '🚫' },
+      { emoji: '📢' }
+    ];
+
+    const bonusTypes = [
+      { emoji: '⭐', type: 'score' },
+      { emoji: '⏳', type: 'time' },
+      { emoji: '🛡', type: 'life' }
+    ];
+
+    function rand(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function clamp(v, min, max) {
+      return Math.max(min, Math.min(max, v));
+    }
+
+    function getBest(key) {
+      try {
+        return Number(localStorage.getItem(key) || 0);
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function setBest(key, value) {
+      try {
+        localStorage.setItem(key, String(value));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function ensureAudio() {
+      try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+
+        if (!AudioContextClass) return;
+
+        if (!audioCtx) {
+          audioCtx = new AudioContextClass();
+        }
+
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function playTone({
+      freq = 440,
+      endFreq = null,
+      duration = 0.12,
+      type = 'sine',
+      gain = 0.05,
+      delay = 0
+    } = {}) {
+      if (settings.sound === 'off') return;
+
+      try {
+        ensureAudio();
+
+        if (!audioCtx) return;
+
+        const now = audioCtx.currentTime + delay;
+
+        const osc = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+
+        osc.type = type;
+        osc.frequency.setValueAtTime(Math.max(20, freq), now);
+
+        if (endFreq) {
+          osc.frequency.exponentialRampToValueAtTime(Math.max(20, endFreq), now + duration);
+        }
+
+        g.gain.setValueAtTime(0.0001, now);
+        g.gain.exponentialRampToValueAtTime(Math.max(0.0002, gain), now + 0.01);
+        g.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+        osc.connect(g);
+        g.connect(audioCtx.destination);
+
+        osc.start(now);
+        osc.stop(now + duration + 0.03);
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function playSound(name) {
+      const theme = SOUND_THEMES[settings.sound];
+
+      if (!theme) return;
+
+      try {
+        ensureAudio();
+
+        if (name === 'good') {
+          playTone(theme.good);
+        }
+
+        if (name === 'bad') {
+          playTone(theme.bad);
+        }
+
+        if (name === 'click') {
+          playTone(theme.click);
+        }
+
+        if (name === 'gameover') {
+          playTone(theme.gameover);
+        }
+
+        if (name === 'bonus') {
+          theme.bonus.notes.forEach((noteFreq, index) => {
+            playTone({
+              freq: noteFreq,
+              endFreq: noteFreq * 1.25,
+              duration: theme.bonus.duration,
+              type: theme.bonus.type,
+              gain: theme.bonus.gain,
+              delay: index * 0.07
+            });
+          });
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function haptic(type) {
+      try {
+        const h = window.Telegram?.WebApp?.HapticFeedback;
+
+        if (h) {
+          if (type === 'error') {
+            h.notificationOccurred('error');
+          } else if (type === 'success') {
+            h.notificationOccurred('success');
+          } else if (type === 'heavy') {
+            h.impactOccurred('heavy');
+          } else {
+            h.impactOccurred('light');
+          }
+        } else if (navigator.vibrate) {
+          if (type === 'error') {
+            navigator.vibrate([60, 35, 60]);
+          } else if (type === 'success') {
+            navigator.vibrate(30);
+          } else {
+            navigator.vibrate(15);
+          }
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function formatTime(value) {
+      const total = Math.max(0, Math.floor(value));
+
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+
+      if (h > 0) {
+        return `${h} ч ${m} мин`;
+      }
+
+      if (m > 0) {
+        return `${m} мин ${s} сек`;
+      }
+
+      return `${s} сек`;
+    }
+
+    function updateLayout() {
+      const basketCenterY = Math.max(150, H - 140);
+
+      layout = {
+        basketCenterY,
+        catchTop: basketCenterY - 40,
+        catchBottom: basketCenterY + 32,
+        catchLineY: basketCenterY + 30,
+        glowY: basketCenterY - 12
+      };
+    }
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      W = rect.width;
+      H = rect.height;
+
+      initBackground();
+      updateLayout();
+    }
+
+    function initBackground() {
+      bgGradient = ctx.createLinearGradient(0, 0, 0, H);
+      bgGradient.addColorStop(0, '#070b16');
+      bgGradient.addColorStop(0.42, '#0b1230');
+      bgGradient.addColorStop(1, '#0d1733');
+
+      const count = Math.max(10, Math.min(26, Math.floor((W * H) / 24000)));
+      particles = [];
+
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: rand(0, W),
+          y: rand(0, H),
+          vx: rand(-7, 7),
+          vy: rand(-5, 5),
+          r: rand(1, 2.3),
+          a: rand(0.06, 0.16)
+        });
+      }
+    }
+
+    function drawGlow(x, y, r, color) {
+      if (r <= 0) return;
+
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, color);
+      g.addColorStop(1, 'rgba(0,0,0,0)');
+
+      ctx.fillStyle = g;
+      ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    }
+
+    function drawBackground(dt) {
+      if (!bgGradient) initBackground();
+
+      ctx.fillStyle = bgGradient;
+      ctx.fillRect(0, 0, W, H);
+
+      const t = performance.now() / 1000;
+
+      drawGlow(
+        W * 0.22 + Math.sin(t * 0.35) * W * 0.04,
+        H * 0.20 + Math.cos(t * 0.28) * H * 0.03,
+        Math.max(W, H) * 0.34,
+        'rgba(124, 255, 196, 0.035)'
+      );
+
+      drawGlow(
+        W * 0.80 + Math.cos(t * 0.22) * W * 0.05,
+        H * 0.28 + Math.sin(t * 0.31) * H * 0.04,
+        Math.max(W, H) * 0.30,
+        'rgba(99, 102, 241, 0.045)'
+      );
+
+      drawGlow(
+        W * 0.50 + Math.sin(t * 0.18) * W * 0.06,
+        H * 0.78 + Math.cos(t * 0.26) * H * 0.04,
+        Math.max(W, H) * 0.36,
+        'rgba(255, 183, 3, 0.025)'
+      );
+
+      for (const p of particles) {
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+
+        if (p.x < -20) p.x = W + 20;
+        if (p.x > W + 20) p.x = -20;
+        if (p.y < -20) p.y = H + 20;
+        if (p.y > H + 20) p.y = -20;
+      }
+
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < particles.length; i++) {
+        const a = particles[i];
+
+        for (let j = i + 1; j < particles.length; j++) {
+          const b = particles[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const dist = Math.hypot(dx, dy);
+
+          if (dist < 120) {
+            const alpha = (1 - dist / 120) * 0.065;
+            ctx.strokeStyle = `rgba(148, 163, 255, ${alpha})`;
+            ctx.beginPath();
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+            ctx.stroke();
+          }
+        }
+      }
+
+      for (const p of particles) {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(226, 232, 240, ${p.a})`;
+        ctx.fill();
+      }
+    }
+
+    function pickWeighted(arr) {
+      const total = arr.reduce((sum, item) => sum + (item.weight || 1), 0);
+      let r = Math.random() * total;
+
+      for (const item of arr) {
+        r -= (item.weight || 1);
+
+        if (r <= 0) {
+          return item;
+        }
+      }
+
+      return arr[0];
+    }
+
+    function spawnItem() {
+      let category = 'good';
+
+      const dynamicBadChance = Math.min(
+        state.diff.badChance + state.elapsed * 0.0015,
+        state.diff.badChanceMax
+      );
+
+      const roll = Math.random();
+
+      if (roll < state.diff.bonusChance) {
+        category = 'bonus';
+      } else if (roll < state.diff.bonusChance + dynamicBadChance) {
+        category = 'bad';
+      }
+
+      let type;
+
+      if (category === 'good') {
+        type = pickWeighted(goodTypes);
+      } else if (category === 'bad') {
+        type = pickWeighted(badTypes);
+      } else {
+        type = bonusTypes[Math.floor(Math.random() * bonusTypes.length)];
+      }
+
+      const speed = Math.min(
+        rand(state.diff.baseSpeed, state.diff.baseSpeed + 45) + state.elapsed * state.diff.speedMult,
+        state.diff.maxSpeed
+      );
+
+      state.items.push({
+        x: rand(34, W - 34),
+        y: -40,
+        vy: speed,
+        emoji: type.emoji,
+        points: type.points || 0,
+        category,
+        bonusType: type.type || null
+      });
+    }
+
+    function applyBonus(item) {
+      stats.totalBonuses += 1;
+
+      state.flash = 0.18;
+      state.flashColor = 'rgba(255, 215, 0, 0.20)';
+
+      haptic('success');
+      playSound('bonus');
+
+      if (item.bonusType === 'score') {
+        state.score += 5;
+      }
+
+      if (item.bonusType === 'time') {
+        if (state.time !== null) {
+          state.time += 5;
+        } else {
+          state.score += 5;
+        }
+      }
+
+      if (item.bonusType === 'life') {
+        state.lives = Math.min(state.lives + 1, 5);
+      }
+    }
+
+    function catchItem(item) {
+      if (item.category === 'bad') {
+        stats.totalBad += 1;
+
+        state.lives -= 1;
+        state.flash = 0.18;
+        state.flashColor = 'rgba(255, 70, 70, 0.24)';
+
+        haptic('error');
+        playSound('bad');
+
+        if (state.lives <= 0) {
+          endGame();
+        }
+      } else if (item.category === 'good') {
+        stats.totalGood += 1;
+
+        state.score += item.points;
+        state.flash = 0.10;
+        state.flashColor = 'rgba(0, 255, 136, 0.14)';
+
+        haptic('light');
+        playSound('good');
+      } else if (item.category === 'bonus') {
+        applyBonus(item);
+      }
+    }
+
+    // Управление нативной кнопкой BackButton в Telegram
+    function showBackButton() {
+      try {
+        if (tg?.BackButton) {
+          tg.BackButton.show();
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function hideBackButton() {
+      try {
+        if (tg?.BackButton) {
+          tg.BackButton.hide();
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    function goBackToHub() {
+      haptic('light');
+      playSound('click');
+
+      // Переход в родительскую директорию (хаб)
+      location.href = '../';
+    }
+
+    // Обработчик нативной кнопки BackButton
+    if (tg?.BackButton) {
+      tg.BackButton.onClick(goBackToHub);
+    }
+
+    function startGame(diffKey) {
+      /* ---------- GA: СТАРТ ИГРЫ ---------- */
+      trackEvent('game_start', {
+        game_name: 'trend_catch',
+        difficulty: diffKey
+      });
+
+      state.diff = DIFFICULTIES[diffKey] || DIFFICULTIES.normal;
+      state.diffName = state.diff.label || diffKey;
+      state.running = true;
+
+      state.score = 0;
+      state.lives = state.diff.lives;
+      state.time = state.diff.time === null ? null : state.diff.time;
+      state.elapsed = 0;
+      state.spawnTimer = 0.45;
+      state.items = [];
+
+      state.playerX = W / 2;
+      state.targetX = W / 2;
+      state.dragging = false;
+
+      state.flash = 0;
+      state.flashColor = 'rgba(255,255,255,0)';
+
+      if (settings.sound !== 'off') {
+        ensureAudio();
+      }
+
+      // Во время игры скрываем BackButton, чтобы случайно не выйти
+      hideBackButton();
+
+      overlay.classList.add('hidden');
+    }
+
+    function endGame() {
+      if (!state.running) return;
+
+      /* ---------- GA: КОНЕЦ ИГРЫ ---------- */
+      const reason = (state.time !== null && state.time <= 0) ? 'time_out' : 'lives_out';
+
+      trackEvent('game_end', {
+        game_name: 'trend_catch',
+        difficulty: state.diffName,
+        score: state.score,
+        duration_sec: Math.round(state.elapsed),
+        reason: reason
+      });
+
+      state.running = false;
+      state.dragging = false;
+
+      haptic('warning');
+      playSound('gameover');
+
+      stats.games += 1;
+      stats.totalScore += state.score;
+      stats.totalTimePlayed += state.elapsed;
+
+      if (!stats.bestScores[state.diffName]) {
+        stats.bestScores[state.diffName] = 0;
+      }
+
+      if (state.score > stats.bestScores[state.diffName]) {
+        stats.bestScores[state.diffName] = state.score;
+      }
+
+      saveStats();
+
+      setBest(`trendBest_${state.diffName}`, stats.bestScores[state.diffName]);
+
+      statsDiv.innerHTML = `
+        Счёт: <b>${state.score.toLocaleString('ru-RU')}</b><br>
+        Лучший результат: <b>${stats.bestScores[state.diffName].toLocaleString('ru-RU')}</b><br>
+        Режим: <b>${DIFF_LABELS[state.diffName] || state.diffName}</b>
+      `;
+
+      showGameOverScreen();
+    }
+
+    function hideAllPanels() {
+      startScreen.classList.add('hidden');
+      gameOverScreen.classList.add('hidden');
+      statsScreen.classList.add('hidden');
+    }
+
+    function showStartScreen() {
+      state.running = false;
+      state.dragging = false;
+
+      hideAllPanels();
+      startScreen.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+
+      updateSoundLabel();
+      showBackButton();
+    }
+
+    function showGameOverScreen() {
+      hideAllPanels();
+      gameOverScreen.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+
+      showBackButton();
+    }
+
+    function showStatsScreen(returnTo) {
+      statsReturn = returnTo;
+
+      renderStats();
+
+      hideAllPanels();
+      statsScreen.classList.remove('hidden');
+      overlay.classList.remove('hidden');
+
+      showBackButton();
+    }
+
+    function updateSoundLabel() {
+      soundBtn.textContent = SOUND_LABELS[settings.sound] || SOUND_LABELS.classic;
+    }
+
+    function cycleSound() {
+      let index = SOUND_ORDER.indexOf(settings.sound);
+
+      if (index === -1) {
+        index = 0;
+      }
+
+      settings.sound = SOUND_ORDER[(index + 1) % SOUND_ORDER.length];
+
+      saveSettings();
+      updateSoundLabel();
+
+      /* ---------- GA: СМЕНА ЗВУКА ---------- */
+      trackEvent('settings_change', {
+        game_name: 'trend_catch',
+        setting: 'sound',
+        value: settings.sound
+      });
+
+      if (settings.sound !== 'off') {
+        ensureAudio();
+        playSound('click');
+      }
+    }
+
+    function renderStats() {
+      const b = stats.bestScores;
+
+      const avg = stats.games > 0
+        ? Math.round(stats.totalScore / stats.games)
+        : 0;
+
+      statsInfo.innerHTML = `
+        <div>Завершено игр: <b>${stats.games.toLocaleString('ru-RU')}</b></div>
+        <div>Всего очков: <b>${stats.totalScore.toLocaleString('ru-RU')}</b></div>
+        <div>Средний счёт: <b>${avg.toLocaleString('ru-RU')}</b></div>
+        <div>Время в игре: <b>${formatTime(stats.totalTimePlayed)}</b></div>
+
+        <div class="stats-separator"></div>
+
+        <div>Лучший счёт — Легко: <b>${b.easy.toLocaleString('ru-RU')}</b></div>
+        <div>Лучший счёт — Средне: <b>${b.normal.toLocaleString('ru-RU')}</b></div>
+        <div>Лучший счёт — Сложно: <b>${b.hard.toLocaleString('ru-RU')}</b></div>
+        <div>Лучший счёт — Бесконечно: <b>${b.endless.toLocaleString('ru-RU')}</b></div>
+
+        <div class="stats-separator"></div>
+
+        <div>Поймано трендов: <b>${stats.totalGood.toLocaleString('ru-RU')}</b></div>
+        <div>Поймано бонусов: <b>${stats.totalBonuses.toLocaleString('ru-RU')}</b></div>
+        <div>Поймано инфошума: <b>${stats.totalBad.toLocaleString('ru-RU')}</b></div>
+      `;
+    }
+
+    function setTargetX(clientX) {
+      const rect = canvas.getBoundingClientRect();
+      state.targetX = clientX - rect.left;
+    }
+
+    function getShareUrl() {
+      if (APP_URL_FOR_SHARE) {
+        return APP_URL_FOR_SHARE;
+      }
+
+      try {
+        const u = new URL(location.href);
+        return u.origin + u.pathname;
+      } catch (e) {
+        return location.href;
+      }
+    }
+
+    function shareResult() {
+      /* ---------- GA: ПОДЕЛИТЬСЯ РЕЗУЛЬТАТОМ ---------- */
+      trackEvent('game_share', {
+        game_name: 'trend_catch',
+        score: state.score,
+        difficulty: state.diffName
+      });
+
+      const text = `Я набрал ${state.score} очков в Trend Catch! Попробуй побить мой рекорд.`;
+      const url = getShareUrl();
+
+      const shareUrl = `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+
+      try {
+        if (window.Telegram?.WebApp?.openTelegramLink) {
+          window.Telegram.WebApp.openTelegramLink(shareUrl);
+        } else {
+          window.open(shareUrl, '_blank');
+        }
+      } catch (e) {
+        window.open(shareUrl, '_blank');
+      }
+
+      haptic('light');
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+      state.dragging = true;
+      setTargetX(e.clientX);
+
+      if (canvas.setPointerCapture) {
+        try {
+          canvas.setPointerCapture(e.pointerId);
+        } catch (err) {}
+      }
+    });
+
+    canvas.addEventListener('pointermove', (e) => {
+      if (state.dragging) {
+        setTargetX(e.clientX);
+      }
+    });
+
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
+      canvas.addEventListener(eventName, () => {
+        state.dragging = false;
+      });
+    });
+
+    canvas.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      state.dragging = true;
+      setTargetX(e.touches[0].clientX);
+    }, { passive: false });
+
+    canvas.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+
+      if (state.dragging) {
+        setTargetX(e.touches[0].clientX);
+      }
+    }, { passive: false });
+
+    ['touchend', 'touchcancel'].forEach((eventName) => {
+      canvas.addEventListener(eventName, () => {
+        state.dragging = false;
+      });
+    });
+
+    document.querySelectorAll('[data-diff]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        playSound('click');
+        startGame(btn.dataset.diff);
+      });
+    });
+
+    restartBtn.addEventListener('click', () => {
+      playSound('click');
+      startGame(state.diffName);
+    });
+
+    shareBtn.addEventListener('click', () => {
+      playSound('click');
+      shareResult();
+    });
+
+    changeDiffBtn.addEventListener('click', () => {
+      playSound('click');
+      showStartScreen();
+    });
+
+    soundBtn.addEventListener('click', () => {
+      cycleSound();
+    });
+
+    statsBtn.addEventListener('click', () => {
+      playSound('click');
+      showStatsScreen('start');
+    });
+
+    gameOverStatsBtn.addEventListener('click', () => {
+      playSound('click');
+      showStatsScreen('gameover');
+    });
+
+    statsBackBtn.addEventListener('click', () => {
+      playSound('click');
+
+      if (statsReturn === 'gameover') {
+        showGameOverScreen();
+      } else {
+        showStartScreen();
+      }
+    });
+
+    // Кнопки возврата в меню
+    backBtnStart.addEventListener('click', goBackToHub);
+    backBtnGameOver.addEventListener('click', goBackToHub);
+    backBtnStats.addEventListener('click', goBackToHub);
+
+    document.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+    });
+
+    function drawItem(item) {
+      const style = ITEM_STYLES[item.category] || ITEM_STYLES.good;
+
+      let r = 24;
+
+      if (item.category === 'bonus') {
+        r = 24 + Math.sin(performance.now() / 180 + item.x * 0.02) * 3;
+      }
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      drawGlow(item.x, item.y, r * 2.2, style.glow);
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(item.x, item.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = style.disc;
+      ctx.fill();
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      drawGlow(item.x, item.y, r * 0.92, 'rgba(255, 255, 255, 0.14)');
+      ctx.restore();
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(item.x, item.y, r, 0, Math.PI * 2);
+      ctx.shadowBlur = 20;
+      ctx.shadowColor = style.ring;
+      ctx.strokeStyle = style.ring;
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.arc(item.x, item.y, r - 6, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.30)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.font = '32px serif';
+      ctx.fillText(item.emoji, item.x, item.y + 1);
+      ctx.fillText(item.emoji, item.x, item.y + 1);
+    }
+
+    function update(dt) {
+      if (!state.running) return;
+
+      state.elapsed += dt;
+      state.flash = Math.max(0, state.flash - dt);
+
+      if (state.time !== null) {
+        state.time -= dt;
+
+        if (state.time <= 0) {
+          state.time = 0;
+          endGame();
+          return;
+        }
+      }
+
+      state.targetX = clamp(state.targetX, 35, W - 35);
+
+      const ease = 0.22;
+      state.playerX += (state.targetX - state.playerX) * ease;
+      state.playerX = clamp(state.playerX, 35, W - 35);
+
+      state.spawnTimer -= dt;
+
+      const spawnInterval = Math.max(
+        state.diff.minSpawn,
+        state.diff.spawnRate - state.elapsed * 0.005
+      );
+
+      if (state.spawnTimer <= 0) {
+        spawnItem();
+        state.spawnTimer = spawnInterval;
+      }
+
+      for (let i = state.items.length - 1; i >= 0; i--) {
+        const item = state.items[i];
+        item.y += item.vy * dt;
+
+        if (item.y > H + 60) {
+          state.items.splice(i, 1);
+          continue;
+        }
+
+        if (
+          Math.abs(item.x - state.playerX) < 46 &&
+          item.y > layout.catchTop &&
+          item.y < layout.catchBottom
+        ) {
+          catchItem(item);
+          state.items.splice(i, 1);
+        }
+      }
+    }
+
+    function draw(dt) {
+      drawBackground(dt);
+
+      if (state.flash > 0) {
+        ctx.fillStyle = state.flashColor;
+        ctx.fillRect(0, 0, W, H);
+      }
+
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.35)';
+      ctx.fillStyle = 'rgba(244, 248, 255, 0.98)';
+      ctx.font = '800 20px system-ui';
+
+      const timeLabel = state.time === null
+        ? '⏱ ∞'
+        : `⏱ ${Math.ceil(state.time)}`;
+
+      ctx.fillText(`Счёт: ${state.score}`, 84, 28);
+      ctx.fillText(timeLabel, W - 76, 28);
+      ctx.fillText(`❤️ ${state.lives}`, W / 2, 28);
+      ctx.restore();
+
+      for (const item of state.items) {
+        drawItem(item);
+      }
+
+      drawGlow(state.playerX, layout.glowY, 95, 'rgba(124, 255, 196, 0.12)');
+
+      ctx.save();
+      ctx.shadowBlur = 18;
+      ctx.shadowColor = 'rgba(124, 255, 196, 0.35)';
+      ctx.font = '50px serif';
+      ctx.fillText('🧺', state.playerX, layout.basketCenterY);
+      ctx.restore();
+
+      ctx.beginPath();
+      ctx.moveTo(state.playerX - 44, layout.catchLineY);
+      ctx.lineTo(state.playerX + 44, layout.catchLineY);
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.22)';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+    }
+
+    let lastTime = performance.now();
+
+    function loop(now) {
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+
+      update(dt);
+      draw(dt);
+
+      requestAnimationFrame(loop);
+    }
+
+    window.addEventListener('resize', resize);
+
+    updateSoundLabel();
+    resize();
+    showBackButton();
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

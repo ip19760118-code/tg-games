@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Игровой центр</title>
+
+  <meta property="og:title" content="Игровой центр">
+  <meta property="og:description" content="Мини-игры прямо в Telegram: выбирай, играй и делись рекордами с друзьями.">
+
+  <!-- УСКОРЕНИЕ: заранее готовим соединения с внешними доменами -->
+  <link rel="preconnect" href="https://telegram.org" crossorigin>
+  <link rel="dns-prefetch" href="https://telegram.org">
+  <link rel="preconnect" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+
+  <!-- Google Analytics (async — не блокирует отрисовку) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-ZD8QE6XKTR', {
+      'page_title': document.title,
+      'page_path': location.pathname
+    });
+  </script>
+
+  <!-- WATCHDOG: если что-то зависло, принудительно гасим splash через 5 сек -->
+  <script>
+    window.__splashTimer = setTimeout(function () {
+      var s = document.getElementById('splash');
+      if (s) s.classList.add('done');
+    }, 5000);
+  </script>
+
+  <style>
+    html, body {
+      margin: 0; padding: 0; height: 100%; overflow: hidden;
+      background: #070b16;
+      font-family: system-ui, -apple-system, sans-serif;
+      touch-action: pan-y;
+      user-select: none;
+      overscroll-behavior: none;
+    }
+
+    /* ===== SPLASH: рисуется мгновенно, без внешних ресурсов ===== */
+    #splash {
+      position: fixed; inset: 0; z-index: 999;
+      background: #070b16;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 14px;
+      transition: opacity .3s ease;
+      color: #eaf0ff;
+      font-family: system-ui, -apple-system, sans-serif;
+    }
+    #splash.done { opacity: 0; pointer-events: none; }
+    .sp-logo { font-size: 56px; animation: spBob 1.6s ease-in-out infinite; }
+    @keyframes spBob { 50% { transform: translateY(-8px); } }
+    .sp-title { font-size: 20px; font-weight: 700; color: #7cffc4; letter-spacing: .04em; }
+    .sp-loader {
+      width: 46px; height: 46px; border-radius: 50%;
+      border: 4px solid rgba(124,255,196,.2);
+      border-top-color: #7cffc4;
+      animation: spSpin .9s linear infinite;
+    }
+    @keyframes spSpin { to { transform: rotate(360deg); } }
+    .sp-hint { font-size: 13px; color: #6b7699; }
+    /* ===== /SPLASH ===== */
+
+    .wrap {
+      width: 100vw; height: 100vh;
+      display: flex;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
+      padding: 20px;
+      padding-top: calc(20px + env(safe-area-inset-top));
+      padding-bottom: calc(20px + env(safe-area-inset-bottom));
+      box-sizing: border-box;
+    }
+
+    .panel {
+      margin: auto;
+      width: 100%; max-width: 380px;
+      padding: 24px 18px; border-radius: 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
+      text-align: center; color: #eaf0ff;
+    }
+
+    h1 { margin: 0 0 6px; font-size: 32px; color: #7cffc4; }
+    .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: 15px; font-weight: 700; }
+    .hub-desc { margin: 0 0 18px; color: #a8b4d8; font-size: 14px; line-height: 1.45; }
+
+    .game-btn {
+      width: 100%;
+      display: flex; align-items: center; gap: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.06);
+      color: #eaf0ff;
+      padding: 14px;
+      margin-bottom: 12px;
+      cursor: pointer; text-align: left;
+      transition: transform 0.08s ease, background 0.15s ease;
+      font-family: inherit; font-size: inherit;
+    }
+
+    .game-btn:active {
+      transform: scale(0.98);
+      background: rgba(255, 255, 255, 0.10);
+    }
+
+    .game-btn.disabled { opacity: 0.45; cursor: default; }
+
+    .game-emoji {
+      width: 52px; height: 52px;
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      background: rgba(124, 255, 196, 0.12);
+      border: 1px solid rgba(124, 255, 196, 0.18);
+      flex-shrink: 0;
+    }
+
+    .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+    .game-text b { font-size: 17px; color: #ffffff; }
+    .game-text small { font-size: 13px; color: #a8b4d8; line-height: 1.25; }
+    .hub-foot { margin: 14px 0 0; color: #6b7699; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <!-- SPLASH: виден сразу, гаснет когда приложение готово -->
+  <div id="splash">
+    <div class="sp-logo">🎮</div>
+    <div class="sp-title">Игровой центр</div>
+    <div class="sp-loader"></div>
+    <div class="sp-hint">Загружаем игры…</div>
+  </div>
+
+  <div class="wrap">
+    <div class="panel">
+
+      <h1>🎮 Игровой центр</h1>
+      <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
+      <p class="hub-desc">Выбирай игру и играй без установки. Рекорды, бонусы и соревнования с друзьями — всё внутри мессенджера.</p>
+
+      <button class="game-btn" id="trendCatchBtn">
+        <span class="game-emoji">🧺</span>
+        <span class="game-text">
+          <b>Trend Catch</b>
+          <small>Лови тренды интернета и избегай инфошум</small>
+        </span>
+      </button>
+
+      <button class="game-btn" id="lightsOutBtn">
+        <span class="game-emoji">💡</span>
+        <span class="game-text">
+          <b>Выключи Свет</b>
+          <small>Логическая головоломка: выключи всё поле</small>
+        </span>
+      </button>
+
+      <button class="game-btn" id="arkanoidBtn">
+        <span class="game-emoji">🧱</span>
+        <span class="game-text">
+          <b>Neon Arkanoid 3D</b>
+          <small>Классический арканоид с бонусами и ловушками</small>
+        </span>
+      </button>
+
+      <button class="game-btn" id="dominoBtn">
+        <span class="game-emoji">🎲</span>
+        <span class="game-text">
+          <b>Домино</b>
+          <small>Классическое домино против компьютера</small>
+        </span>
+      </button>
+
+      <button class="game-btn" id="shooterBtn">
+        <span class="game-emoji">🔫</span>
+        <span class="game-text">
+          <b>3D Shooter</b>
+          <small>3D-шутер с волнами врагов и тремя видами оружия</small>
+        </span>
+      </button>
+
+      <button class="game-btn" id="fruitSamuraiBtn">
+        <span class="game-emoji">🍉</span>
+        <span class="game-text">
+          <b>Фруктовый самурай</b>
+          <small>Режь фрукты на лету и уворачивайся от бомб</small>
+        </span>
+      </button>
+
+      <button class="game-btn disabled" disabled>
+        <span class="game-emoji">🚧</span>
+        <span class="game-text">
+          <b>Скоро</b>
+          <small>Здесь появится новая игра</small>
+        </span>
+      </button>
+
+      <p class="hub-foot">Новые игры появляются здесь регулярно</p>
+    </div>
+  </div>
+
+  <!-- SDK перенесён В КОНЕЦ body: страница рисуется сразу, не дожидаясь его -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <script>
+    /* ===== Скрыть splash ===== */
+    function hideSplash() {
+      if (window.__splashTimer) { clearTimeout(window.__splashTimer); window.__splashTimer = null; }
+      var s = document.getElementById('splash');
+      if (s) {
+        s.classList.add('done');
+        setTimeout(function () { if (s && s.parentNode) s.parentNode.removeChild(s); }, 350);
+      }
+    }
+
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    if (tg) {
+      try {
+        tg.ready();
+        tg.expand();
+        if (typeof tg.setHeaderColor === 'function') tg.setHeaderColor('#070b16');
+        if (typeof tg.setBackgroundColor === 'function') tg.setBackgroundColor('#070b16');
+        if (typeof tg.disableVerticalSwipes === 'function') tg.disableVerticalSwipes();
+      } catch (e) {}
+    }
+
+    function trackEvent(name, params) {
+      try { if (typeof gtag === 'function') gtag('event', name, params); } catch (e) {}
+    }
+
+    function openGame(url, gameName) {
+      trackEvent('hub_game_click', { game_name: gameName });
+      try {
+        if (tg && tg.HapticFeedback) tg.HapticFeedback.impactOccurred('light');
+      } catch (e) {}
+      location.href = url;
+    }
+
+    document.getElementById('trendCatchBtn').addEventListener('click', () => openGame('./trend-catch/', 'trend_catch'));
+    document.getElementById('lightsOutBtn').addEventListener('click', () => openGame('./lights-out/', 'lights_out'));
+    document.getElementById('arkanoidBtn').addEventListener('click', () => openGame('./arkanoid/', 'arkanoid'));
+    document.getElementById('dominoBtn').addEventListener('click', () => openGame('./domino/', 'domino'));
+    document.getElementById('shooterBtn').addEventListener('click', () => openGame('./shooter/', 'shooter'));
+    document.getElementById('fruitSamuraiBtn').addEventListener('click', () => openGame('./fruit-samurai/', 'fruit_samurai'));
+
+    /* Splash гаснем, как только основной код отработал (страница отрисована) */
+    requestAnimationFrame(function () {
+      requestAnimationFrame(hideSplash);
+    });
+    if (document.readyState === 'complete') hideSplash();
+    else window.addEventListener('load', hideSplash);
+  </script>
+</body>
+</html>
