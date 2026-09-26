@@ -43,13 +43,11 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pair .def{position:absolute;left:10px;top:14px;transform:rotate(12deg)}
 .card{width:var(--cw);height:calc(var(--cw)*1.4);border-radius:8px;background:linear-gradient(160deg,#fff,#e8e8e8);box-shadow:0 3px 8px rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;border:1px solid #bbb}
 .card.red{color:var(--red)}
-/* ИСПРАВЛЕНО: крести теперь тёмно-зелёные для лучшей видимости */
 .card.club{color:#1a6b1a}
 .card.black{color:#111}
 .card .corner{position:absolute;font-size:calc(var(--cw)*.28);line-height:1.1;text-align:center;font-weight:900}
 .card .corner.tl{top:4px;left:5px}
 .card .corner.br{bottom:4px;right:5px;transform:rotate(180deg)}
-/* ИСПРАВЛЕНО: центральная масть крупнее и жирнее */
 .card .center{font-size:calc(var(--cw)*.52);font-weight:900;text-shadow:0 1px 2px rgba(0,0,0,.1)}
 .card.back{background:repeating-linear-gradient(45deg,#1d3557,#1d3557 4px,#274b7a 4px,#274b7a 8px);border-color:#0e1c30}
 .card.back .corner,.card.back .center{display:none}
@@ -86,6 +84,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .code-input input{width:130px;font-size:20px;text-align:center;padding:7px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.2);border-radius:10px;color:var(--text);font-family:monospace;letter-spacing:4px;text-transform:uppercase}
 .lobby-list{display:flex;flex-direction:column;gap:7px;margin:10px 0;text-align:left}
 .lobby-list .row{display:flex;justify-content:space-between;background:rgba(0,0,0,.2);border-radius:10px;padding:7px 12px;font-size:13px}
+.lobby-list .row.host{border:1px solid rgba(255,209,102,.35)}
 </style>
 </head>
 <body>
@@ -141,7 +140,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="overlay" id="lobbyOverlay">
   <div class="cardbox">
     <h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2>
-    <div class="sub">Ожидание игроков (2–4)</div>
+    <div class="sub">Ожидание игроков (2–4). Поделись ссылкой или кодом.</div>
     <div class="lobby-list" id="lobbyList"></div>
     <div class="btns">
       <button class="btn" id="lobbyInvite">📤 Пригласить</button>
@@ -285,8 +284,26 @@ function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',
 function S(){return onlineMode?(roomData&&roomData.state):G;}
 function myHand(){const s=S();if(!s)return[];return s.hands[onlineMode?myUid:'p0']||[];}
 function iAmActor(){const s=S();if(!s||s.result)return false;return curActor(s)===(onlineMode?myUid:'p0');}
-function nameOf(uid){if(!onlineMode)return uid==='p0'?'Вы':('Бот '+uid.slice(1));const p=(roomData.players||{})[uid];return p?p.name:'?';}
-function playersList(){const s=S();if(!s)return[];return s.order.map(u=>({uid:u,name:nameOf(u),n:(s.hands[u]||[]).length,connected:onlineMode?!!(roomData.presence&&roomData.presence[u]):true,loses:onlineMode?((roomData.loses||{})[u]||0):0}));}
+function nameOf(uid){if(!onlineMode)return uid==='p0'?'Вы':('Бот '+uid.slice(1));const p=(roomData&&roomData.players||{})[uid];return p?p.name:'?';}
+/* ИСПРАВЛЕНО: список игроков берётся из комнаты (order/players/presence),
+   а не из игрового состояния — поэтому работает и в лобби до старта партии */
+function playersList(){
+  if(onlineMode){
+    if(!roomData)return[];
+    const order=roomData.order||[];
+    const hands=(roomData.state&&roomData.state.hands)||{};
+    return order.map(uid=>({
+      uid,
+      name:nameOf(uid),
+      n:(hands[uid]||[]).length,
+      connected:!!(roomData.presence&&roomData.presence[uid]),
+      loses:((roomData.loses||{})[uid]||0),
+      host:roomData.host===uid
+    }));
+  }
+  if(!G)return[];
+  return G.order.map(uid=>({uid,name:nameOf(uid),n:(G.hands[uid]||[]).length,connected:true,loses:0,host:uid==='p0'}));
+}
 /* ========== ОНЛАЙН ========== */
 async function createRoom(){
   if(!fbDb){alert('Firebase не загружен. Обнови страницу.');return;}
@@ -333,12 +350,22 @@ function leaveRoom(){onlineMode=false;if(roomRef){roomRef.off();if(myUid)roomRef
 function showLobby(){
   lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
   const list=$('lobbyList');list.innerHTML='';
-  playersList().forEach((p,i)=>{const r=document.createElement('div');r.className='row';r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.uid===myUid?' (вы)':'')+'</span><span>'+(p.connected?'🟢':'⚪')+'</span>';list.appendChild(r);});
-  for(let i=playersList().length;i<MAX_PLAYERS;i++){const r=document.createElement('div');r.className='row';r.innerHTML='<span style="opacity:.5">— свободно —</span><span>⚪</span>';list.appendChild(r);}
-  $('lobbyStart').style.display=(roomData.host===myUid)?'inline-flex':'none';
-  $('lobbyStart').disabled=playersList().length<2;
+  const pl=playersList();
+  pl.forEach((p,i)=>{
+    const r=document.createElement('div');
+    r.className='row'+(p.host?' host':'');
+    r.innerHTML='<span>'+(i+1)+'. '+esc(p.name)+(p.uid===myUid?' (вы)':'')+(p.host?' 👑':'')+'</span><span>'+(p.connected?'🟢':'')+'</span>';
+    list.appendChild(r);
+  });
+  for(let i=pl.length;i<MAX_PLAYERS;i++){
+    const r=document.createElement('div');r.className='row';
+    r.innerHTML='<span style="opacity:.5">— свободно —</span><span>⚪</span>';
+    list.appendChild(r);
+  }
+  $('lobbyStart').style.display=(roomData&&roomData.host===myUid)?'inline-flex':'none';
+  $('lobbyStart').disabled=pl.length<2;
 }
-$('lobbyStart').onclick=()=>{if(roomData.host!==myUid)return;const order=roomData.order;if(order.length<2)return;const st=dealState(order);roomRef.update({state:st,status:'playing',lastMove:{name:myName,action:'deal',at:Date.now()}});trackEvent('game_start',{game_name:'durak',mode:'online',players:order.length});};
+$('lobbyStart').onclick=()=>{if(!roomData||roomData.host!==myUid)return;const order=roomData.order||[];if(order.length<2)return;const st=dealState(order);roomRef.update({state:st,status:'playing',lastMove:{name:myName,action:'deal',at:Date.now()}});trackEvent('game_start',{game_name:'durak',mode:'online',players:order.length});};
 $('lobbyInvite').onclick=shareInvite;
 $('lobbyLeave').onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};
 $('inviteBtn').onclick=shareInvite;
@@ -420,9 +447,7 @@ function botStep(uid){
 function cardEl(c,faceDown,clickable,hi,dim){
   const d=document.createElement('div');
   const suit=suitOf(c);
-  const isRed=RED[suit];
-  const isClub=CLUB[suit];
-  d.className='card '+(faceDown?'back':(isRed?'red':(isClub?'club':'black')))+(clickable?' clickable':'')+(hi?' hi':'')+(dim?' dim':'');
+  d.className='card '+(faceDown?'back':(RED[suit]?'red':(CLUB[suit]?'club':'black')))+(clickable?' clickable':'')+(hi?' hi':'')+(dim?' dim':'');
   if(!faceDown){d.innerHTML='<span class="corner tl">'+rankOf(c)+'<br>'+SUITS[suit]+'</span><span class="center">'+SUITS[suit]+'</span><span class="corner br">'+rankOf(c)+'<br>'+SUITS[suit]+'</span>';}
   return d;
 }
@@ -439,7 +464,14 @@ function esc(s){return (s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>
 function renderAll(){
   const s=S();
   const bar=$('playersBar');bar.innerHTML='';
-  if(s){playersList().forEach(p=>{const chip=document.createElement('span');chip.className='chip'+(curActor(s)===p.uid&&!s.result?' turn':'');chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+' · 🂠'+p.n+(onlineMode?' · 🤡'+p.loses:'');bar.appendChild(chip);});}
+  if(s||onlineMode){
+    playersList().forEach(p=>{
+      const chip=document.createElement('span');
+      chip.className='chip'+(s&&curActor(s)===p.uid&&!s.result?' turn':'');
+      chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+(p.host?' 👑':'')+' · 🂠'+p.n+(onlineMode?' · 🤡'+p.loses:'');
+      bar.appendChild(chip);
+    });
+  }
   const dp=$('deckPile');dp.innerHTML='';
   if(s&&s.deck&&s.deck.length){
     if(s.trumpCard){const t=cardEl(s.trumpCard,false,false);t.classList.add('trumpcard');dp.appendChild(t);}
