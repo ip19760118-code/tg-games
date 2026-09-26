@@ -21,7 +21,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .title{font-size:20px;font-weight:700}
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
 .hbtn:active{transform:scale(.95)}
-.ver{ text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
+.ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
 .room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px 10px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;font-size:12px}
 .room-bar .code{font-family:monospace;letter-spacing:2px;font-size:15px;color:var(--accent);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:6px;font-weight:700}
 .rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
@@ -43,7 +43,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .pair{position:relative;width:var(--cw);height:calc(var(--cw)*1.55)}
 .pair .def{position:absolute;left:10px;top:14px;transform:rotate(12deg)}
 .card{width:var(--cw);height:calc(var(--cw)*1.4);border-radius:8px;background:linear-gradient(160deg,#fff,#e8e8e8);box-shadow:0 3px 8px rgba(0,0,0,.45);position:relative;display:flex;align-items:center;justify-content:center;font-weight:700;border:1px solid #bbb}
-/* ЧЕТЫРЕ РАЗНЫХ ЦВЕТА МАСТЕЙ — не сливаются */
 .card.spade{color:#101418}
 .card.club{color:#0a8a0a}
 .card.heart{color:#e63946}
@@ -122,13 +121,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
     <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
   </div>
-  <div class="ver">v1.4</div>
+  <div class="ver">v1.5</div>
 </div>
 
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button>
-    <h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace">v1.4</span></h2>
+    <h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace">v1.5</span></h2>
     <div class="sub">Подкидной · 36 карт</div>
     <div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div>
     <div class="mode-choice">
@@ -180,7 +179,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 
 <script>
-const VER='1.4';
+const VER='1.5';
 /* ========== FIREBASE ========== */
 let fbDb=null;
 try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
@@ -218,6 +217,22 @@ function cval(c){return RANKS.indexOf(rankOf(c));}
 function cbeats(d,a,trump){if(suitOf(d)===trump&&suitOf(a)!==trump)return true;return suitOf(d)===suitOf(a)&&cval(d)>cval(a);}
 function removeOne(arr,c){const i=arr.indexOf(c);if(i>-1)arr.splice(i,1);return arr;}
 function clone(o){return JSON.parse(JSON.stringify(o));}
+/* ========== ГЛАВНОЕ ИСПРАВЛЕНИЕ v1.5 ==========
+   Firebase превращает пустые массивы/объекты в null при чтении.
+   prep() возвращает их обратно, иначе s.table.forEach() роняет отрисовку. */
+function prep(s){
+  if(!s)return s;
+  if(!Array.isArray(s.table))s.table=[];
+  if(!Array.isArray(s.deck))s.deck=[];
+  if(!Array.isArray(s.order))s.order=[];
+  if(!s.hands||typeof s.hands!=='object')s.hands={};
+  for(const k of Object.keys(s.hands)){if(!Array.isArray(s.hands[k]))s.hands[k]=[];}
+  for(const u of s.order){if(!Array.isArray(s.hands[u]))s.hands[u]=[];}
+  if(typeof s.discard!=='number')s.discard=0;
+  if(typeof s.passCount!=='number')s.passCount=0;
+  if(typeof s.turnAt!=='number')s.turnAt=Date.now();
+  return s;
+}
 function nextWithCards(order,uid,hands){const i=order.indexOf(uid);for(let k=1;k<=order.length;k++){const u=order[(i+k)%order.length];if((hands[u]||[]).length>0)return u;}return null;}
 function dealState(order){
   const deck=mkDeck();const hands={};order.forEach(u=>hands[u]=[]);
@@ -238,6 +253,7 @@ function canAddCard(s,uid,card,first){
 }
 function curActor(s){return s.phase==='attack'?s.defender:s.attacker;}
 function actAttack(s,uid,card){
+  prep(s);
   if(s.phase!=='add'||uid!==s.attacker)return null;
   if(!canAddCard(s,uid,card,s.table.length===0))return null;
   const ns=clone(s);removeOne(ns.hands[uid],card);
@@ -245,32 +261,36 @@ function actAttack(s,uid,card){
   ns.table.push({a:card,d:null});ns.phase='attack';ns.turnAt=Date.now();return ns;
 }
 function actBeat(s,uid,card,ti){
+  prep(s);
   if(s.phase!=='attack'||uid!==s.defender)return null;
-  if(s.table[ti].d)return null;
+  if(!s.table[ti]||s.table[ti].d)return null;
   if(!cbeats(card,s.table[ti].a,s.trump))return null;
   const ns=clone(s);removeOne(ns.hands[uid],card);ns.table[ti].d=card;
   ns.phase=ns.table.every(p=>p.d)?'add':'attack';ns.turnAt=Date.now();return ns;
 }
-function actTake(s,uid){if(s.phase!=='attack'||uid!==s.defender)return null;const ns=clone(s);ns.phase='taking';ns.turnAt=Date.now();return ns;}
-function actAddTaking(s,uid,card){if(s.phase!=='taking'||uid!==s.attacker)return null;if(!canAddCard(s,uid,card,false))return null;const ns=clone(s);removeOne(ns.hands[uid],card);ns.table.push({a:card,d:null});ns.turnAt=Date.now();return ns;}
+function actTake(s,uid){prep(s);if(s.phase!=='attack'||uid!==s.defender)return null;const ns=clone(s);ns.phase='taking';ns.turnAt=Date.now();return ns;}
+function actAddTaking(s,uid,card){prep(s);if(s.phase!=='taking'||uid!==s.attacker)return null;if(!canAddCard(s,uid,card,false))return null;const ns=clone(s);removeOne(ns.hands[uid],card);ns.table.push({a:card,d:null});ns.turnAt=Date.now();return ns;}
 function actFinishTake(s,uid){
+  prep(s);
   if(s.phase!=='taking'||uid!==s.attacker)return null;
   const ns=clone(s);const cards=[];ns.table.forEach(p=>{cards.push(p.a);if(p.d)cards.push(p.d);});
   ns.hands[ns.defender]=ns.hands[ns.defender].concat(cards);
   return resolveRound(ns,true);
 }
 function actBito(s,uid){
+  prep(s);
   if(s.phase!=='add'||uid!==s.attacker)return null;
   if(!s.table.length||!s.table.every(p=>p.d))return null;
   const ns=clone(s);ns.discard+=ns.table.length*2;ns.table=[];
   return resolveRound(ns,false);
 }
-function drawSeq(s){const o=s.order,i=o.indexOf(s.attacker),seq=[];for(let k=0;k<o.length;k++)seq.push(o[(i+k)%o.length]);const di=seq.indexOf(s.defender);if(di>-1){seq.splice(di,1);seq.push(s.defender);}return seq.filter(u=>s.hands[u].length>0);}
+function drawSeq(s){const o=s.order,i=o.indexOf(s.attacker),seq=[];for(let k=0;k<o.length;k++)seq.push(o[(i+k)%o.length]);const di=seq.indexOf(s.defender);if(di>-1){seq.splice(di,1);seq.push(s.defender);}return seq.filter(u=>(s.hands[u]||[]).length>0);}
 function resolveRound(s,took){
+  prep(s);
   s.table=[];s.roundLimit=null;
   for(const u of drawSeq(s)){while(s.hands[u].length<6&&s.deck.length)s.hands[u].push(s.deck.pop());}
   if(!s.deck.length)s.trumpCard=null;
-  const active=s.order.filter(u=>s.hands[u].length>0);
+  const active=s.order.filter(u=>(s.hands[u]||[]).length>0);
   if(active.length<=1){s.result={loser:active[0]||null,at:Date.now()};s.phase='end';s.turnAt=Date.now();return s;}
   let na = took ? nextWithCards(s.order, s.defender, s.hands) : s.defender;
   if(!na) na = active[0];
@@ -286,8 +306,8 @@ function getUid(){let u=localStorage.getItem('durak_uid');if(!u){u='u'+Math.rand
 function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=localStorage.getItem('durak_name');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('durak_name',n);}return n;}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function inviteLink(c){const u=new URL(location.href);u.searchParams.set('room',c);return u.toString();}
-function S(){return onlineMode?(roomData&&roomData.state):G;}
-function myHand(){const s=S();if(!s)return[];return s.hands[onlineMode?myUid:'p0']||[];}
+function S(){const st=onlineMode?(roomData&&roomData.state):G;return st?prep(st):st;}
+function myHand(){const s=S();if(!s)return[];return (s.hands||{})[onlineMode?myUid:'p0']||[];}
 function iAmActor(){const s=S();if(!s||s.result)return false;return curActor(s)===(onlineMode?myUid:'p0');}
 function nameOf(uid){if(!onlineMode)return uid==='p0'?'Вы':('Бот '+uid.slice(1));const p=(roomData&&roomData.players||{})[uid];return p?p.name:'?';}
 function playersList(){
@@ -300,7 +320,7 @@ function playersList(){
   if(!G)return[];
   return G.order.map(uid=>({uid,name:nameOf(uid),n:(G.hands[uid]||[]).length,connected:true,loses:0,host:uid==='p0'}));
 }
-/* ========== ВОССТАНОВЛЕНИЕ МЕСТА (работает постоянно) ========== */
+/* ========== ВОССТАНОВЛЕНИЕ МЕСТА ========== */
 function setPresence(){
   if(!roomRef||!myUid)return;
   const p=roomRef.child('presence/'+myUid);
@@ -368,6 +388,7 @@ function subscribeRoom(){
   roomRef.on('value',snap=>{
     roomData=snap.val();
     if(!roomData){setStatus('❌ Комната закрыта');leaveRoom();return;}
+    if(roomData.state)prep(roomData.state);
     $('roomCount').textContent=(roomData.order||[]).length+'/'+MAX_PLAYERS;
     ensureSeat();
     if(roomData.status==='waiting')showLobby();else lobbyOverlay.classList.remove('show');
@@ -411,7 +432,7 @@ function startWatchdog(){
   if(watchdog)clearInterval(watchdog);
   watchdog=setInterval(()=>{
     if(!onlineMode||!roomData||roomData.status!=='playing'||roomData.host!==myUid)return;
-    const s=roomData.state;if(!s||s.result)return;
+    const s=prep(roomData.state);if(!s||s.result)return;
     const a=curActor(s);
     if(roomData.presence&&roomData.presence[a])return;
     if(Date.now()-(s.turnAt||0)<30000)return;
@@ -512,8 +533,9 @@ function renderAll(){
     $('trumpBadge').innerHTML='Козырь: <span style="color:'+(SUITCOLOR[s.trump]||'#fff')+'">'+SUITS[s.trump]+'</span>';
   }else{$('deckCount').textContent='0';$('trumpBadge').textContent=s?('Козырь: '+SUITS[s.trump]):'—';}
   const tb=$('tableEl');tb.innerHTML='';
-  if(s)s.table.forEach(p=>{const pr=document.createElement('div');pr.className='pair';pr.appendChild(cardEl(p.a,false,false));if(p.d){const d=cardEl(p.d,false,false);d.classList.add('def');pr.appendChild(d);}tb.appendChild(pr);});
-  if(s&&!s.table.length){const em=document.createElement('div');em.style.cssText='color:rgba(255,255,255,.35);font-size:13px;align-self:center';em.textContent='стол пуст';tb.appendChild(em);}
+  const tbl=(s&&Array.isArray(s.table))?s.table:[];
+  tbl.forEach(p=>{const pr=document.createElement('div');pr.className='pair';pr.appendChild(cardEl(p.a,false,false));if(p.d){const d=cardEl(p.d,false,false);d.classList.add('def');pr.appendChild(d);}tb.appendChild(pr);});
+  if(s&&!tbl.length){const em=document.createElement('div');em.style.cssText='color:rgba(255,255,255,.35);font-size:13px;align-self:center';em.textContent='стол пуст';tb.appendChild(em);}
   const hEl=$('handEl');hEl.innerHTML='';
   const hand=myHand().slice().sort(sortHand(s?s.trump:'s'));
   const myTurn=iAmActor();
@@ -531,15 +553,14 @@ function renderAll(){
   $('finishBtn').style.display=(myTurn&&isAtt&&s.phase==='taking')?'inline-flex':'none';
   $('menuBtn').style.display=(s&&!s.result)?'inline-flex':'none';
   if(s&&!s.result)setStatus(statusText(s));
-  /* ДИАГНОСТИКА: если в онлайне у твоего места нет карт — сказать почему */
   if(onlineMode&&s&&!s.result){
     const order=(roomData&&roomData.order)||[];
     window.__DBG={ver:VER,myUid,order,hands:Object.keys(s.hands||{}),seated,status:roomData&&roomData.status};
     if(order.length&&!order.includes(myUid)){
-      setStatus('⚠️ Тебя нет в составе партии (uid='+myUid.slice(0,6)+'…). Выйди и зайди по ссылке заново.',true);
+      setStatus('⚠️ Тебя нет в составе партии. Выйди и зайди по ссылке заново.',true);
       console.warn('DURAK DBG',window.__DBG);
     }else if(hand.length===0&&(s.hands||{})[myUid]===undefined){
-      setStatus('⚠️ Место есть, но карт нет: рассинхрон партии. Выйди и зайди заново.',true);
+      setStatus('⚠️ Место есть, но карт нет: рассинхрон. Выйди и зайди заново.',true);
       console.warn('DURAK DBG',window.__DBG);
     }
   }
