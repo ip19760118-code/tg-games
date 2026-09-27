@@ -7,10 +7,10 @@
 
   <meta property="og:title" content="Игровой центр">
   <meta property="og:description" content="Мини-игры прямо в Telegram: выбирай, играй и делись рекордами с друзьями.">
+  <meta name="color-scheme" content="light dark">
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-  <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -23,6 +23,9 @@
   </script>
 
   <style>
+    /* ИСПРАВЛЕНО: универсальный box-sizing — панель больше не вылезает по ширине */
+    *, *::before, *::after { box-sizing: border-box; }
+
     html, body {
       margin: 0; padding: 0; height: 100%; overflow: hidden;
       background: #070b16;
@@ -36,18 +39,20 @@
     .wrap {
       width: 100vw; height: 100vh;
       display: flex;
-      padding: 20px;
-      padding-top: calc(20px + env(safe-area-inset-top));
-      padding-bottom: calc(20px + env(safe-area-inset-bottom));
-      box-sizing: border-box;
+      padding: 16px;
+      padding-top: calc(16px + env(safe-area-inset-top));
+      padding-bottom: calc(16px + env(safe-area-inset-bottom));
       overflow-y: auto;
+      overflow-x: hidden;
       -webkit-overflow-scrolling: touch;
     }
 
     .panel {
       margin: auto;
-      width: 100%; max-width: 380px;
-      padding: 24px 18px; border-radius: 24px;
+      width: 100%;
+      max-width: min(420px, 100%);
+      padding: 22px 16px;
+      border-radius: 24px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.08);
       box-shadow: 0 24px 70px rgba(0, 0, 0, 0.28);
@@ -55,23 +60,24 @@
       flex-shrink: 0;
     }
 
-    h1 { margin: 0 0 6px; font-size: 32px; color: #7cffc4; }
-    .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: 15px; font-weight: 700; }
-    .hub-desc { margin: 0 0 18px; color: #a8b4d8; font-size: 14px; line-height: 1.45; }
+    h1 { margin: 0 0 6px; font-size: clamp(24px, 7vw, 32px); color: #7cffc4; }
+    .hub-subtitle { margin: 0 0 8px; color: #7cffc4; font-size: clamp(13px, 3.6vw, 15px); font-weight: 700; }
+    .hub-desc { margin: 0 0 16px; color: #a8b4d8; font-size: clamp(12px, 3.4vw, 14px); line-height: 1.45; }
 
     .game-btn {
       width: 100%;
-      display: flex; align-items: center; gap: 14px;
+      display: flex; align-items: center; gap: 12px;
       border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 18px;
       background: rgba(255, 255, 255, 0.06);
       color: #eaf0ff;
-      padding: 14px;
-      margin-bottom: 12px;
+      padding: 12px;
+      margin-bottom: 10px;
       cursor: pointer; text-align: left;
       transition: transform 0.08s ease, background 0.15s ease;
       font-family: inherit; font-size: inherit;
       touch-action: manipulation;
+      min-width: 0;
     }
 
     .game-btn:active {
@@ -82,20 +88,20 @@
     .game-btn.disabled { opacity: 0.45; cursor: default; }
 
     .game-emoji {
-      width: 52px; height: 52px;
-      border-radius: 16px;
+      width: 48px; height: 48px;
+      border-radius: 14px;
       display: flex; align-items: center; justify-content: center;
-      font-size: 28px;
+      font-size: 26px;
       background: rgba(124, 255, 196, 0.12);
       border: 1px solid rgba(124, 255, 196, 0.18);
       flex-shrink: 0;
     }
 
-    .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
-    .game-text b { font-size: 17px; color: #ffffff; }
-    .game-text small { font-size: 13px; color: #a8b4d8; line-height: 1.25; }
+    .game-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+    .game-text b { font-size: clamp(15px, 4.2vw, 17px); color: #ffffff; }
+    .game-text small { font-size: clamp(11px, 3.2vw, 13px); color: #a8b4d8; line-height: 1.25; }
 
-    .hub-foot { margin: 14px 0 0; color: #6b7699; font-size: 12px; }
+    .hub-foot { margin: 12px 0 0; color: #6b7699; font-size: 12px; }
 
     .tag-online {
       display: inline-block;
@@ -180,7 +186,7 @@
         <span class="game-emoji">🃏</span>
         <span class="game-text">
           <b>Дурак <span class="tag-online">ONLINE</span></b>
-          <small>Подкидной: боты или онлайн до 4 игроков</small>
+          <small>Подкидной и переводной: боты или онлайн до 4</small>
         </span>
       </button>
 
