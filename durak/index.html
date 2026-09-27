@@ -22,14 +22,18 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
 .hbtn:active{transform:scale(.95)}
 .ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
-.room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px 10px;margin-bottom:8px;font-size:12px}
-.rb-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.rb-toggle{background:none;border:none;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;padding:2px 0}
+/* ==== ШТОРКА КОМНАТЫ ==== */
+.room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px;margin-bottom:8px;font-size:12px}
+.rb-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,209,102,.2);border-radius:10px;padding:7px 8px 7px 12px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
+.rb-toggle:active{background:rgba(255,255,255,.09)}
 .rb-toggle .code{font-family:monospace;letter-spacing:2px;font-size:15px;color:var(--accent);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:6px;font-weight:700}
-.rb-toggle .chev{opacity:.7;font-size:10px}
-.rb-line .spacer{flex:1}
-.rb-extra{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
-.rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:20px;padding:4px 10px;font-size:11px;cursor:pointer;font-family:inherit}
+/* крупный заметный шеврон */
+.rb-chevron{flex:0 0 auto;width:32px;height:32px;border-radius:50%;background:rgba(255,209,102,.16);border:2px solid var(--accent);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:900;line-height:1;box-shadow:0 0 12px rgba(255,209,102,.35);transition:transform .25s ease;animation:chevBob 1.6s ease-in-out infinite}
+.room-bar.open .rb-chevron{animation:none;transform:rotate(180deg)}
+@keyframes chevBob{0%,100%{transform:translateY(-1px)}50%{transform:translateY(2px)}}
+.rb-extra{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;padding:2px 4px 4px}
+.rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
+.rbtn:active{transform:scale(.95)}
 .rbtn.danger{border-color:rgba(255,80,80,.4);color:#ff9a9a}
 .players-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 9px;font-size:11px}
@@ -106,15 +110,14 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     </div>
   </div>
   <div class="room-bar" id="roomBar" style="display:none">
-    <div class="rb-line">
-      <button class="rb-toggle" id="rbToggle">👥 Комната <span class="code" id="roomCode">------</span> <span class="chev" id="rbChev">▾</span></button>
-      <span id="roomCount" style="opacity:.8">0/4</span>
-      <span class="spacer"></span>
-      <button class="rbtn danger" id="leaveBtn">🚪 Выйти</button>
-    </div>
+    <button class="rb-toggle" id="rbToggle">
+      <span>👥 Комната <span class="code" id="roomCode">------</span> · <span id="roomCount">0/4</span></span>
+      <span class="rb-chevron" id="rbChev">▾</span>
+    </button>
     <div class="rb-extra" id="rbExtra" style="display:none">
       <button class="rbtn" id="inviteBtn">📤 Пригласить</button>
       <button class="rbtn" id="copyBtn">🔢 Код</button>
+      <button class="rbtn danger" id="leaveBtn">🚪 Выйти</button>
     </div>
   </div>
   <div class="players-bar" id="playersBar"></div>
@@ -135,13 +138,13 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
     <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
   </div>
-  <div class="ver">v1.7</div>
+  <div class="ver">v1.8</div>
 </div>
 
 <div class="overlay" id="modeOverlay">
   <div class="cardbox">
     <button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button>
-    <h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace">v1.7</span></h2>
+    <h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace">v1.8</span></h2>
     <div class="sub">Подкидной · 36 карт</div>
     <div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div>
     <div class="mode-choice">
@@ -205,7 +208,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 
 <script>
-const VER='1.7';
+const VER='1.8';
 let fbDb=null;
 try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
 const tg=window.Telegram?.WebApp;
@@ -254,13 +257,11 @@ function prep(s){
 }
 function nextWithCards(order,uid,hands){const i=order.indexOf(uid);for(let k=1;k<=order.length;k++){const u=order[(i+k)%order.length];if((hands[u]||[]).length>0)return u;}return null;}
 function prevWithCards(order,uid,hands){const i=order.indexOf(uid);for(let k=1;k<=order.length;k++){const u=order[(i-k+order.length)%order.length];if((hands[u]||[]).length>0)return u;}return null;}
-/* НОВОЕ v1.7: кто может подкидывать */
 function canPodkid(s,uid){
   if(!s||uid===s.defender)return false;
   const active=s.order.filter(u=>(s.hands[u]||[]).length>0);
-  if(active.length<=3)return true;               /* 2–3 игрока: все кроме защитника */
-  if(s.allAddEnabled)return true;                  /* настройка «подкидывают все» */
-  /* классика вчетвером: только крайние к отбивающемуся (соседи по кругу) */
+  if(active.length<=3)return true;
+  if(s.allAddEnabled)return true;
   return uid===nextWithCards(s.order,s.defender,s.hands)||uid===prevWithCards(s.order,s.defender,s.hands);
 }
 function dealState(order,loses,transferEnabled,allAddEnabled){
@@ -474,7 +475,7 @@ function subscribeRoom(){
   setPresence();
   startWatchdog();
 }
-function leaveRoom(){onlineMode=false;seated=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
+function leaveRoom(){onlineMode=false;seated=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
 function showLobby(){
   lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
   const list=$('lobbyList');list.innerHTML='';
@@ -490,7 +491,15 @@ $('lobbyLeave').onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};
 $('inviteBtn').onclick=shareInvite;
 $('copyBtn').onclick=()=>{navigator.clipboard?.writeText(roomCode);setStatus('Код '+roomCode+' скопирован');};
 $('leaveBtn').onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};
-$('rbToggle').onclick=()=>{const ex=$('rbExtra');const open=ex.style.display!=='none';ex.style.display=open?'none':'flex';$('rbChev').textContent=open?'▾':'▴';};
+/* НОВОЕ v1.8: вся строка — кнопка шторки; класс .open крутит шеврон */
+$('rbToggle').onclick=()=>{
+  const bar=$('roomBar'),ex=$('rbExtra');
+  const open=ex.style.display!=='none';
+  ex.style.display=open?'none':'flex';
+  bar.classList.toggle('open',!open);
+  sClickUi();
+};
+function sClickUi(){tone(800,600,.05,'sine',.08);}
 function shareInvite(){const url=inviteLink(roomCode);const text='🃏 Дурак онлайн! Комната '+roomCode+'\n'+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else{navigator.clipboard?.writeText(url);alert('Ссылка скопирована');}}
 let watchdog=null;
 function startWatchdog(){
