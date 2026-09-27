@@ -90,9 +90,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
 <div class="actions"><button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button><button class="btn primary" id="newBtn" style="display:none">🔄 Новая игра</button></div>
-<div class="ver" id="verTag">v1.2</div>
+<div class="ver" id="verTag">v1.3</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🟤 Шашки <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.2</span></h2><div class="sub">Русские · обязательное взятие</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🟤 Шашки <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.3</span></h2><div class="sub">Русские · обязательное взятие</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание второго игрока…</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
@@ -104,31 +104,27 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="overlay" id="statsOverlay"><div class="cardbox"><h2>📊 Статистика</h2><div class="stat-row"><span>Партий сыграно</span><b id="stT">0</b></div><div class="stat-row"><span>Побед</span><b id="stW">0</b></div><div class="stat-row"><span>Поражений</span><b id="stL">0</b></div><div class="stat-row"><span>Процент побед</span><b id="stPct">—</b></div><div class="stat-row"><span>Серия побед сейчас</span><b id="stSt">0</b></div><div class="stat-row"><span>Рекордная серия</span><b id="stBest">0</b></div><div class="stat-row"><span>Съедено шашек</span><b id="stCap">0</b></div><div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="stClose">Закрыть</button></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (русские)</h2><div class="sub">• Простая шашка ходит на одну клетку по диагонали вперёд; бьёт — перескакивая через шашку соперника вперёд или назад.<br>• Взятие обязательно; за один ход можно съесть несколько шашек цепочкой.<br>• Дойдя до последнего ряда, шашка становится дамкой (♛): ходит и бьёт на любое расстояние по диагонали.<br>• Если шашка стала дамкой во время цепочки — она продолжает бить уже как дамка.<br>• Победа: у соперника не осталось шашек или ходов (пропуск хода невозможен).<br>• Онлайн: ничья и сдача — в шторке комнаты.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='1.2',FLY=230;let fbDb=null;try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
+const VER='1.3',FLY=230;let fbDb=null;try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
 const tg=window.Telegram?.WebApp;if(tg){try{tg.ready();tg.expand();tg.disableVerticalSwipes&&tg.disableVerticalSwipes();}catch(e){}}
 function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;t==='success'?h.notificationOccurred('success'):t==='error'?h.notificationOccurred('error'):h.impactOccurred('light');}catch(e){}}
 function goToHub(){location.href='../';}
 if(tg?.BackButton){tg.BackButton.show();tg.BackButton.onClick(()=>{if(rulesOverlay.classList.contains('show')){rulesOverlay.classList.remove('show');return;}if(statsOverlay.classList.contains('show')){statsOverlay.classList.remove('show');return;}if(setOverlay.classList.contains('show')){setOverlay.classList.remove('show');return;}if(lobbyOverlay.classList.contains('show')){leaveRoom();modeOverlay.classList.add('show');return;}if(modeOverlay.classList.contains('show')){modeOverlay.classList.remove('show');goToHub();return;}goToHub();});}
 function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='shashki_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'shashki',source:(window.Telegram?.WebApp?.initDataUnsafe?.user)?'telegram':'browser',ver:VER});}}catch(e){}})();
-/* настройки + скины */
 let set=Object.assign({diff:'medium',vol:.8,board:'classic',piece:'classic'},JSON.parse(localStorage.shashki_set||'{}'));
 const saveSet=()=>localStorage.shashki_set=JSON.stringify(set);
 const BOARDS={classic:['#e9d5b0','#a97e4f'],green:['#eeeed2','#769656'],night:['#3b3f63','#23263c'],ice:['#dff1f7','#7fb6c9']};
 const PIECES={classic:['#fffdf6','#d8cbb0','#5a5a5a','#161616'],red:['#f7f3ea','#d8cbb0','#d43a3a','#7a1010'],blue:['#f7f3ea','#d8cbb0','#2b6cb0','#123c6b']};
 function applySkins(){const b=BOARDS[set.board]||BOARDS.classic,p=PIECES[set.piece]||PIECES.classic,rs=document.documentElement.style;rs.setProperty('--sqL',b[0]);rs.setProperty('--sqD',b[1]);rs.setProperty('--pcW1',p[0]);rs.setProperty('--pcW2',p[1]);rs.setProperty('--pcB1',p[2]);rs.setProperty('--pcB2',p[3]);}
-/* звук с общей громкостью */
 let AC=null,MASTER=null;function ensureAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination);}catch(e){}}if(AC&&AC.resume)AC.resume();if(MASTER)MASTER.gain.value=set.vol;}
 function out(){return MASTER||AC.destination;}
 function tone(f0,f1,d,tp,v){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(out());o.start(n);o.stop(n+d);}
 function noise(d,v,f){if(!AC)return;const n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*d,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.exp(-i/(AC.sampleRate*d*.4));n.buffer=b;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;bp.Q.value=.9;const g=AC.createGain();g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);n.connect(bp);bp.connect(g);g.connect(out());n.start();}
 const sMove=()=>{noise(.06,.16,1500);tone(420,300,.06,'triangle',.1);},sCap=()=>{noise(.09,.22,900);tone(240,120,.12,'square',.14);},sKing=()=>{[660,880,1100].forEach((f,i)=>setTimeout(()=>tone(f,f,.12,'sine',.14),i*80));},sTurn=()=>tone(660,990,.13,'sine',.12),sDeny=()=>tone(150,90,.16,'sawtooth',.12),sClickUi=()=>tone(800,600,.05,'sine',.08),sDeal=()=>{for(let i=0;i<5;i++)setTimeout(()=>noise(.05,.12,2400),i*60);},sWin=()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.18,'triangle',.15),i*110));},sLose=()=>{[400,350,300,250].forEach((f,i)=>setTimeout(()=>tone(f,f,.2,'sawtooth',.1),i*130));},sDraw=()=>{[440,554,659].forEach((f,i)=>setTimeout(()=>tone(f,f,.2,'sine',.12),i*120));};
-/* статистика */
 let ST=Object.assign({t:0,w:0,l:0,st:0,best:0,cap:0},JSON.parse(localStorage.shashki_stats||'{}'));
 const saveST=()=>localStorage.shashki_stats=JSON.stringify(ST);
 function bumpST(win,caps){ST.t++;ST.cap+=caps||0;if(win){ST.w++;ST.st++;if(ST.st>ST.best)ST.best=ST.st;}else{ST.l++;ST.st=0;}saveST();showST();}
 function showST(){$('stT').textContent=ST.t;$('stW').textContent=ST.w;$('stL').textContent=ST.l;$('stPct').textContent=ST.t?Math.round(ST.w/ST.t*100)+'%':'—';$('stSt').textContent=ST.st;$('stBest').textContent=ST.best;$('stCap').textContent=ST.cap;}
-/* движок */
 const $=id=>document.getElementById(id),D=[[1,1],[1,-1],[-1,1],[-1,-1]],oth=s=>s==='w'?'b':'w';
 function newState(){const b=Array(64).fill(null);for(let i=0;i<24;i++){const r=i>>3,c=i&7;if((r+c)%2===0)b[i]={c:'w',k:false};}for(let i=40;i<64;i++){const r=i>>3,c=i&7;if((r+c)%2===0)b[i]={c:'b',k:false};}return{board:b,turn:'w',result:null,scores:{w:0,b:0},turnAt:Date.now(),lastMove:null};}
 function normState(s){s=(s&&typeof s==='object')?s:{};if(!Array.isArray(s.board)||s.board.length!==64){const b=Array(64).fill(null);if(s.board&&typeof s.board==='object')for(let i=0;i<64;i++){const p=s.board[i]||s.board[String(i)];b[i]=p?{c:p.c==='b'?'b':'w',k:!!p.k}:null;}s.board=b;}else s.board=s.board.map(p=>p?{c:p.c==='b'?'b':'w',k:!!p.k}:null);s.turn=s.turn==='b'?'b':'w';s.scores=(s.scores&&typeof s.scores==='object')?{w:+s.scores.w||0,b:+s.scores.b||0}:{w:0,b:0};s.result=(s.result&&typeof s.result==='object')?s.result:null;s.lastMove=s.lastMove||null;s.turnAt=+s.turnAt||Date.now();return s;}
@@ -153,7 +149,6 @@ function genMoves(s,side){
 }
 function applyMove(s,side,mv){const p=s.board[mv.from];s.board[mv.from]=null;mv.caps.forEach(ci=>s.board[ci]=null);const fin=mv.path[mv.path.length-1];s.board[fin]={c:side,k:mv.k||p.k};s.turn=oth(side);s.turnAt=Date.now();return s;}
 function countP(s,side){let n=0;for(const p of(s.board||[]))if(p&&p.c===side)n++;return n;}
-/* ИСПРАВЛЕНО v1.2: проигрывает тот, у кого НЕТ ходов/шашек (раньше было наоборот → зависание) */
 function checkEnd(s){const y=s.turn;if(!s.result&&(countP(s,y)===0||genMoves(s,y).length===0)){const w=oth(y);s.result={winner:w,at:Date.now()};s.scores[w]=(s.scores[w]||0)+1;}return s;}
 function clone(o){return JSON.parse(JSON.stringify(o));}
 function evalS(s,side){let sc=0;for(let i=0;i<64;i++){const p=s.board[i];if(!p)continue;const adv=p.c==='w'?(i>>3):(7-(i>>3));const v=p.k?220:100+adv*4+(((i&7)>0&&(i&7)<7)?2:0);sc+=p.c===side?v:-v;}return sc+(set.diff==='hard'?0:Math.random()*4);}
@@ -166,7 +161,6 @@ function botMove(s,side){const mv=genMoves(s,side);if(!mv.length)return null;
   if(m.caps.length)sc+=full?10:6;
   if(sc>bs){bs=sc;best=m;}}
  return best;}
-/* состояние приложения */
 let onlineMode=false,roomCode=null,myUid=null,mySide=null,myName=null,roomRef=null,roomData=null,shownEndAt=null,G=null,botTimer=null,flight=null,sel=-1,dests=[],playerSide='w',prevTurnMe=null,prevLastAt=0,capsMe=0;
 function getUid(){let u=localStorage.getItem('shashki_uid');if(!u){u='u'+Math.random().toString(36).slice(2,10);localStorage.setItem('shashki_uid',u);}return u;}
 function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}let n=localStorage.getItem('shashki_name');if(!n){n='Игрок'+Math.floor(Math.random()*900+100);localStorage.setItem('shashki_name',n);}return n;}
@@ -177,7 +171,6 @@ function meSide(){return onlineMode?mySide:playerSide;}
 function nameOf(side){if(!onlineMode)return side===playerSide?'Вы':'Компьютер';const p=(roomData&&roomData.players||{})[side];return p?p.name:(side==='w'?'Белые':'Чёрные');}
 function playersList(){if(onlineMode){if(!roomData)return[];const sc=(roomData.state&&roomData.state.scores)||{};return['w','b'].filter(x=>(roomData.players||{})[x]).map(sd=>({side:sd,name:nameOf(sd),n:countP(roomData.state||{},sd),connected:!!(roomData.presence&&roomData.presence[sd]),wins:sc[sd]||0}));}
  if(!G)return[];return[{side:'w',name:nameOf('w'),n:countP(G,'w'),connected:true,wins:0},{side:'b',name:nameOf('b'),n:countP(G,'b'),connected:true,wins:0}];}
-/* доска с ориентацией под игрока: свои внизу */
 let cellEls={};
 function buildBoard(){const bd=$('board');bd.innerHTML='';cellEls={};const me=meSide();
  for(let dr=0;dr<8;dr++)for(let dc=0;dc<8;dc++){
@@ -188,20 +181,24 @@ function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 function setStatus(t,w){const e=$('statusEl');e.innerHTML=t;e.classList.toggle('warn',!!w);}
 function statusText(){const s=S();if(!s)return onlineMode?'Ожидание партии…':'Выбери режим';if(s.result)return s.result.winner===meSide()?'🏆 Вы победили!':'🏁 Победил: '+esc(nameOf(s.result.winner));const me=meSide();if(s.turn!==me)return'🎲 Ходит '+esc(nameOf(s.turn));const caps=genMoves(s,me).filter(m=>m.caps.length);return caps.length?'⚔️ Обязательное взятие!':'⚔️ Твой ход';}
 function cellCenter(i){const r=cellEls[i].getBoundingClientRect();return{x:r.left+r.width/2,y:r.top+r.height/2,w:r.width};}
+/* ИСПРАВЛЕНО v1.3: полёт ВСЕГДА завершается (страховочный таймер) и сам сбрасывает flight */
 function startFlight(side,path,k,cb){
+ let el=null,done=false;
+ const finish=()=>{if(done)return;done=true;flight=null;try{el&&el.remove();}catch(e){}cb&&cb();};
+ const hard=setTimeout(finish,FLY*(Math.max(1,path.length-1))+400);
  flight={dest:path[path.length-1],side:side};
  try{
   const st=cellCenter(path[0]);const size=st.w*0.74;
-  const el=document.createElement('div');el.className='pcfly pc '+(side==='w'?'w':'b')+(k?' king':'');el.style.width=size+'px';el.style.height=size+'px';el.style.left=(st.x-size/2)+'px';el.style.top=(st.y-size/2)+'px';document.body.appendChild(el);
+  el=document.createElement('div');el.className='pcfly pc '+(side==='w'?'w':'b')+(k?' king':'');el.style.width=size+'px';el.style.height=size+'px';el.style.left=(st.x-size/2)+'px';el.style.top=(st.y-size/2)+'px';document.body.appendChild(el);
   let seg=0;
   (function next(){
-   if(seg>=path.length-1){el.remove();cb&&cb();return;}
+   if(done)return;
+   if(seg>=path.length-1){clearTimeout(hard);finish();return;}
    const a=cellCenter(path[seg]),b=cellCenter(path[seg+1]);const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy),arc=Math.min(46,14+dist*.22);const t0=performance.now();
-   (function fr(t){const p=Math.min(1,(t-t0)/FLY);const e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;const x=a.x+dx*e,y=a.y+dy*e-Math.sin(Math.PI*e)*arc;el.style.transform='translate('+(x-a.x)+'px,'+(y-a.y)+'px) scale('+(1-.12*Math.sin(Math.PI*e))+')';if(p<1)requestAnimationFrame(fr);else{seg++;next();}})(t0);
+   (function fr(t){if(done)return;const p=Math.min(1,(t-t0)/FLY);const e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;const x=a.x+dx*e,y=a.y+dy*e-Math.sin(Math.PI*e)*arc;el.style.transform='translate('+(x-a.x)+'px,'+(y-a.y)+'px) scale('+(1-.12*Math.sin(Math.PI*e))+')';if(p<1)requestAnimationFrame(fr);else{seg++;next();}})(t0);
   })();
- }catch(e){cb&&cb();}
+ }catch(e){clearTimeout(hard);finish();}
 }
-/* онлайн */
 async function createRoom(){if(!fbDb){alert('Firebase не загружен.');return;}myUid=getUid();myName=getUserName();mySide='w';roomCode=genRoomCode();roomRef=fbDb.ref('rooms/'+roomCode);
  try{await roomRef.set({game:'shashki',host:mySide,createdAt:Date.now(),status:'waiting',players:{w:{name:myName}},presence:{},flags:{drawOffer:null,drawAccept:false,surrender:null,winner:null},scores:{w:0,b:0},state:newState()});
  onlineMode=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;modeOverlay.classList.remove('show');buildBoard();subscribeRoom();trackEvent('room_created',{game_name:'shashki'});}catch(e){alert('Ошибка: '+e.message);}}
@@ -216,7 +213,7 @@ function subscribeRoom(){roomRef.on('value',snap=>{roomData=snap.val();if(!roomD
  if(roomData.status==='waiting')showLobby();else lobbyOverlay.classList.remove('show');
  const s=roomData.state,fl=roomData.flags||{},lm=s.lastMove;
  if(lm&&lm.at&&lm.at!==prevLastAt){prevLastAt=lm.at;
-  if(lm.by!==mySide&&lm.path&&lm.path.length){startFlight(lm.by,lm.path,lm.k);setTimeout(()=>{lm.caps&&lm.caps.length?sCap():sMove();if(lm.k)sKing();renderAll();},FLY*lm.path.length);}
+  if(lm.by!==mySide&&lm.path&&lm.path.length){startFlight(lm.by,lm.path,lm.k,()=>{lm.caps&&lm.caps.length?sCap():sMove();if(lm.k)sKing();renderAll();});}
   else if(lm.by!==mySide){lm.caps&&lm.caps.length?sCap():sMove();}}
  if(fl.drawOffer&&fl.drawOffer!==mySide&&!fl.drawAccept)showPrompt('draw','Ничья?','flags/drawAccept',true,'flags/drawOffer',null);
  if(fl.drawAccept&&s&&!s.result){s.result={winner:null,at:Date.now()};try{roomRef.child('state/result').set(s.result);}catch(e){}}
@@ -239,12 +236,22 @@ function updateRoomActions(){const box=$('roomActions');[...box.children].forEac
   const sb=document.createElement('button');sb.className='rbtn danger';sb.textContent='🏳 Сдаться';sb.onclick=async()=>{if(confirm('Сдаться?'))await roomRef.child('flags/surrender').set(mySide);};box.appendChild(sb);}
  const lb=document.createElement('button');lb.className='rbtn danger';lb.textContent='🚪 Выйти';lb.onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};box.appendChild(lb);}
 function updateLiveBadge(){if(!onlineMode||!roomData)return;const pl=playersList();const live=pl.filter(p=>p.connected).length;$('rbLive').textContent=live;$('rbDot').className='live-dot'+(pl.length>0&&live<pl.length?' some-off':'');$('roomCount').textContent=pl.length+'/2';}
-let watchdog=null;function startWatchdog(){if(watchdog)clearInterval(watchdog);watchdog=setInterval(()=>{if(!onlineMode||!roomData||roomData.status!=='playing'||roomData.host!==mySide)return;const s=S();if(!s||s.result)return;if(roomData.presence&&roomData.presence[s.turn])return;if(Date.now()-(s.turnAt||0)<30000)return;const mv=botMove(s,s.turn);const ns=clone(s);if(mv){applyMove(ns,s.turn,mv);checkEnd(ns);}else{ns.result={winner:oth(s.turn),at:Date.now()};ns.scores[oth(s.turn)]=(ns.scores[oth(s.turn)]||0)+1;}ns.lastMove={name:nameOf(s.turn),action:'автоход (нет связи)',caps:mv?mv.caps:[],path:mv?mv.path:[],at:Date.now()};roomRef.update({state:ns});},5000);}
-/* офлайн */
+let watchdog=null;function startWatchdog(){if(watchdog)clearInterval(watchdog);watchdog=setInterval(async()=>{if(!onlineMode||!roomData||roomData.status!=='playing'||roomData.host!==mySide)return;const s=S();if(!s||s.result)return;if(roomData.presence&&roomData.presence[s.turn])return;if(Date.now()-(s.turnAt||0)<30000)return;const mv=botMove(s,s.turn);const ns=clone(s);if(mv){applyMove(ns,s.turn,mv);checkEnd(ns);}else{ns.result={winner:oth(s.turn),at:Date.now()};ns.scores[oth(s.turn)]=(ns.scores[oth(s.turn)]||0)+1;}ns.lastMove={name:nameOf(s.turn),action:'автоход (нет связи)',caps:mv?mv.caps:[],path:mv?mv.path:[],at:Date.now()};try{await roomRef.child('state').set(ns);}catch(e){}},5000);}
 function startOffline(side){onlineMode=false;G=newState();playerSide=side;flight=null;sel=-1;dests=[];prevTurnMe=null;capsMe=0;modeOverlay.classList.remove('show');endOverlay.classList.remove('show');buildBoard();renderAll();setStatus(statusText());sDeal();trackEvent('game_start',{game_name:'shashki',mode:'ai',side,difficulty:set.diff});maybeBot();}
-function maybeBot(){if(onlineMode||!G||G.result)return;if(G.turn===playerSide)return;if(botTimer)clearTimeout(botTimer);botTimer=setTimeout(()=>{if(!G||G.result)return;const mv=botMove(G,G.turn);if(!mv){checkEnd(G);renderAll();if(G.result)showEnd();else{endTurnFallback();}return;}commitMove(G.turn,mv,true);},600);}
+function maybeBot(){if(onlineMode||!G||G.result)return;if(G.turn===playerSide)return;if(botTimer)clearTimeout(botTimer);botTimer=setTimeout(()=>{if(!G||G.result)return;const mv=botMove(G,G.turn);if(!mv){checkEnd(G);renderAll();if(G.result)showEnd();else endTurnFallback();return;}commitMove(G.turn,mv,true);},600);}
 function endTurnFallback(){G.result={winner:oth(G.turn),at:Date.now()};G.scores[G.result.winner]=(G.scores[G.result.winner]||0)+1;renderAll();showEnd();}
-/* ход */
+/* ИСПРАВЛЕНО v1.3: запись хода через once+set вместо transaction (не отменяется молча) */
+async function mutateOnline(fn,label,mv){
+ try{
+  const snap=await roomRef.child('state').once('value');
+  const cur=normState(snap.val()||newState());
+  const ns=fn(clone(cur));
+  if(!ns)return false;
+  ns.lastMove={by:mySide,name:myName,action:label,caps:mv?mv.caps:[],path:mv?mv.path:[],k:mv?mv.k:false,at:Date.now()};
+  await roomRef.child('state').set(ns);
+  return true;
+ }catch(e){console.error(e);return false;}
+}
 function commitMove(side,mv,isBot){
  const s=S();if(!s||s.result)return;
  const wasK=(s.board[mv.from]||{}).k;const promo=mv.k&&!wasK;const caps=mv.caps.length;
@@ -253,7 +260,6 @@ function commitMove(side,mv,isBot){
  flight={dest:mv.path[mv.path.length-1],side:side};
  renderAll();
  startFlight(side,mv.path,mv.k,()=>{
-  flight=null;
   if(caps)sCap();else sMove();if(promo)sKing();tgHaptic(caps?'medium':'light');
   renderAll();
   const st=S();
@@ -261,7 +267,6 @@ function commitMove(side,mv,isBot){
   if(!onlineMode){setStatus(statusText());maybeBot();}
  });
 }
-function mutateOnline(fn,label,mv){return new Promise(res=>{roomRef.child('state').transaction(cur=>{if(!cur)return undefined;normState(cur);const ns=fn(clone(cur));if(!ns)return undefined;ns.lastMove={by:mySide,name:myName,action:label,caps:mv?mv.caps:[],path:mv?mv.path:[],k:mv?mv.k:false,at:Date.now()};return ns;},(e,c)=>res(c),false);});}
 function onCell(i){ensureAudio();const s=S();if(!s||s.result||flight)return;const me=meSide();if(s.turn!==me){sDeny();setStatus('⏳ Сейчас не твой ход',true);return;}
  if(sel===i){sel=-1;dests=[];renderAll();return;}
  const d=dests.find(x=>x.fin===i);
@@ -297,7 +302,6 @@ function showEnd(){const s=S();if(!s||!s.result)return;flight=null;const me=meSi
   const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню шашек';h.onclick=()=>{endOverlay.classList.remove('show');G=newState();flight=null;buildBoard();renderAll();modeOverlay.classList.add('show');};b.appendChild(h);
   const h2=document.createElement('button');h2.className='btn';h2.textContent='← В меню игр';h2.onclick=goToHub;b.appendChild(h2);}
  endOverlay.classList.add('show');trackEvent('game_end',{game_name:'shashki',mode:onlineMode?'online':'ai',winner:draw?'draw':(win?'player':'other')});}
-/* меню и настройки */
 $('hubBtn').onclick=()=>{if(onlineMode)leaveRoom();goToHub();};$('modeHubBtn').onclick=goToHub;
 $('rulesBtn').onclick=()=>{sClickUi();rulesOverlay.classList.add('show');};$('rulesClose').onclick=()=>rulesOverlay.classList.remove('show');
 $('statsBtn').onclick=()=>{sClickUi();showST();statsOverlay.classList.add('show');};$('stClose').onclick=()=>statsOverlay.classList.remove('show');
