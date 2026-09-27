@@ -28,7 +28,6 @@
   --panel:rgba(24,32,44,0.85); --text:#e8ecf2; --accent:#7cffc4;
   --sq-light:#f0d9b5; --sq-dark:#b58863;
   --shadow:rgba(0,0,0,0.6);
-  /* ИСПРАВЛЕНО: доска учитывает отступы body и карточки */
   --bs:min(calc(100vw - 64px), 460px);
 }
 [data-theme="green"]{ --sq-light:#eeeed2; --sq-dark:#769656; }
@@ -45,7 +44,6 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .status{text-align:center;font-size:15px;font-weight:600;min-height:24px;margin-bottom:6px;color:var(--accent);text-shadow:0 1px 4px rgba(0,0,0,0.5)}
 .status.warn{color:#ff6b6b}
 
-/* ==== ШТОРКА КОМНАТЫ (как в Дураке) ==== */
 .room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(124,255,196,.25);border-radius:14px;padding:6px;margin-bottom:8px;font-size:12px}
 .rb-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(124,255,196,.2);border-radius:10px;padding:6px 6px 6px 12px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
 .rb-toggle:active{background:rgba(255,255,255,.09)}
@@ -202,22 +200,18 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 </div>
 
 <script>
-/* ================== FIREBASE ================== */
 let fbDb=null;
 try{
   firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});
   fbDb=firebase.database();
 }catch(e){console.error(e);}
-/* ================== TELEGRAM ================== */
 const tg=window.Telegram?.WebApp;
 if(tg){try{tg.ready();tg.expand();if(typeof tg.disableVerticalSwipes==='function')tg.disableVerticalSwipes();}catch(e){}}
 function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;if(t==='success')h.notificationOccurred('success');else if(t==='error')h.notificationOccurred('error');else if(t==='warning')h.notificationOccurred('warning');else if(t==='medium')h.impactOccurred('medium');else h.impactOccurred('light');}catch(e){}}
 function goToHub(){tgHaptic('light');location.href='../';}
 function tgHeaderColor(c){try{if(tg&&tg.setHeaderColor)tg.setHeaderColor(c);if(tg&&tg.setBackgroundColor)tg.setBackgroundColor(c);}catch(e){}}
-/* ================== GA ================== */
 function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
 (function(){try{const k='chess_session_tracked';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'chess',source:(window.Telegram?.WebApp?.initDataUnsafe?.user)?'telegram':'browser'});}}catch(e){}})();
-/* ================== ЗВУК ================== */
 let AC=null,MASTER=null;
 function ensureAudio(){if(!AC){try{AC=new (window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination);}catch(e){}}if(AC&&AC.resume)AC.resume();}
 function tone(f0,f1,d,tp,v){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(0.001,n+d);o.connect(g);g.connect(MASTER);o.start(n);o.stop(n+d);}
@@ -228,13 +222,10 @@ const sClick=()=>tone(800,600,0.05,'sine',0.1);
 const sWin=()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,0.18,'triangle',0.15),i*110));};
 const sLose=()=>{[440,392,349,311].forEach((f,i)=>setTimeout(()=>tone(f,f,0.2,'sawtooth',0.09),i*130));};
 const sDraw=()=>{[440,554,659].forEach((f,i)=>setTimeout(()=>tone(f,f,0.2,'sine',0.12),i*120));};
-/* ================== НАСТРОЙКИ ================== */
 let set=Object.assign({diff:'medium',side:'w',theme:'classic',vol:0.5},JSON.parse(localStorage.chess_set||'{}'));
 const saveSet=()=>localStorage.chess_set=JSON.stringify(set);
 let stats=Object.assign({w:0,l:0,d:0},JSON.parse(localStorage.chess_stats||'{}'));
 const saveStats=()=>localStorage.chess_stats=JSON.stringify(stats);
-/* ================== ЯДРО ================== */
-/* ИСПРАВЛЕНО v2.0: разные глифы для белых и чёрных — видно даже при инверсии цветов */
 const GLYPH_W={K:'♔',Q:'♕',R:'♖',B:'♗',N:'♘',P:'♙'};
 const GLYPH_B={K:'♚',Q:'♛',R:'♜',B:'♝',N:'♞',P:'♟'};
 function glyphOf(p){return (p.c==='w'?GLYPH_W:GLYPH_B)[p.t];}
@@ -301,9 +292,9 @@ function aiBestMove(){const mv=genLegal(aiSide);if(!mv.length)return null;orderM
  const depth=set.diff==='medium'?2:3;let best=mv[0],bs=-Infinity,alpha=-Infinity;
  for(const m of mv){makeMove(m);let sc=-negamax(depth-1,-Infinity,-alpha,aiSide==='w'?'b':'w',1);if(set.diff==='medium')sc+=Math.random()*10;unmakeMove();if(sc>bs){bs=sc;best=m;if(sc>alpha)alpha=sc;}}return best;}
 function insufficient(){const pcs=[];for(const p of board)if(p)pcs.push(p);if(pcs.length===2)return true;if(pcs.length===3){const t=pcs.find(p=>p.t!=='K');if(t&&(t.t==='B'||t.t==='N'))return true;}return false;}
-/* ================== МУЛЬТИПЛЕЕР ================== */
 let onlineMode=false,roomCode=null,mySideOnline=null,myName=null,myUid=null,roomRef=null,opponentOnline=false;
 let matchScore={w:0,b:0};
+let roomDataCache=null;
 function getUserName(){try{const u=window.Telegram?.WebApp?.initDataUnsafe?.user;if(u)return u.first_name||('id'+u.id);}catch(e){}const s=localStorage.chess_name;if(s)return s;const n='Игрок'+Math.floor(Math.random()*900+100);localStorage.chess_name=n;return n;}
 function genRoomCode(){const L='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';let s='';for(let i=0;i<6;i++)s+=L[Math.floor(Math.random()*L.length)];return s;}
 function inviteLink(code){const u=new URL(location.href);u.searchParams.set('room',code);u.hash='';return u.toString();}
@@ -314,9 +305,11 @@ function subscribeRoom(){if(!fbDb||!roomRef)return;let firstLoad=true;
   board=initialBoard();turn='w';castling={wK:true,wQ:true,bK:true,bQ:true};epTarget=-1;halfmove=0;moveLog=[];undoStack=[];
   for(const it of items){try{const legal=genLegal(turn);const cand=legal.find(x=>x.from===it.m.from&&x.to===it.m.to&&x.promo===(it.m.promo||null));if(cand){makeMove(cand);if(it.m.by!==mySideOnline)(cand.captured?sCap():sMove());}}catch(e){}}
   render();updateOnlineStatus();});
- roomRef.on('value',snap=>{const room=snap.val();if(!room){showStatus('❌ Комната закрыта');leaveRoom();return;}
-  opponentOnline=!!(room.presence&&room.presence[mySideOnline==='w'?'b':'w']);
-  const fl=room.flags||{};
+ roomRef.on('value',snap=>{
+  roomDataCache=snap.val();
+  if(!roomDataCache){showStatus('❌ Комната закрыта');leaveRoom();return;}
+  opponentOnline=!!(roomDataCache.presence&&roomDataCache.presence[mySideOnline==='w'?'b':'w']);
+  const fl=roomDataCache.flags||{};
   if(fl.drawOffer&&fl.drawOffer!==mySideOnline&&!fl.drawAccept)showDrawOffer();
   if(fl.drawAccept)endGame(null,'draw_agreed');
   if(fl.surrender)endGame(fl.surrender==='w'?'b':'w','surrender');
@@ -349,22 +342,19 @@ async function joinRoom(code){if(!fbDb){alert('Firebase не загружен. �
  }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}}
 function leaveRoom(){onlineMode=false;if(roomRef){roomRef.off();roomRef=null;}
  $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
- roomCode=null;mySideOnline=null;document.querySelectorAll('[data-prompt]').forEach(e=>e.remove());}
-/* НОВОЕ: чипы игроков внутри шторки + живой счётчик на шевроне */
-function renderPlayersBar(){const bar=$('playersBar');bar.innerHTML='';if(!onlineMode||!roomRef)return;
- const room=roomDataCache;if(!room)return;
- const scores=room.scores||{};
+ roomCode=null;mySideOnline=null;roomDataCache=null;document.querySelectorAll('[data-prompt]').forEach(e=>e.remove());}
+function renderPlayersBar(){const bar=$('playersBar');bar.innerHTML='';if(!onlineMode||!roomRef||!roomDataCache)return;
+ const scores=roomDataCache.scores||{};
  for(const side of['w','b']){
-  const p=(room.players||{})[side];if(!p)continue;
-  const connected=!!(room.presence&&room.presence[side]);
+  const p=(roomDataCache.players||{})[side];if(!p)continue;
+  const connected=!!(roomDataCache.presence&&roomDataCache.presence[side]);
   const chip=document.createElement('span');
   chip.className='chip'+(!gameOver&&turn===side?' turn':'');
   chip.innerHTML='<span class="dot'+(connected?'':' off')+'"></span>'+esc(p.name)+(side===mySideOnline?' (вы)':'')+' · '+(side==='w'?'♔':'♚')+' · 🏆'+(scores[side]||0);
   bar.appendChild(chip);
  }}
-let roomDataCache=null;
-function updateLiveBadge(){if(!onlineMode||!roomRef)return;const room=roomDataCache;if(!room)return;
- let live=0,total=0;for(const side of['w','b']){if((room.players||{})[side]){total++;if(room.presence&&room.presence[side])live++;}}
+function updateLiveBadge(){if(!onlineMode||!roomRef||!roomDataCache)return;
+ let live=0,total=0;for(const side of['w','b']){if((roomDataCache.players||{})[side]){total++;if(roomDataCache.presence&&roomDataCache.presence[side])live++;}}
  $('rbLive').textContent=live;$('rbDot').className='live-dot'+(live<total?' some-off':'');$('roomCount').textContent=total+'/2';}
 function updateRoomActions(){const box=$('roomActions');[...box.children].forEach(c=>{if(!c.dataset.prompt)c.remove();});if(!onlineMode||!roomRef)return;
  const sh=document.createElement('button');sh.className='rbtn';sh.textContent='📤 Пригласить';sh.onclick=()=>{const url=inviteLink(roomCode);const text='♟️ Шахматы онлайн. Комната: '+roomCode+'\n'+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else{navigator.clipboard?.writeText(url);alert('Ссылка скопирована');}};box.appendChild(sh);
@@ -380,7 +370,6 @@ function checkEndOnline(){const mv=genLegal(turn);if(mv.length===0){if(inCheck(t
 function resetBoard(){board=initialBoard();turn='w';castling={wK:true,wQ:true,bK:true,bQ:true};epTarget=-1;halfmove=0;undoStack=[];moveLog=[];lastMove=null;gameOver=false;thinking=false;sel=-1;promoPending=null;legalCache=[];hidePromo();endOverlay.classList.remove('show');document.querySelectorAll('[data-prompt]').forEach(e=>e.remove());render();}
 async function proposeRematch(){if(!roomRef)return;await roomRef.update({'flags/rematchOffer':mySideOnline,'flags/rematchAccept':false});showStatus('🔄 Ожидание согласия...');}
 function startRematch(){if(!roomRef)return;roomRef.child('moves').remove();roomRef.update({flags:{drawOffer:null,drawAccept:false,rematchOffer:null,rematchAccept:false,surrender:null,winner:null},status:'playing'}).then(()=>{resetBoard();mySideOnline=mySideOnline==='w'?'b':'w';playerSide=mySideOnline;aiSide=mySideOnline==='w'?'b':'w';render();showStatus('🔄 Реванш! Ты за '+(mySideOnline==='w'?'белых':'чёрных'));updateRoomActions();});}
-/* ================== ИНТЕРФЕЙС ================== */
 const $=id=>document.getElementById(id);
 const boardEl=$('board'),statusEl=$('status');
 const settingsModal=$('settingsModal'),endOverlay=$('endOverlay'),promoOverlay=$('promoOverlay'),modeOverlay=$('modeOverlay');
@@ -441,7 +430,7 @@ function openPromo(cands){promoPending=cands;const row=$('promoRow');row.innerHT
 function hidePromo(){promoPending=null;promoOverlay.classList.remove('show');}
 function cancelPromo(){hidePromo();sel=-1;render();}
 $('promoCancel').onclick=cancelPromo;
-function resetGameAI(){onlineMode=false;if(roomRef){roomRef.off();roomRef=null;}roomCode=null;mySideOnline=null;
+function resetGameAI(){onlineMode=false;if(roomRef){roomRef.off();roomRef=null;}roomCode=null;mySideOnline=null;roomDataCache=null;
  $('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';
  playerSide=set.side;aiSide=playerSide==='w'?'b':'w';resetBoard();render();showStatus('Ваш ход');
  trackEvent('game_start',{game_name:'chess',difficulty:set.diff,side:playerSide});if(turn!==playerSide)aiTurn();}
@@ -465,10 +454,6 @@ $('modeHost').onclick=async()=>{ensureAudio();sClick();await createRoom();};
 $('modeJoin').onclick=()=>{$('joinCodeBox').style.display='flex';$('joinCodeActions').style.display='flex';$('joinCodeInput').value='';$('joinCodeInput').focus();};
 $('joinCancel').onclick=()=>{$('joinCodeBox').style.display='none';$('joinCodeActions').style.display='none';};
 $('joinGo').onclick=async()=>{const c=$('joinCodeInput').value.trim().toUpperCase();if(c.length!==6){alert('Введи 6 символов');return;}await joinRoom(c);};
-/* подписка на комнату для чипов/бейджа */
-function hookRoomCache(){if(!roomRef)return;roomRef.on('value',snap=>{roomDataCache=snap.val();renderPlayersBar();updateLiveBadge();});}
-const _subscribeRoom=subscribeRoom;
-subscribeRoom=function(){_subscribeRoom();hookRoomCache();};
 (function loadSettings(){$('diffSelect').value=set.diff;$('sideSelect').value=set.side;$('themeSelect').value=set.theme;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';applyTheme();displayStats();})();
 (function initStart(){
  try{
