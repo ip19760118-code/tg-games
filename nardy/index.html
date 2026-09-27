@@ -41,11 +41,11 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .die.used{opacity:.28}
 .bear{font-size:12px;background:rgba(0,0,0,.25);border-radius:14px;padding:4px 10px;cursor:pointer}
 .bear.dst{box-shadow:0 0 0 3px rgba(90,220,130,.8)}
-/* ===== ДОСКА КАК НА ОБРАЗЦЕ: 12 колонок × 2 ряда + бар посередине ===== */
-.board{--ck:clamp(12px,min(6.6vw,4.2vh),30px);--ph:calc(var(--ck)*7.4);display:flex;gap:6px;width:min(96vw,660px);margin:0 auto;background:linear-gradient(160deg,#5a3d22,#4a3018);border-radius:12px;padding:8px;box-shadow:inset 0 2px 14px rgba(0,0,0,.6)}
-.half{flex:1;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,var(--ph));gap:2px}
+/* ===== ДОСКА: вписана в ширину карточки, размер фишки от экрана ===== */
+.board{--ck:clamp(9px,min(calc((100vw - 76px)/13),calc((100vh - 250px)/16)),30px);--ph:min(calc(var(--ck)*7.4),calc((100vh - 250px)/2));display:flex;gap:6px;width:100%;max-width:660px;margin:0 auto;background:linear-gradient(160deg,#5a3d22,#4a3018);border-radius:12px;padding:8px;box-shadow:inset 0 2px 14px rgba(0,0,0,.6)}
+.half{flex:1;min-width:0;display:grid;grid-template-columns:repeat(6,1fr);grid-template-rows:repeat(2,var(--ph));gap:2px}
 .bar{flex:0 0 calc(var(--ck)*1.15);background:linear-gradient(90deg,#3f2a15,#6b4a26 45%,#3f2a15);border-radius:5px;box-shadow:inset 0 0 10px rgba(0,0,0,.65)}
-.pt{position:relative;cursor:pointer;border-radius:3px}
+.pt{position:relative;cursor:pointer;border-radius:3px;min-width:0}
 .pt .tri{position:absolute;inset:0}
 .pt.top .tri{clip-path:polygon(0 0,100% 0,50% 94%)}
 .pt.bot .tri{clip-path:polygon(50% 6%,0 100%,100% 100%)}
@@ -91,15 +91,15 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="topline"><div class="dice" id="diceBox"></div><div><span class="bear" id="bearW">⚪ снято: 0</span> <span class="bear" id="bearB">⚫ снято: 0</span></div></div>
 <div class="board" id="board"></div>
 <div class="status" id="statusEl">Выбери режим</div>
-<div class="actions"><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button></div>
-<div class="ver" id="verTag">v1.4</div>
+<div class="actions"><button class="btn primary" id="rollBtn" style="display:none">🎲 Бросить кости</button><button class="btn" id="menuBtn" style="display:none">🏠 Меню нарды</button><button class="btn" id="newBtn" style="display:none">🔄 Новая игра</button></div>
+<div class="ver" id="verTag">v1.5</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.4</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🎲 Нарды <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v1.5</span></h2><div class="sub">Классические длинные · против часовой</div><div class="seg" id="sideSeg"><b data-s="w" class="on">⚪ Белые</b><b data-s="b">⚫ Чёрные</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Выбери цвет выше</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание второго игрока…</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
-<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, голова соперника — верхний правый; движение против часовой: низ слева→направо, затем верх справа→налево.<br>• Каждый проходит полный круг и возвращает шашки в свой дом (твой — верхняя левая четверть), затем снимает их.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• В свой ход нажми «🎲 Бросить кости»; зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• Победил — кто первым снял все 15.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила (длинные)</h2><div class="sub">• Твоя голова — нижний левый угол, твой дом — верхняя левая четверть; голова соперника — верхний правый угол, его дом — нижняя правая четверть.<br>• Движение против часовой: низ слева→направо, затем верх справа→налево; каждый проходит полный круг и возвращает шашки в свой дом.<br>• Бить нельзя: занятая точка блокирует соперника.<br>• С головы — одна шашка за ход (в первом броске 3-3, 4-4, 6-6 — две).<br>• Нельзя строить шесть точек подряд, если впереди блока нет шашки соперника.<br>• Сброс с дома: точное значение или старше, если позади нет своих.<br>• В свой ход нажми «🎲 Бросить кости»; зелёная рамка показывает шашки, которые могут ходить; конец хода автоматический.<br>• «🏠 Меню нарды» прерывает партию и возвращает к выбору режима.<br>• Победил — кто первым снял все 15.</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='1.4';let fbDb=null;try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
+const VER='1.5';let fbDb=null;try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
 const tg=window.Telegram?.WebApp;if(tg){try{tg.ready();tg.expand();tg.disableVerticalSwipes&&tg.disableVerticalSwipes();}catch(e){}}
 function tgHaptic(t){try{const h=tg?.HapticFeedback;if(!h)return;t==='success'?h.notificationOccurred('success'):t==='error'?h.notificationOccurred('error'):h.impactOccurred('light');}catch(e){}}
 function goToHub(){location.href='../';}
@@ -109,9 +109,11 @@ function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catc
 let AC=null;function ensureAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}if(AC&&AC.resume)AC.resume();}
 function tone(f0,f1,d,tp,v){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(AC.destination);o.start(n);o.stop(n+d);}
 const sMove=()=>tone(500,320,.07,'triangle',.15),sBear=()=>tone(700,1000,.12,'sine',.15),sRoll=()=>{tone(300,500,.06,'square',.12);setTimeout(()=>tone(400,600,.06,'square',.12),70);},sWin=()=>{[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,f,.18,'triangle',.15),i*110));},sLose=()=>{[400,350,300,250].forEach((f,i)=>setTimeout(()=>tone(f,f,.2,'sawtooth',.1),i*130));},sClick=()=>tone(800,600,.05,'sine',.1);
-const $=id=>document.getElementById(id),HEAD={w:23,b:12},HOME={w:[0,5],b:[13,18]};
-const pOf=(s,i)=>s==='w'?23-i:(i<=12?12-i:36-i),idxOf=(s,p)=>s==='w'?23-p:(p<=12?12-p:36-p);
-function newState(){const W=Array(24).fill(0),B=Array(24).fill(0);W[23]=15;B[12]=15;return{W,B,turn:'w',dice:[],rolled:[0,0],headUsed:0,first:{w:true,b:true},borne:{w:0,b:0},scores:{w:0,b:0},result:null,turnAt:Date.now(),lastMove:null};}
+const $=id=>document.getElementById(id);
+/* ИСПРАВЛЕНО v1.5: головы и дома точно по классической раскладке (соперник по диагонали) */
+const HEAD={w:23,b:11},HOME={w:[0,5],b:[12,17]};
+const pOf=(s,i)=>s==='w'?23-i:(i<=11?11-i:35-i),idxOf=(s,p)=>s==='w'?23-p:(p<=11?11-p:35-p);
+function newState(){const W=Array(24).fill(0),B=Array(24).fill(0);W[23]=15;B[11]=15;return{W,B,turn:'w',dice:[],rolled:[0,0],headUsed:0,first:{w:true,b:true},borne:{w:0,b:0},scores:{w:0,b:0},result:null,turnAt:Date.now(),lastMove:null};}
 const own=(s,side)=>side==='w'?s.W:s.B,opp=(s,side)=>side==='w'?s.B:s.W;
 function allInHome(s,side){const o=own(s,side);for(let i=0;i<24;i++){if(i>=HOME[side][0]&&i<=HOME[side][1])continue;if(o[i]>0)return false;}return true;}
 function headLimit(s,side){return (s.first[side]&&s.rolled[0]===s.rolled[1]&&(s.rolled[0]===3||s.rolled[0]===4||s.rolled[0]===6))?2:1;}
@@ -153,13 +155,13 @@ function S(){return onlineMode?(roomData&&roomData.state):G;}
 function meSide(){return onlineMode?mySide:playerViewSide;}
 function nameOf(side){if(!onlineMode)return side===playerViewSide?'Вы':'Компьютер';const p=(roomData.players||{})[side];return p?p.name:(side==='w'?'Белые':'Чёрные');}
 function playersList(){if(!onlineMode||!roomData)return[];return['w','b'].map(sd=>({side:sd,name:nameOf(sd),connected:!!(roomData.presence&&roomData.presence[sd]),wins:((roomData.state&&roomData.state.scores)||{})[sd]||0}));}
-/* ===== ПОСТРОЕНИЕ ДОСКИ: низ = свой путь p0..p11 слева→направо, верх = p23..p12 слева→направо ===== */
 let ptEls={};
 function makePt(idx,pos){const d=document.createElement('div');
  d.className='pt '+pos+' '+((idx%2)?'a':'b')+(idx===HEAD.w||idx===HEAD.b?' head':'');d.dataset.i=idx;
  const tri=document.createElement('div');tri.className='tri';d.appendChild(tri);
  const cks=document.createElement('div');cks.className='cks';d.appendChild(cks);
  d.addEventListener('click',()=>onPt(idx));ptEls[idx]=d;return d;}
+/* низ = свои p0..p11 слева→направо (голова в левом нижнем), верх = p23..p12 (голова соперника в правом верхнем) */
 function buildBoard(){const bd=$('board');bd.innerHTML='';ptEls={};const me=meSide();
  const halfL=document.createElement('div');halfL.className='half';
  const bar=document.createElement('div');bar.className='bar';
@@ -211,7 +213,7 @@ function maybeAi(){if(onlineMode||!G||G.result)return;if(G.turn===playerViewSide
    if(!G.dice.length||!anyMove(G,G.turn)){endTurn(G);renderAll();setStatus(statusText());}
    if(G.turn!==playerViewSide)aiTimer=setTimeout(step,700);};
   step();},800);}
-function renderAll(){const s=S();if(!s)return;
+function renderAll(){const s=S();if(!s){$('rollBtn').style.display='none';$('menuBtn').style.display='none';$('newBtn').style.display='none';return;}
  const me=meSide();const canSet=new Set();
  if(!s.result&&s.turn===me&&s.dice.length){const o=own(s,me);for(let i=0;i<24;i++){if(o[i]>0&&[...new Set(s.dice)].some(v=>moveTarget(s,me,i,v)!==null))canSet.add(i);}}
  for(let i=0;i<24;i++){const el=ptEls[i];if(!el)continue;const cks=el.querySelector('.cks');cks.innerHTML='';
@@ -223,14 +225,16 @@ function renderAll(){const s=S();if(!s)return;
  $('bearW').textContent='⚪ снято: '+s.borne.w;$('bearB').textContent='⚫ снято: '+s.borne.b;
  $('bearW').classList.toggle('dst',dests.some(d=>d.t==='off'&&me==='w'));
  $('bearB').classList.toggle('dst',dests.some(d=>d.t==='off'&&me==='b'));
+ const menuHidden=modeOverlay.classList.contains('show');
  $('rollBtn').style.display=(!s.result&&s.turn===me&&!s.dice.length)?'inline-flex':'none';
+ $('menuBtn').style.display=(!s.result&&!menuHidden)?'inline-flex':'none';
  $('newBtn').style.display=(!onlineMode&&s.result)?'inline-flex':'none';
  setStatus(statusText());renderPlayersBar();scheduleAutoEnd();}
 function scheduleAutoEnd(){const s=S();if(autoEndTimer){clearTimeout(autoEndTimer);autoEndTimer=null;}if(!s||s.result)return;const me=meSide();
  if(s.turn===me&&s.dice.length&&!anyMove(s,me)){autoEndTimer=setTimeout(()=>{autoEndTimer=null;const s2=S();if(!s2||s2.result||s2.turn!==me||!s2.dice.length||anyMove(s2,me))return;
    if(onlineMode){const ns=clone(roomData.state);endTurn(ns);ns.lastMove={name:myName,action:'нет ходов — авто-передача',at:Date.now()};roomRef.update({state:ns});}
    else{endTurn(G);renderAll();setStatus('⚔️ Ходов нет — ход передан');maybeAi();}},700);}}
-function renderPlayersBar(){const bar=$('playersBar');bar.innerHTML='';if(!onlineMode)return;const s=S();playersList().forEach(p=>{const chip=document.createElement('span');chip.className='chip'+(s&&s.turn===p.side&&!s.result?' turn':'');chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+(p.side===mySide?' (вы)':'')+' · '+(p.side==='w'?'⚪':'⚫')+' · 🏆'+p.wins;bar.appendChild(chip);});}
+function renderPlayersBar(){const bar=$('playersBar');bar.innerHTML='';if(!onlineMode)return;const s=S();playersList().forEach(p=>{const chip=document.createElement('span');chip.className='chip'+(s&&s.turn===p.side&&!s.result?' turn':'');chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+(p.side===mySide?' (вы)':'')+' · '+(p.side==='w'?'⚪':'')+' · '+p.wins;bar.appendChild(chip);});}
 function onPt(idx){ensureAudio();const s=S();if(!s||s.result)return;const me=meSide();if(s.turn!==me)return;
  if(sel===idx){sel=-1;dests=[];renderAll();return;}
  const d=dests.find(x=>x.t===idx);
@@ -251,6 +255,13 @@ function tapOff(side){const s=S();if(!s||s.result||s.turn!==side||side!==meSide(
 $('rollBtn').onclick=()=>{ensureAudio();const s=S();if(!s||s.result||s.turn!==meSide()||s.dice.length)return;sRoll();
  if(onlineMode){const ns=clone(roomData.state);roll(ns);ns.lastMove={name:myName,action:'бросок',at:Date.now()};roomRef.update({state:ns});}
  else{roll(G);renderAll();}};
+/* НОВОЕ v1.5: выход в меню нарды */
+$('menuBtn').onclick=()=>{if(!confirm('Прервать партию и вернуться в меню нарды?'))return;sClick();
+ if(onlineMode)leaveRoom();
+ G=newState();sel=-1;dests=[];
+ endOverlay.classList.remove('show');
+ buildBoard();renderAll();
+ modeOverlay.classList.add('show');};
 $('newBtn').onclick=()=>{sClick();startOffline(playerViewSide);};
 function showEnd(){const s=S();if(!s||!s.result)return;const me=meSide();const win=s.result.winner===me;
  $('endTitle').textContent=win?'🏆 Победа!':'🏁 Победил '+esc(nameOf(s.result.winner));$('endSub').textContent='Все шашки прошли круг и сняты с доски.';win?sWin():sLose();tgHaptic(win?'success':'error');
@@ -259,7 +270,8 @@ function showEnd(){const s=S();if(!s||!s.result)return;const me=meSide();const w
   const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareInvite;b.appendChild(sh);
   const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=()=>{leaveRoom();endOverlay.classList.remove('show');modeOverlay.classList.add('show');};b.appendChild(lv);}
  else{const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Ещё партию';r.onclick=()=>{endOverlay.classList.remove('show');startOffline(playerViewSide);};b.appendChild(r);
-  const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню';h.onclick=goToHub;b.appendChild(h);}
+  const h=document.createElement('button');h.className='btn';h.textContent='🏠 В меню нарды';h.onclick=()=>{endOverlay.classList.remove('show');G=newState();buildBoard();renderAll();modeOverlay.classList.add('show');};b.appendChild(h);
+  const h2=document.createElement('button');h2.className='btn';h2.textContent='← В меню игр';h2.onclick=goToHub;b.appendChild(h2);}
  endOverlay.classList.add('show');trackEvent('game_end',{game_name:'nardy',mode:onlineMode?'online':'ai',winner:win?'player':'other'});}
 $('hubBtn').onclick=()=>{if(onlineMode)leaveRoom();goToHub();};$('modeHubBtn').onclick=goToHub;
 $('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');$('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
