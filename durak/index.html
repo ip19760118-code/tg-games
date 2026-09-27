@@ -22,34 +22,25 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 .hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
 .hbtn:active{transform:scale(.95)}
 .ver{text-align:center;font-size:10px;opacity:.45;margin-top:6px;font-family:monospace;letter-spacing:1px}
-/* ==== ШТОРКА-ВЕЕР ==== */
+/* ==== ШТОРКА КОМНАТЫ ==== */
 .room-bar{background:rgba(0,0,0,.25);border:1px solid rgba(255,209,102,.25);border-radius:14px;padding:6px;margin-bottom:8px;font-size:12px}
-.rb-row{display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,209,102,.2);border-radius:12px;padding:8px 10px;cursor:pointer}
-.rb-row:active{background:rgba(255,255,255,.09)}
-.rb-left{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.rb-left .code{font-family:monospace;letter-spacing:2px;font-size:15px;color:var(--accent);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:6px;font-weight:700}
-.fan{position:relative;width:76px;height:46px;flex:0 0 auto;transition:width .35s ease,height .35s ease}
-.room-bar:not(.open) .fan{animation:fanBob 1.9s ease-in-out infinite}
-@keyframes fanBob{0%,100%{transform:translateY(-1px)}50%{transform:translateY(2px)}}
-.fan-card{position:absolute;top:2px;width:30px;height:42px;border-radius:5px;border:1px solid #0e1c30;background:repeating-linear-gradient(45deg,#1d3557,#1d3557 3px,#274b7a 3px,#274b7a 6px);box-shadow:0 2px 6px rgba(0,0,0,.55);transform-origin:50% 100%;transition:left .35s cubic-bezier(.2,.8,.3,1.05),width .35s cubic-bezier(.2,.8,.3,1.05),transform .35s ease,background .3s,border-color .3s;pointer-events:none;padding:0;cursor:pointer}
-.fan-card:nth-child(1){left:2px;transform:rotate(-20deg)}
-.fan-card:nth-child(2){left:23px;transform:rotate(0deg)}
-.fan-card:nth-child(3){left:44px;transform:rotate(20deg)}
-.fan-card .face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:5px;font-size:11px;font-weight:700;color:var(--text);opacity:0;transition:opacity .25s .12s;white-space:nowrap;border-radius:5px}
-.fan-count{position:absolute;top:-9px;left:50%;transform:translateX(-50%);min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:#2e9e44;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 10px rgba(46,158,68,.8);animation:cntPulse 1.6s ease-in-out infinite;transition:left .3s,transform .3s}
-@keyframes cntPulse{0%,100%{box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 6px rgba(46,158,68,.6)}50%{box-shadow:0 0 0 2px rgba(0,0,0,.35),0 0 14px rgba(46,158,68,1)}}
-.fan-count.zero{background:#666;animation:none}
-/* раскрытое состояние: рубашки разъезжаются и становятся кнопками */
-.room-bar.open .fan{width:100%;height:44px;animation:none}
-.room-bar.open .fan-card{top:2px;height:40px;transform:none;pointer-events:auto;background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.25)}
-.room-bar.open .fan-card:active{transform:scale(.96)}
-.room-bar.open .fan-card:nth-child(1){left:0;width:calc((100% - 16px)/3)}
-.room-bar.open .fan-card:nth-child(2){left:calc((100% - 16px)/3 + 8px);width:calc((100% - 16px)/3)}
-.room-bar.open .fan-card:nth-child(3){left:calc(2*((100% - 16px)/3 + 8px));width:calc((100% - 16px)/3)}
-.room-bar.open .fan-card .face{opacity:1}
-.room-bar.open .fan-card.fc-danger{background:rgba(255,80,80,.12);border-color:rgba(255,80,80,.5)}
-.room-bar.open .fan-card.fc-danger .face{color:#ff9a9a}
-.room-bar.open .fan-count{left:auto;right:2px;transform:none}
+.rb-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:rgba(255,255,255,.05);border:1px solid rgba(255,209,102,.2);border-radius:10px;padding:6px 6px 6px 12px;color:var(--text);font-family:inherit;font-size:12px;cursor:pointer;text-align:left}
+.rb-toggle:active{background:rgba(255,255,255,.09)}
+.rb-toggle .code{font-family:monospace;letter-spacing:2px;font-size:15px;color:var(--accent);background:rgba(0,0,0,.3);padding:2px 8px;border-radius:6px;font-weight:700}
+/* шеврон-пилюля со счётчиком онлайна */
+.rb-chevron{flex:0 0 auto;display:flex;align-items:center;gap:7px;height:34px;padding:0 12px;border-radius:19px;background:rgba(255,209,102,.16);border:2px solid var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(255,209,102,.35);animation:chevBob 1.6s ease-in-out infinite}
+.room-bar.open .rb-chevron{animation:none}
+.rb-chevron b{font-size:14px;font-weight:900;line-height:1;color:var(--accent)}
+.rb-chevron .chev{font-size:15px;font-weight:900;line-height:1;transition:transform .25s ease}
+.room-bar.open .rb-chevron .chev{transform:rotate(180deg)}
+.live-dot{width:9px;height:9px;border-radius:50%;background:#57c85b;box-shadow:0 0 7px #57c85b}
+.live-dot.some-off{background:#ffb35c;box-shadow:0 0 7px #ffb35c}
+@keyframes chevBob{0%,100%{transform:translateY(-1px)}50%{transform:translateY(2px)}}
+.rb-extra{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;padding:2px 4px 4px}
+.rb-extra .players-bar{width:100%;margin:4px 0 2px}
+.rbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:20px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
+.rbtn:active{transform:scale(.95)}
+.rbtn.danger{border-color:rgba(255,80,80,.4);color:#ff9a9a}
 .players-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px}
 .chip{display:inline-flex;align-items:center;gap:5px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:20px;padding:3px 9px;font-size:11px}
 .chip.turn{border-color:var(--accent);color:var(--accent);font-weight:700}
@@ -125,17 +116,17 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
     </div>
   </div>
   <div class="room-bar" id="roomBar" style="display:none">
-    <div class="rb-row" id="rbToggle">
-      <span class="rb-left">👥 Комната <span class="code" id="roomCode">------</span> · <span id="roomCount">0/4</span></span>
-      <span class="fan" id="fan">
-        <button class="fan-card" id="fcInvite" type="button"><span class="face">📤 Пригласить</span></button>
-        <button class="fan-card" id="fcCopy" type="button"><span class="face">🔢 Код</span></button>
-        <button class="fan-card fc-danger" id="fcLeave" type="button"><span class="face">🚪 Выйти</span></button>
-        <span class="fan-count" id="fanCount">0</span>
-      </span>
+    <button class="rb-toggle" id="rbToggle">
+      <span>👥 Комната <span class="code" id="roomCode">------</span> · <span id="roomCount">0/4</span></span>
+      <span class="rb-chevron" id="rbChev"><span class="live-dot" id="rbDot"></span><b id="rbLive">0</b><span class="chev">▾</span></span>
+    </button>
+    <div class="rb-extra" id="rbExtra" style="display:none">
+      <button class="rbtn" id="inviteBtn">📤 Пригласить</button>
+      <button class="rbtn" id="copyBtn">🔢 Код</button>
+      <button class="rbtn danger" id="leaveBtn">🚪 Выйти</button>
+      <div class="players-bar" id="playersBar"></div>
     </div>
   </div>
-  <div class="players-bar" id="playersBar"></div>
   <div class="felt">
     <div class="deckbox">
       <div class="deckpile" id="deckPile"></div>
@@ -412,7 +403,6 @@ function S(){const st=onlineMode?(roomData&&roomData.state):G;return st?prep(st)
 function myHand(){const s=S();if(!s)return[];return (s.hands||{})[onlineMode?myUid:'p0']||[];}
 function meUid(){return onlineMode?myUid:'p0';}
 function nameOf(uid){if(!onlineMode)return uid==='p0'?'Вы':('Бот '+uid.slice(1));const p=(roomData&&roomData.players||{})[uid];return p?p.name:'?';}
-function activeCount(){if(!roomData)return 0;return (roomData.order||[]).filter(u=>roomData.presence&&roomData.presence[u]).length;}
 function playersList(){
   if(onlineMode){
     if(!roomData)return[];
@@ -423,6 +413,14 @@ function playersList(){
   }
   if(!G)return[];
   return G.order.map(uid=>({uid,name:nameOf(uid),n:(G.hands[uid]||[]).length,connected:true,loses:(G.loses||{})[uid]||0,host:uid==='p0'}));
+}
+/* НОВОЕ v1.9: панель игроков живёт в шторке в онлайне и на старом месте в офлайне */
+let pbHome=null,pbNext=null;
+function placePlayersBar(){
+  const pb=$('playersBar');
+  if(!pbHome){pbHome=pb.parentNode;pbNext=pb.nextSibling;}
+  if(onlineMode){ $('rbExtra').appendChild(pb); }
+  else if(pb.parentNode!==pbHome){ pbHome.insertBefore(pb,pbNext); }
 }
 function setPresence(){if(!roomRef||!myUid)return;const p=roomRef.child('presence/'+myUid);p.set({name:myName,at:Date.now()});p.onDisconnect().remove();}
 function ensureSeat(){
@@ -444,7 +442,8 @@ async function createRoom(){
     await roomRef.set({game:'durak',host:myUid,createdAt:Date.now(),status:'waiting',maxPlayers:MAX_PLAYERS,order:[],players:{},presence:{},state:null});
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;arr.push(myUid);return arr;});
     await roomRef.child('players/'+myUid).set({name:myName});
-    onlineMode=true;seated=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;
+    onlineMode=true;seated=true;placePlayersBar();
+    $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_created',{game_name:'durak'});
   }catch(e){console.error(e);alert('Ошибка создания: '+e.message);}
 }
@@ -460,7 +459,8 @@ async function joinRoom(code){
     await roomRef.child('order').transaction(a=>{const arr=Array.isArray(a)?a:[];if(arr.includes(myUid))return arr;if(arr.length>=MAX_PLAYERS){ok=false;return undefined;}arr.push(myUid);return arr;},(e,c)=>{ok=c;});
     if(!ok){alert('Комната заполнена.');return;}
     await roomRef.child('players/'+myUid).set({name:myName});
-    onlineMode=true;seated=true;$('roomBar').style.display='block';$('roomCode').textContent=roomCode;
+    onlineMode=true;seated=true;placePlayersBar();
+    $('roomBar').style.display='block';$('roomCode').textContent=roomCode;
     modeOverlay.classList.remove('show');subscribeRoom();trackEvent('room_joined',{game_name:'durak'});
   }catch(e){console.error(e);alert('Ошибка входа: '+e.message);}
 }
@@ -483,9 +483,6 @@ function subscribeRoom(){
     if(!roomData){setStatus('❌ Комната закрыта');leaveRoom();return;}
     if(roomData.state)prep(roomData.state);
     $('roomCount').textContent=(roomData.order||[]).length+'/'+MAX_PLAYERS;
-    const ac=activeCount();
-    $('fanCount').textContent=ac;
-    $('fanCount').classList.toggle('zero',ac===0);
     ensureSeat();
     if(roomData.status==='waiting')showLobby();else lobbyOverlay.classList.remove('show');
     renderAll();
@@ -495,7 +492,7 @@ function subscribeRoom(){
   setPresence();
   startWatchdog();
 }
-function leaveRoom(){onlineMode=false;seated=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';$('roomBar').classList.remove('open');lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
+function leaveRoom(){onlineMode=false;seated=false;if(roomRef){roomRef.off();if(myUid)roomRef.child('presence/'+myUid).remove();roomRef=null;}roomData=null;roomCode=null;shownEndAt=null;$('roomBar').style.display='none';$('roomBar').classList.remove('open');$('rbExtra').style.display='none';placePlayersBar();lobbyOverlay.classList.remove('show');endOverlay.classList.remove('show');}
 function showLobby(){
   lobbyOverlay.classList.add('show');$('lobbyCode').textContent=roomCode;
   const list=$('lobbyList');list.innerHTML='';
@@ -508,11 +505,16 @@ function showLobby(){
 $('lobbyStart').onclick=()=>{if(!roomData||roomData.host!==myUid)return;const order=roomData.order||[];if(order.length<2)return;const st=dealState(order,{},set.transfer,set.allAdd);st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st,status:'playing'});trackEvent('game_start',{game_name:'durak',mode:'online',players:order.length,transfer:set.transfer,all_add:set.allAdd});};
 $('lobbyInvite').onclick=shareInvite;
 $('lobbyLeave').onclick=()=>{leaveRoom();modeOverlay.classList.add('show');};
-/* ==== ВЕЕР: строка = тумблер, карты = кнопки ==== */
-$('rbToggle').onclick=()=>{const bar=$('roomBar');bar.classList.toggle('open');sClickUi();};
-$('fcInvite').onclick=e=>{e.stopPropagation();shareInvite();};
-$('fcCopy').onclick=e=>{e.stopPropagation();navigator.clipboard?.writeText(roomCode);setStatus('Код '+roomCode+' скопирован');};
-$('fcLeave').onclick=e=>{e.stopPropagation();if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};
+$('inviteBtn').onclick=shareInvite;
+$('copyBtn').onclick=()=>{navigator.clipboard?.writeText(roomCode);setStatus('Код '+roomCode+' скопирован');};
+$('leaveBtn').onclick=()=>{if(confirm('Выйти из комнаты?')){leaveRoom();modeOverlay.classList.add('show');}};
+$('rbToggle').onclick=()=>{
+  const bar=$('roomBar'),ex=$('rbExtra');
+  const open=ex.style.display!=='none';
+  ex.style.display=open?'none':'flex';
+  bar.classList.toggle('open',!open);
+  sClickUi();
+};
 function shareInvite(){const url=inviteLink(roomCode);const text='🃏 Дурак онлайн! Комната '+roomCode+'\n'+url;if(tg&&tg.openTelegramLink)tg.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(url)+'&text='+encodeURIComponent(text));else{navigator.clipboard?.writeText(url);alert('Ссылка скопирована');}}
 let watchdog=null;
 function startWatchdog(){
@@ -535,7 +537,7 @@ function startWatchdog(){
 }
 /* ========== ОФЛАЙН + БОТЫ ========== */
 function startOffline(n){
-  onlineMode=false;G=null;
+  onlineMode=false;G=null;placePlayersBar();
   const order=['p0'];for(let i=1;i<n;i++)order.push('b'+i);
   G=dealState(order,{},set.transfer,set.allAdd);
   modeOverlay.classList.remove('show');endOverlay.classList.remove('show');
@@ -663,13 +665,20 @@ function isLegalNow(s,c){
 function renderAll(){
   const s=S();
   const bar=$('playersBar');bar.innerHTML='';
+  const pl=playersList();
   if(s||onlineMode){
-    playersList().forEach(p=>{
+    pl.forEach(p=>{
       const chip=document.createElement('span');
       chip.className='chip'+(s&&!s.result&&curActor(s)===p.uid?' turn':'');
       chip.innerHTML='<span class="dot'+(p.connected?'':' off')+'"></span>'+esc(p.name)+(p.host?' 👑':'')+' · 🂠'+p.n+(onlineMode?' · 🤡'+p.loses:'');
       bar.appendChild(chip);
     });
+  }
+  /* НОВОЕ v1.9: счётчик онлайна на шевроне */
+  if(onlineMode){
+    const live=pl.filter(p=>p.connected).length;
+    $('rbLive').textContent=live;
+    $('rbDot').className='live-dot'+(live<pl.length?' some-off':'');
   }
   const dp=$('deckPile');dp.innerHTML='';
   if(s&&s.deck&&s.deck.length){
@@ -701,11 +710,6 @@ function renderAll(){
   $('finishBtn').style.display=(s&&!s.result&&isAtt&&s.phase==='taking')?'inline-flex':'none';
   $('menuBtn').style.display=(s&&!s.result)?'inline-flex':'none';
   if(s&&!s.result)setStatus(statusText(s));
-  if(onlineMode){
-    const ac=activeCount();
-    $('fanCount').textContent=ac;
-    $('fanCount').classList.toggle('zero',ac===0);
-  }
   if(onlineMode&&s&&!s.result){
     const order=(roomData&&roomData.order)||[];
     window.__DBG={ver:VER,myUid,order,hands:Object.keys(s.hands||{}),seated};
