@@ -129,9 +129,9 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <button class="btn primary" id="finishBtn" style="display:none">🏁 Завершить</button>
 <button class="btn" id="menuBtn" style="display:none">🏠 В меню игр</button>
 </div>
-<div class="ver" id="verTag">v2.5</div>
+<div class="ver" id="verTag">v2.6</div>
 </div>
-<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.5</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Сложность — в настройках ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
+<div class="overlay" id="modeOverlay"><div class="cardbox"><button class="hbtn hubbtn" id="modeHubBtn">← В меню игр</button><h2>🃏 Дурак <span style="font-size:12px;opacity:.6;font-family:monospace" id="verTag2">v2.6</span></h2><div class="sub">Подкидной · 36 карт</div><div class="seg" id="botsSeg"><b data-n="2" class="on">2</b><b data-n="3">3</b><b data-n="4">4</b></div><div class="mode-choice"><button class="mode-btn" id="modeAi"><div class="icon">🤖</div><div><b>Против компьютера</b><small>Сложность — в настройках ⚙️</small></div></button><button class="mode-btn primary" id="modeHost"><div class="icon">👥</div><div><b>Создать комнату</b><small>Онлайн: 2–4 игрока</small></div></button><button class="mode-btn" id="modeJoin"><div class="icon">🎯</div><div><b>Зайти по коду</b><small>Комната уже создана</small></div></button></div><div class="code-input" id="joinBox" style="display:none"><input id="joinInput" maxlength="6" placeholder="ABC123"></div><div class="btns" id="joinActions" style="display:none"><button class="btn" id="joinCancel">Отмена</button><button class="btn primary" id="joinGo">Войти</button></div></div></div>
 <div class="overlay" id="lobbyOverlay"><div class="cardbox"><h2>👥 Комната <span id="lobbyCode" style="color:var(--accent);font-family:monospace"></span></h2><div class="sub">Ожидание игроков (2–4). Поделись ссылкой или кодом.</div><div class="lobby-list" id="lobbyList"></div><div class="btns"><button class="btn" id="lobbyInvite">📤 Пригласить</button><button class="btn primary" id="lobbyStart">▶ Начать</button><button class="btn" id="lobbyLeave">🚪 Выйти</button></div></div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle">🏁</h2><div class="sub" id="endSub"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="setOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">⚙️ Настройки</h2>
@@ -150,8 +150,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="btns"><button class="btn primary" id="setClose">Готово</button></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox" style="text-align:left"><h2 style="text-align:center">📖 Правила</h2><div class="sub">• Козырь — масть последней карты колоды; первый ход — у младшего козыря среди всех игроков.<br>• Атакующий кладёт карту, отбивающийся бьёт её старшей той же масти или козырем.<br>• Подкидывать карты того же ранга: вчетвером по умолчанию только крайние к отбивающемуся, при включённой настройке — все, кроме него; вдвоём/втроём — все, кроме отбивающегося. Игрок без карт не подкидывает — он наблюдает.<br>• Подкинуть можно, пока число неотбитых карт + 1 не превышает руку отбивающегося (и не больше 6 пар).<br>• «Бито» — всё отбито, карты в сброс; отбившийся становится атакующим.<br>• «Взять» — отбивающийся забирает стол и пропускает ход атаки (вдвоём следующий раунд снова «под него»).<br>• Переводной: отбивающийся с картой того же ранга переводит атаку дальше.<br>• После раунда все добирают из колоды до 6 (отбивающийся последним).<br>• Проигравший — последний с картами («дурак»).<br>• Офлайн: перед «Бито»/«Завершить» бота игра даёт паузу на подкидывание (настраивается).</div><div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-const VER='2.5';
-/* защищённый localStorage */
+const VER='2.6';
 function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
 function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
 let fbDb=null;try{firebase.initializeApp({apiKey:"AIzaSyAE_64LRvG7ac6Y3fvqXDV5bzHUOD4Liz4",authDomain:"tg-games-69c06.firebaseapp.com",databaseURL:"https://tg-games-69c06-default-rtdb.firebaseio.com",projectId:"tg-games-69c06",storageBucket:"tg-games-69c06.firebasestorage.app",messagingSenderId:"797878618357",appId:"1:797878618357:web:7a1b91ff76fe4ea85c9dbc"});fbDb=firebase.database();}catch(e){console.error(e);}
@@ -539,7 +538,7 @@ function botDecide(uid){
    if(!s.table.length){
     const sorted=hand.slice().sort(sortHand(s.trump));
     if(d==='easy')return{type:'add',card:sorted[Math.floor(Math.random()*sorted.length)]};
-    if(d==='hard'){const nt=sorted.find(c=>suitOf(c)!==s.trump)||sorted[0];return{type:'add',card:nt};}
+    if(d==='hard'){const nt=sorted.find(cc=>suitOf(cc)!==s.trump)||sorted[0];return{type:'add',card:nt};}
     return{type:'add',card:sorted[0]};
    }
    const c=botAddCard(s,uid);
@@ -596,21 +595,43 @@ function botStepOnce(){
   }
  }
 }
-function applyMove(fn,label,snd){
- if(onlineMode){mutateOnline(fn,label).then(ok=>{if(ok&&snd)snd();});}
- else{const ns=fn(G);if(!ns)return;G=ns;closeHoldUntil=0;holdKey='';snd&&snd();renderAll();if(G.result)showEnd();else{updateMessage(statusText());botThink();}}
-}
+/* ИСПРАВЛЕНО v2.6: транзакция + гарантированный запасной путь записи + видимая ошибка */
 function mutateOnline(fn,label){
- return new Promise(res=>{
-  roomRef.child('state').transaction(cur=>{
-   if(!cur)return undefined;
-   prep(cur);
-   const ns=fn(clone(cur));
-   if(!ns)return undefined;
-   ns.lastMove={by:mySide,name:myName,action:label,at:Date.now()};
-   return ns;
-  },function(e,c){res(c);},false);
+ return new Promise(function(res){
+  let finished=false;
+  const finish=ok=>{if(!finished){finished=true;res(ok);}};
+  try{
+   roomRef.child('state').transaction(function(cur){
+    if(!cur)return undefined;
+    prep(cur);
+    const ns=fn(clone(cur));
+    if(!ns)return undefined;
+    ns.lastMove={by:mySide,name:myName,action:label,at:Date.now()};
+    return ns;
+   },function(err,committed){
+    if(committed){finish(true);return;}
+    console.warn('TX aborted:',err);
+    roomRef.child('state').once('value').then(function(sn){
+     const base=prep(sn.val()||{});
+     if(!base.hands||!base.turn){finish(false);return;}
+     const ns=fn(clone(base));
+     if(!ns){finish(false);return;}
+     ns.lastMove={by:mySide,name:myName,action:label,at:Date.now()};
+     roomRef.child('state').set(ns).then(function(){finish(true);}).catch(function(e){console.warn(e);finish(false);});
+    }).catch(function(e){console.warn(e);finish(false);});
+   },false);
+  }catch(e){console.warn(e);finish(false);}
  });
+}
+function applyMove(fn,label,snd){
+ if(onlineMode){
+  mutateOnline(fn,label).then(function(ok){
+   if(ok){snd&&snd();}
+   else{updateMessage('⚠️ Ход не записан (не твоя очередь или устарело состояние) — попробуй ещё раз',true);sDeny();}
+  });
+  return;
+ }
+ const ns=fn(G);if(!ns)return;G=ns;closeHoldUntil=0;holdKey='';snd&&snd();renderAll();if(G.result)showEnd();else{updateMessage(statusText());botThink();}
 }
 function cardEl(c,faceDown,clickable,hi,dim){
  const d=document.createElement('div');
@@ -740,7 +761,7 @@ function showEnd(){
  const b=$('endBtns');b.innerHTML='';
  const mkRematch=()=>{const st=dealState(s.order,s.loses||{},s.transferEnabled,s.allAddEnabled);st.lastMove={name:(onlineMode?myName:'Вы'),action:'deal',at:Date.now()};return st;};
  if(onlineMode){
-  if(roomData&&roomData.host===mySide){const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Реванш';r.onclick=function(){shownEndAt=null;sDeal();roomRef.update({state:mkRematch(),status:'playing'});endOverlay.classList.remove('show');};b.appendChild(r);}
+  if(roomData&&roomData.host===myUid){const r=document.createElement('button');r.className='btn primary';r.textContent='🔄 Реванш';r.onclick=function(){shownEndAt=null;sDeal();roomRef.update({state:mkRematch(),status:'playing'});endOverlay.classList.remove('show');};b.appendChild(r);}
   else{const w=document.createElement('div');w.style.cssText='font-size:12px;opacity:.8;width:100%';w.textContent='⏳ Хост готовит реванш...';b.appendChild(w);}
   const sh=document.createElement('button');sh.className='btn';sh.textContent='📤 Поделиться';sh.onclick=shareInvite;b.appendChild(sh);
   const lv=document.createElement('button');lv.className='btn';lv.textContent='🚪 Выйти';lv.onclick=function(){leaveRoom();endOverlay.classList.remove('show');showMode();};b.appendChild(lv);
@@ -752,7 +773,6 @@ function showEnd(){
  endOverlay.classList.add('show');
  trackEvent('game_end',{game_name:'durak',mode:onlineMode?'online':'ai',difficulty:DIFF(),loser:s.result.loser===me?'player':(s.result.loser?'other':'draw')});
 }
-/* обработчики — в защищённой функции, чтобы один сбой не убил запуск */
 function attachUI(){
  $('lobbyStart').onclick=function(){if(!roomData||roomData.host!==myUid)return;const order=roomData.order||[];if(order.length<2)return;const st=dealState(order,{},set.transfer,set.allAdd);st.lastMove={name:myName,action:'deal',at:Date.now()};roomRef.update({state:st,status:'playing'});sDeal();trackEvent('game_start',{game_name:'durak',mode:'online',players:order.length});};
  $('lobbyInvite').onclick=shareInvite;
@@ -794,7 +814,6 @@ try{
 }
 </script>
 <script>
-/* страховочный загрузчик: работает даже если основной скрипт умер */
 setTimeout(function(){
  try{
   var m=document.getElementById('modeOverlay');
@@ -802,7 +821,7 @@ setTimeout(function(){
   var err=(window.__ERR||'')+(window.__ERR2||'');
   if(err&&st){st.innerHTML='⚠️ Ошибка: '+err;st.className='status warn';}
   if(m&&(!m.classList.contains('show')||m.style.display==='none')){m.classList.add('show');m.style.display='flex';}
-  if(!window.__BOOT_OK&&st&&!err){st.innerHTML='⚠️ Скрипт игры загрузился не полностью. Перезалей файл целиком (последняя строка должна быть &lt;/html&gt;) и обнови кэш.';st.className='status warn';if(m){m.classList.add('show');m.style.display='flex';}}
+  if(!window.__BOOT_OK&&st&&!err){st.innerHTML='⚠️ Скрипт игры загрузился не полностью. Перезалей файл целиком (последняя строка </html>) и обнови кэш.';st.className='status warn';if(m){m.classList.add('show');m.style.display='flex';}}
  }catch(e){}
 },900);
 </script>
