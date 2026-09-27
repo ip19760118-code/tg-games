@@ -24,7 +24,6 @@
   </script>
 
   <style>
-    /* универсальный box-sizing: панель не вылезает по ширине */
     *, *::before, *::after { box-sizing: border-box; }
 
     html, body {
@@ -37,8 +36,6 @@
       overscroll-behavior: none;
     }
 
-    /* контейнер листается по высоте; margin:auto у панели = безопасное центрирование:
-       если список не влезает — он начинается сверху с заголовка */
     .wrap {
       width: 100vw; height: 100vh;
       display: flex;
@@ -128,7 +125,7 @@
 
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
-      <p class="hub-desc">9 игр в одном боте: аркады, головоломки, классика и онлайн-партии с друзьями. Без установки — нажми и играй.</p>
+      <p class="hub-desc">10 игр в одном боте: аркады, головоломки, классика и онлайн-партии с друзьями. Без установки — нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn">
         <span class="game-emoji">🧺</span>
@@ -202,6 +199,14 @@
         </span>
       </button>
 
+      <button class="game-btn" id="shashkiBtn">
+        <span class="game-emoji">🟤</span>
+        <span class="game-text">
+          <b>Шашки <span class="tag-online">ONLINE</span></b>
+          <small>Русские шашки: бот или онлайн вдвоём</small>
+        </span>
+      </button>
+
       <button class="game-btn disabled" disabled>
         <span class="game-emoji">🚧</span>
         <span class="game-text">
@@ -211,12 +216,12 @@
       </button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v2.0</p>
+      <p class="hub-ver" id="hubVer">hub v3.0</p>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '2.0';
+    const HUB_VER = '3.0';
 
     const tg = window.Telegram?.WebApp;
 
@@ -236,7 +241,6 @@
       } catch (e) {}
     }
 
-    /* открытие хаба — 1 раз за сессию */
     (function(){
       try {
         const k = 'hub_session_tracked';
@@ -267,6 +271,7 @@
     document.getElementById('chessBtn').addEventListener('click', () => openGame('./chess/', 'chess'));
     document.getElementById('durakBtn').addEventListener('click', () => openGame('./durak/', 'durak'));
     document.getElementById('nardyBtn').addEventListener('click', () => openGame('./nardy/', 'nardy'));
+    document.getElementById('shashkiBtn').addEventListener('click', () => openGame('./shashki/', 'shashki'));
 
     document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
   </script>
