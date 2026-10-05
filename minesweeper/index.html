@@ -1,0 +1,164 @@
+<!DOCTYPE html><html lang="ru"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"/><title>Сапёр</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-ZD8QE6XKTR"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-ZD8QE6XKTR',{page_title:document.title,page_path:location.pathname});</script>
+<style>
+:root{--bg1:#101418;--bg2:#1c2430;--bg3:#080a0d;--panel:rgba(24,32,44,.9);--text:#e8ecf2;--accent:#7cffc4;--cellClosed:#bdbdbd;--cellOpen:#e6e6e6;--frame:#4a4a52;--num1:#2743ff;--num2:#1c8a1c;--num3:#e33;--num4:#1919c8;--num5:#a11;--num6:#0aa;--num7:#111;--num8:#888}
+[data-skin="emerald"]{--cellClosed:#79b28a;--cellOpen:#dcefd8;--frame:#2c5e46}
+[data-skin="night"]{--cellClosed:#3a4666;--cellOpen:#232c47;--frame:#141a2e;--num1:#7db4ff;--num2:#7dff9a;--num3:#ff7d7d;--num4:#9aa8ff;--num5:#ff9a9a;--num6:#7dffe0;--num7:#e8e8e8;--num8:#bbb}
+[data-skin="sand"]{--cellClosed:#d9c08f;--cellOpen:#f2e6c8;--frame:#7a5c33}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse at center,var(--bg2),var(--bg3));font-family:'Segoe UI',Roboto,system-ui,sans-serif;color:var(--text);display:flex;justify-content:center;align-items:flex-start;padding:10px;padding-top:calc(10px + env(safe-area-inset-top));padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.wrap{max-width:760px;width:100%;background:var(--panel);border-radius:24px;padding:12px;box-shadow:0 20px 60px rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.08)}
+.header{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.title{font-size:20px;font-weight:700}
+.hbtn{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.15);color:var(--text);border-radius:30px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:inherit}
+.hbtn:active{transform:scale(.95)}
+.ver{text-align:center;font-size:10px;opacity:.45;margin-top:8px;font-family:monospace;letter-spacing:1px}
+.hud{display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.35);border-radius:14px;padding:8px 12px;margin-bottom:10px}
+.lcd{font-family:'Courier New',monospace;font-weight:700;font-size:26px;color:#f33;background:#1a0505;border-radius:8px;padding:2px 10px;letter-spacing:2px;box-shadow:inset 0 0 8px rgba(255,60,60,.35);min-width:74px;text-align:center}
+.mid{display:flex;flex-direction:column;align-items:center;gap:2px}
+.lives{font-size:14px;letter-spacing:2px;line-height:1}
+.smiley{font-size:30px;background:var(--cellClosed);border-radius:12px;width:52px;height:52px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:inset 2px 2px 0 rgba(255,255,255,.7),inset -2px -2px 0 rgba(0,0,0,.35)}
+.smiley:active{transform:scale(.94)}
+.boardwrap{overflow:auto;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y;border-radius:12px;background:var(--frame);padding:8px;box-shadow:inset 0 2px 10px rgba(0,0,0,.5)}
+@media (max-width:700px){.boardwrap{max-height:min(60vh,520px)}}
+.board{display:grid;grid-template-columns:repeat(var(--cols,9),var(--cs,32px));grid-auto-rows:var(--cs,32px);gap:0;margin:0 auto;width:max-content}
+.cell{width:var(--cs,32px);height:var(--cs,32px);background:var(--cellClosed);box-shadow:inset 2px 2px 0 rgba(255,255,255,.65),inset -2px -2px 0 rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(var(--cs,32px)*.5);cursor:pointer;position:relative}
+.cell.open{background:var(--cellOpen);box-shadow:inset 0 0 0 1px rgba(0,0,0,.25)}
+.cell.mineopen{background:#e88}
+.cell.boom{background:#f33!important}
+.cell.wrong{background:#e88}
+.cell.flag::after{content:'🚩';font-size:calc(var(--cs,32px)*.55)}
+.cell.mineopen::after{content:'💣';font-size:calc(var(--cs,32px)*.55)}
+.cell.boom::after{content:'💥';font-size:calc(var(--cs,32px)*.55)}
+.cell.wrong::after{content:'❌';font-size:calc(var(--cs,32px)*.5)}
+.n1{color:var(--num1)}.n2{color:var(--num2)}.n3{color:var(--num3)}.n4{color:var(--num4)}.n5{color:var(--num5)}.n6{color:var(--num6)}.n7{color:var(--num7)}.n8{color:var(--num8)}
+.status{text-align:center;font-size:14px;font-weight:600;margin:8px 0;min-height:20px;color:var(--accent)}
+.modes{display:flex;gap:10px;justify-content:center;margin-top:8px}
+.modebtn{flex:1;max-width:150px;padding:12px 0;border-radius:16px;font-size:20px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.15);cursor:pointer;color:var(--text)}
+.modebtn.active{border-color:var(--accent);background:rgba(124,255,196,.15);box-shadow:0 0 12px rgba(124,255,196,.35)}
+.overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.72);backdrop-filter:blur(5px);z-index:100;display:none;align-items:center;justify-content:center;padding:16px}
+.overlay.show{display:flex}
+.cardbox{background:var(--panel);border:1px solid rgba(255,255,255,.12);border-radius:24px;padding:22px;max-width:420px;width:100%;text-align:center;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.6);max-height:88vh;overflow-y:auto;color:var(--text)}
+.cardbox h2{font-size:24px;margin-bottom:10px}
+.selrow{margin:12px 0 4px;font-size:14px;font-weight:600;text-align:left}
+.selrow select{width:100%;margin-top:6px;padding:7px;border-radius:10px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.15);color:var(--text);font-size:14px}
+.stat-row{display:flex;justify-content:space-between;padding:5px 2px;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
+.btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:var(--text);padding:9px 18px;border-radius:30px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn.primary{background:linear-gradient(135deg,#7cffc4,#33d6ff);color:#061019;border:none}
+.note{font-size:12px;opacity:.7;line-height:1.45;margin-top:8px;text-align:left}
+</style></head><body>
+<div class="wrap" id="wrap">
+<div class="header"><button class="hbtn" id="hubBtn">← В меню игр</button><div class="title">💣 САПЁР</div><div style="display:flex;gap:6px"><button class="hbtn" id="setBtn">⚙️</button><button class="hbtn" id="rulesBtn">📖</button></div></div>
+<div class="hud"><div class="lcd" id="mineLcd">010</div><div class="mid"><div class="lives" id="livesEl">❤️❤️❤️</div><div class="smiley" id="smiley">🙂</div></div><div class="lcd" id="timeLcd">000</div></div>
+<div class="boardwrap" id="boardwrap"><div class="board" id="board"></div></div>
+<div class="status" id="statusEl">Выбери сложность в ⚙️ и нажми 🙂</div>
+<div class="modes"><button class="modebtn active" id="btnDig">🔨</button><button class="modebtn" id="btnFlag">🚩</button></div>
+<div class="ver" id="verTag">v1.4</div>
+</div>
+<div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
+<div class="selrow">Сложность<select id="diffSel"><option value="novice">Новичок · 9×9 · 10 мин</option><option value="inter">Любитель · 16×16 · 40 мин</option><option value="expert">Эксперт · 30×16 · 99 мин</option></select></div>
+<div class="selrow">Скин<select id="skinSel"><option value="classic">Классика (серый)</option><option value="emerald">Изумруд</option><option value="night">Ночь</option><option value="sand">Песок</option></select></div>
+<div class="selrow">Громкость · <span id="volV">70%</span><input type="range" id="volSlider" min="0" max="100" value="70"></div>
+<div class="selrow">📊 Статистика</div>
+<div class="stat-row"><span>⭐ Очки (жизни влияют)</span><b id="stPts">0</b></div>
+<div class="stat-row"><span>🩸 Потрачено жизней</span><b id="stLives">0</b></div>
+<div class="stat-row"><span>Всего игр / побед</span><b id="stAll">0 / 0</b></div>
+<div class="stat-row"><span>Серия побед / рекорд</span><b id="stStreak">0 / 0</b></div>
+<div class="stat-row"><span>Новичок: игр/побед/рекорд</span><b id="stN">—</b></div>
+<div class="stat-row"><span>Любитель: игр/побед/рекорд</span><b id="stI">—</b></div>
+<div class="stat-row"><span>Эксперт: игр/побед/рекорд</span><b id="stE">—</b></div>
+<div class="btns"><button class="btn" id="stReset">Сбросить статистику</button><button class="btn primary" id="setClose">Готово</button></div>
+<div class="note">Очки за победу: 30 (без потерь) / 20 (−1 жизнь) / 10 (−2). Поражение: −5 очков и +3 потраченные жизни. Смена сложности и скина — к новой игре (кнопка 🙂).</div>
+</div></div>
+<div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Как играть</h2>
+<div class="note" style="text-align:left">• Открывай клетки 🔨 (ПК — левый клик). Цифра — сколько мин вокруг.<br>• 🚩 — флажок (ПК — правый клик; на телефоне режим 🚩, повторный тап снимает).<br>• Тап/двойной клик по открытой цифре открывает соседей, если флажков вокруг столько же, сколько цифра.<br>• Первый клик всегда безопасен.<br>• ❤️❤️❤️ — 3 жизни: мина снимает жизнь и помечается 💥; третья мина — поражение.<br>• Чем меньше жизней потратил — тем больше очков в статистику.<br>• Победа — открыты все клетки без мин.</div>
+<div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
+<script>
+const VER='1.4';
+/* Telegram-интеграция */
+const tg=window.Telegram?window.Telegram.WebApp:null;
+if(tg){try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#101418');if(tg.setBackgroundColor)tg.setBackgroundColor('#101418');}catch(e){}}
+if(tg&&tg.BackButton){try{tg.BackButton.show();tg.BackButton.onClick(function(){if($('setOverlay').classList.contains('show')){$('setOverlay').classList.remove('show');return;}if($('rulesOverlay').classList.contains('show')){$('rulesOverlay').classList.remove('show');return;}location.href='../';});}catch(e){}}
+function trackEvent(n,p){try{if(typeof gtag==='function')gtag('event',n,p);}catch(e){}}
+(function(){try{const k='mines_session';if(!sessionStorage.getItem(k)){sessionStorage.setItem(k,'1');trackEvent('game_open',{game_name:'minesweeper',source:(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user)?'telegram':'browser',ver:VER});}}catch(e){}})();
+function lsGet(k,d){try{const v=localStorage.getItem(k);return v==null?d:v;}catch(e){return d;}}
+function lsSet(k,v){try{localStorage.setItem(k,v);}catch(e){}}
+let AC=null,MASTER=null;function ensureAudio(){if(!AC){try{AC=new(window.AudioContext||window.webkitAudioContext)();MASTER=AC.createGain();MASTER.gain.value=set.vol;MASTER.connect(AC.destination);}catch(e){}}if(AC&&AC.resume)AC.resume();if(MASTER)MASTER.gain.value=set.vol;}
+function tone(f0,f1,d,tp,v){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain(),n=AC.currentTime;o.type=tp;o.frequency.setValueAtTime(f0,n);o.frequency.exponentialRampToValueAtTime(Math.max(f1,1),n+d);g.gain.setValueAtTime(v,n);g.gain.exponentialRampToValueAtTime(.001,n+d);o.connect(g);g.connect(MASTER);o.start(n);o.stop(n+d);}
+function noise(d,v,f){if(!AC)return;const n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*d,AC.sampleRate),a=b.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.exp(-i/(AC.sampleRate*d*.4));n.buffer=b;const bp=AC.createBiquadFilter();bp.type='bandpass';bp.frequency.value=f;const g=AC.createGain();g.gain.setValueAtTime(v,AC.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC.currentTime+d);n.connect(bp);bp.connect(g);g.connect(MASTER);n.start();}
+const sDig=()=>{noise(.05,.2,2500);tone(600,400,.05,'triangle',.1);};
+const sFlagOn=()=>tone(900,1200,.06,'square',.12);
+const sFlagOff=()=>tone(1200,700,.06,'square',.1);
+const sBoom=()=>{noise(.6,.5,300);tone(150,40,.5,'sawtooth',.3);};
+const sWin=()=>{[523,659,784,1046,1318].forEach((f,i)=>setTimeout(()=>tone(f,f,.16,'triangle',.15),i*100));};
+let set=Object.assign({diff:'novice',skin:'classic',vol:.7},JSON.parse(lsGet('mines_set','{}')));
+const saveSet=()=>lsSet('mines_set',JSON.stringify(set));
+let ST=Object.assign({played:0,wins:0,losses:0,streak:0,bestStreak:0,points:0,livesUsed:0,best:{novice:null,inter:null,expert:null},byDiff:{novice:{p:0,w:0},inter:{p:0,w:0},expert:{p:0,w:0}}},JSON.parse(lsGet('mines_stats','{}')));
+const saveST=()=>lsSet('mines_stats',JSON.stringify(ST));
+const DIFFS={novice:{c:9,r:9,m:10,name:'Новичок'},inter:{c:16,r:16,m:40,name:'Любитель'},expert:{c:30,r:16,m:99,name:'Эксперт'}};
+const $=id=>document.getElementById(id);
+let G=null,mode='dig',cellEls=[];
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function adj(i){const r=Math.floor(i/G.cols),c=i%G.cols,out=[];for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){if(!dr&&!dc)continue;const nr=r+dr,nc=c+dc;if(nr>=0&&nr<G.rows&&nc>=0&&nc<G.cols)out.push(nr*G.cols+nc);}return out;}
+function tgHapticSafe(t){try{if(tg&&tg.HapticFeedback)tg.HapticFeedback.notificationOccurred(t);}catch(e){}}
+function newGame(){
+ const d=DIFFS[set.diff];
+ G={cols:d.c,rows:d.r,mines:d.m,cells:Array.from({length:d.c*d.r},()=>({m:0,r:0,f:0,n:0,boom:0})),firstDone:false,over:false,won:false,flags:0,time:0,timer:null,lives:3};
+ stopTimer();
+ let cs;
+ if(window.innerWidth<700){cs=d.c<=9?Math.max(28,Math.floor((window.innerWidth-60)/d.c)):34;}
+ else{cs=Math.min(34,Math.max(28,Math.floor((Math.min(window.innerWidth-70,700))/d.c)));}
+ $('board').style.setProperty('--cols',d.c);
+ $('board').style.setProperty('--cs',cs+'px');
+ buildBoard();updateHud();smiley('🙂');
+ const wide=d.c*cs>window.innerWidth-60;
+ setStatus('💣 '+d.name+': '+d.c+'×'+d.r+', мин: '+d.m+'. Жизни: ❤️❤️❤️.'+(wide?' Поле двигается пальцем.':' Первый клик безопасен.'));
+ trackEvent('game_start',{game_name:'minesweeper',difficulty:set.diff});
+}
+function buildBoard(){const b=$('board');b.innerHTML='';cellEls=[];for(let i=0;i<G.cols*G.rows;i++){const d=document.createElement('div');d.className='cell';d.dataset.i=i;d.addEventListener('click',()=>onCell(i));d.addEventListener('contextmenu',e=>{e.preventDefault();ensureAudio();toggleFlag(i);});d.addEventListener('dblclick',()=>{ensureAudio();chord(i);});b.appendChild(d);cellEls.push(d);}drawAll();$('boardwrap').scrollTop=0;$('boardwrap').scrollLeft=0;}
+function placeMines(safe){const total=G.cols*G.rows;const banned=new Set([safe]);adj(safe).forEach(i=>banned.add(i));let pool=[];for(let i=0;i<total;i++)if(!banned.has(i))pool.push(i);if(pool.length<G.mines){pool=[];for(let i=0;i<total;i++)if(i!==safe)pool.push(i);}shuffle(pool);for(let k=0;k<G.mines;k++)G.cells[pool[k]].m=1;for(let i=0;i<total;i++)G.cells[i].n=adj(i).filter(j=>G.cells[j].m).length;}
+function startTimer(){G.timer=setInterval(()=>{G.time=Math.min(999,G.time+1);$('timeLcd').textContent=String(G.time).padStart(3,'0');},1000);}
+function stopTimer(){if(G&&G.timer){clearInterval(G.timer);G.timer=null;}}
+function flood(i){const st=[i];while(st.length){const j=st.pop();const c=G.cells[j];if(c.r||c.f||c.m)continue;c.r=true;if(c.n===0)adj(j).forEach(j2=>{const a=G.cells[j2];if(!a.r&&!a.m)st.push(j2);});}}
+function doReveal(i){const c=G.cells[i];if(G.over||c.f||c.r)return;ensureAudio();if(!G.firstDone){placeMines(i);G.firstDone=true;startTimer();smiley('😮');}
+ if(c.m){hitMine(i);return;}flood(i);sDig();drawAll();checkWin();updateHud();}
+function chord(i){const c=G.cells[i];if(G.over||!c.r||!c.n)return;ensureAudio();let f=0;const targets=[];adj(i).forEach(j=>{const a=G.cells[j];if(a.f)f++;else if(!a.r)targets.push(j);});if(f!==c.n||!targets.length)return;const mine=targets.find(j=>G.cells[j].m);if(mine!=null){hitMine(mine);return;}targets.forEach(j=>flood(j));sDig();drawAll();checkWin();updateHud();}
+function hitMine(i){G.lives--;G.cells[i].r=true;G.cells[i].boom=1;sBoom();tgHapticSafe('error');drawAll();
+ if(G.lives<=0){G.over=true;G.won=false;stopTimer();G.cells.forEach(c=>{if(c.m&&!c.f)c.r=true;});drawAll();cellEls.forEach((el,idx)=>{const c=G.cells[idx];if(c.f&&!c.m)el.classList.add('wrong');});smiley('😵');setStatus('💥 Жизни кончились! Время: '+G.time+' с');endStats(false);}
+ else{smiley('😮');setStatus('💥 Мина! Осталось жизней: '+'❤️'.repeat(G.lives)+'🖤'.repeat(3-G.lives),true);}
+ updateHud();}
+function toggleFlag(i){const c=G.cells[i];if(G.over||c.r)return;if(!G.firstDone){setStatus('Сначала открой первую клетку 🔨',true);return;}c.f=c.f?0:1;G.flags+=c.f?1:-1;c.f?sFlagOn():sFlagOff();drawCell(i);updateHud();}
+function onCell(i){if(!G||G.over)return;if(mode==='flag'){toggleFlag(i);return;}const c=G.cells[i];if(c.r){chord(i);return;}doReveal(i);}
+function win(){G.over=true;G.won=true;stopTimer();G.cells.forEach(c=>{if(c.m)c.f=1;});G.flags=G.mines;drawAll();smiley('😎');const gain=G.lives*10;sWin();tgHapticSafe('success');setStatus('🏆 Победа! +'+gain+' очков (жизней осталось: '+G.lives+')');endStats(true);}
+function checkWin(){let left=0;for(const c of G.cells)if(!c.m&&!c.r)left++;if(left===0)win();}
+/* НОВОЕ v1.4: жизни влияют на очки статистики */
+function endStats(w){ST.played++;const bd=ST.byDiff[set.diff];bd.p++;
+ if(w){ST.wins++;ST.streak++;if(ST.streak>ST.bestStreak)ST.bestStreak=ST.streak;bd.w++;if(ST.best[set.diff]==null||G.time<ST.best[set.diff])ST.best[set.diff]=G.time;
+  const gain=G.lives*10;ST.points=(ST.points||0)+gain;ST.livesUsed=(ST.livesUsed||0)+(3-G.lives);}
+ else{ST.losses++;ST.streak=0;ST.livesUsed=(ST.livesUsed||0)+3;ST.points=Math.max(0,(ST.points||0)-5);}
+ saveST();trackEvent('game_end',{game_name:'minesweeper',difficulty:set.diff,win:w?1:0,time:G.time,lives_left:G.lives,points:ST.points});}
+function drawCell(i){const el=cellEls[i],c=G.cells[i];el.className='cell'+(c.r?(c.m?' open mineopen':' open'):'')+(c.boom?' boom':'');el.innerHTML='';if(!c.r&&c.f)el.classList.add('flag');else if(c.r&&c.n>0&&!c.m){el.textContent=c.n;el.classList.add('n'+c.n);}}
+function drawAll(){for(let i=0;i<cellEls.length;i++)drawCell(i);}
+function updateHud(){$('mineLcd').textContent=String(Math.max(-99,G.mines-G.flags)).padStart(3,'0').replace('-0','-');$('timeLcd').textContent=String(G.time||0).padStart(3,'0');$('livesEl').textContent='❤️'.repeat(Math.max(0,G.lives))+'🖤'.repeat(Math.max(0,3-Math.max(0,G.lives)));}
+function smiley(s){$('smiley').textContent=s;}
+function setStatus(t,w){const e=$('statusEl');e.innerHTML=t;e.style.color=w?'#ff8f8f':'var(--accent)';}
+$('btnDig').onclick=function(){ensureAudio();mode='dig';this.classList.add('active');$('btnFlag').classList.remove('active');sFlagOff();};
+$('btnFlag').onclick=function(){ensureAudio();mode='flag';this.classList.add('active');$('btnDig').classList.remove('active');sFlagOn();};
+$('smiley').onclick=function(){ensureAudio();sDig();newGame();};
+function applySkin(){document.getElementById('wrap').setAttribute('data-skin',set.skin);}
+function showStats(){$('stPts').textContent=ST.points||0;$('stLives').textContent=ST.livesUsed||0;$('stAll').textContent=ST.played+' / '+ST.wins;$('stStreak').textContent=ST.streak+' / '+ST.bestStreak;const f=d=>{const b=ST.byDiff[d];return b.p+'/'+b.w+'/'+(ST.best[d]==null?'—':ST.best[d]+'с');};$('stN').textContent=f('novice');$('stI').textContent=f('inter');$('stE').textContent=f('expert');}
+$('setBtn').onclick=function(){ensureAudio();$('diffSel').value=set.diff;$('skinSel').value=set.skin;$('volSlider').value=Math.round(set.vol*100);$('volV').textContent=Math.round(set.vol*100)+'%';showStats();$('setOverlay').classList.add('show');};
+$('setClose').onclick=()=>$('setOverlay').classList.remove('show');
+$('diffSel').onchange=e=>{set.diff=e.target.value;saveSet();trackEvent('settings_change',{game_name:'minesweeper',setting:'difficulty',value:set.diff});};
+$('skinSel').onchange=e=>{set.skin=e.target.value;saveSet();applySkin();trackEvent('settings_change',{game_name:'minesweeper',setting:'skin',value:set.skin});};
+$('volSlider').oninput=e=>{set.vol=e.target.value/100;$('volV').textContent=e.target.value+'%';saveSet();ensureAudio();};
+$('stReset').onclick=()=>{if(confirm('Сбросить статистику?')){ST={played:0,wins:0,losses:0,streak:0,bestStreak:0,points:0,livesUsed:0,best:{novice:null,inter:null,expert:null},byDiff:{novice:{p:0,w:0},inter:{p:0,w:0},expert:{p:0,w:0}}};saveST();showStats();}};
+$('rulesBtn').onclick=()=>$('rulesOverlay').classList.add('show');
+$('rulesClose').onclick=()=>$('rulesOverlay').classList.remove('show');
+$('hubBtn').onclick=()=>{location.href='../';};
+window.addEventListener('resize',()=>{if(G)newGame();});
+applySkin();$('verTag').textContent='v'+VER;newGame();
+</script></body></html>

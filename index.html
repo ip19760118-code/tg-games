@@ -125,7 +125,7 @@
 
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
-      <p class="hub-desc">10 игр в одном боте: аркады, головоломки, классика и онлайн-партии с друзьями. Без установки — нажми и играй.</p>
+      <p class="hub-desc">11 игр в одном боте: аркады, головоломки, классика и онлайн-партии с друзьями. Без установки — нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn">
         <span class="game-emoji">🧺</span>
@@ -207,6 +207,14 @@
         </span>
       </button>
 
+      <button class="game-btn" id="minesBtn">
+        <span class="game-emoji">💣</span>
+        <span class="game-text">
+          <b>Сапёр</b>
+          <small>3 жизни, 3 уровня, скины, очки за жизни</small>
+        </span>
+      </button>
+
       <button class="game-btn disabled" disabled>
         <span class="game-emoji">🚧</span>
         <span class="game-text">
@@ -216,12 +224,12 @@
       </button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.0</p>
+      <p class="hub-ver" id="hubVer">hub v3.1</p>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.0';
+    const HUB_VER = '3.1';
 
     const tg = window.Telegram?.WebApp;
 
@@ -272,6 +280,7 @@
     document.getElementById('durakBtn').addEventListener('click', () => openGame('./durak/', 'durak'));
     document.getElementById('nardyBtn').addEventListener('click', () => openGame('./nardy/', 'nardy'));
     document.getElementById('shashkiBtn').addEventListener('click', () => openGame('./shashki/', 'shashki'));
+    document.getElementById('minesBtn').addEventListener('click', () => openGame('./minesweeper/', 'minesweeper'));
 
     document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
   </script>
