@@ -137,7 +137,7 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="catled" id="catLed"></div>
 <div class="status" id="statusEl">Выбери режим в ⚙️ и нажми 🔄</div>
 <div class="actions"><span class="bankchip" id="bankChip">⭐ Банк: 0</span><button class="btn" id="undoBtn">↩️ Отмена</button><button class="btn" id="pauseBtn" style="display:none">⏸ Пауза</button><button class="btn skipglow" id="nextLevelBtn" style="display:none">⏭️ След. уровень (−1000)</button><button class="btn" id="hintBtn">💡 Подсказка</button></div>
-<div class="ver" id="verTag">v4.14</div>
+<div class="ver" id="verTag">v4.15</div>
 </div>
 <div class="overlay" id="setOverlay"><div class="cardbox"><h2>⚙️ Настройки</h2>
 <div class="selrow">Режим<select id="modeSel"><option value="qtime">Задания на время</option><option value="qmoves">Задания на ходы</option><option value="cats">Проведи котиков (∞)</option><option value="endless">Бесконечно</option></select></div>
@@ -152,16 +152,16 @@ body{min-height:100vh;background:var(--bg1);background:radial-gradient(ellipse a
 <div class="stat-row"><span>🐱 Рекорд проведённых котиков</span><b id="stCats">0</b></div>
 <div class="stat-row"><span>🧺 Собрано в корзины</span><b id="stBask">0</b></div>
 <div class="btns"><button class="btn" id="stReset">Сбросить</button><button class="btn primary" id="setClose">Готово</button></div>
-<div class="note">Сенсор: тап = выбор/обмен с первого касания; свайп = обмен, если палец прошёл >35% клетки; случайные дальние смахи игнорируются.</div>
+<div class="note">Ввод: тап = выбор/обмен по исходной клетке; свайп = обмен по направлению пальца. Случайные соскакивания пальца больше не съедают ход.</div>
 </div></div>
 <div class="overlay" id="endOverlay"><div class="cardbox"><h2 id="endTitle"></h2><div class="note" id="endSub" style="text-align:center"></div><div class="btns" id="endBtns"></div></div></div>
 <div class="overlay" id="rulesOverlay"><div class="cardbox"><h2>📖 Как играть</h2>
-<div class="note" style="text-align:left">• Управление: тап по кристаллу → тап по соседу, ИЛИ свайп к соседу (на телефоне с первого касания).<br>• ОЧКИ УРОВНЯ (слева); БАНК ⭐ (чип под полем).<br>• Режимы: «На время», «На ходы», «Проведи котиков» (∞), «Бесконечно».<br>• Уровни: каждый 3‑й плитки, каждый 4‑й котики, каждый 6‑й корзины.<br>• 🐱 Кот в пустой клетке; засчитывается сразу у низа; свап бонуса с котом активирует бонус; без разрушения — откат.<br>• 🧺 Корзины: цифра = осталось; собрал — исчезает; 3+ цвета сгорают, проваливаются 1–2.<br>• Звёзды: ≥70% ★★★, 40–69% ★★, 10–39% ★; бонус 3000/2000/1000. Овертайм −50/ход, −10/сек; пропуск −1000.</div>
+<div class="note" style="text-align:left">• Управление: тап по кристаллу → тап по соседу, ИЛИ свайп от кристалла к соседу (направление берётся из движения пальца).<br>• ОЧКИ УРОВНЯ (слева); БАНК ⭐ (чип под полем).<br>• Режимы: «На время», «На ходы», «Проведи котиков» (∞), «Бесконечно».<br>• Уровни: каждый 3‑й плитки, каждый 4‑й котики, каждый 6‑й корзины.<br>• 🐱 Кот в пустой клетке; засчитывается сразу у низа; свап бонуса с котом активирует бонус; без разрушения — откат.<br>• 🧺 Корзины: цифра = осталось; собрал — исчезает; 3+ цвета сгорают, проваливаются 1–2.<br>• Звёзды: ≥70% ★★★, 40–69% ★★, 10–39% ★; бонус 3000/2000/1000. Овертайм −50/ход, −10/сек; пропуск −1000.</div>
 <div class="btns"><button class="btn primary" id="rulesClose">Понятно</button></div></div></div>
 <script>
-var VER='4.14';
+var VER='4.15';
 var IMG='img/';
-var SWAP_MS=260,FALL_MS=300;
+var SWAP_MS=240,FALL_MS=240;
 (function(){var t=new Image();t.onerror=function(){document.body.classList.add('noarrow');};t.src=IMG+'arrow_h.png';})();
 var tg=window.Telegram?window.Telegram.WebApp:null;
 if(tg){try{tg.ready();tg.expand();if(tg.setHeaderColor)tg.setHeaderColor('#0d1026');if(tg.setBackgroundColor)tg.setBackgroundColor('#0d1026');}catch(e){}}
@@ -203,20 +203,22 @@ function $(id){return document.getElementById(id);}
 var G=null,cellEls=[],crEls=[],catEls2={},uid=0,undoStack=[];
 var questScore=0,levelStart=0;
 var CATCOLS=['o','b','w'];
-/* ИСПРАВЛЕНО v4.14: единый pointer-ввод (тап и свайп), pointercancel, порог 35% клетки */
-var dragI=-1,dragX=0,dragY=0,moved=false,dragCell=-1;
-function dragThreshold(){var cs=(cellEls&&cellEls[0])?cellEls[0].offsetWidth:44;return Math.max(12,cs*0.35);}
-function cellFromPoint(e){var el=document.elementFromPoint(e.clientX,e.clientY);var c=(el&&el.closest)?el.closest('.cell'):null;return c?+c.dataset.i:-1;}
+/* ИСПРАВЛЕНО v4.15: детерминированный ввод — тап по исходной клетке, свайп по вектору пальца */
+var dragI=-1,dragX=0,dragY=0,dragCell=-1;
+function dragThreshold(){var cs=(cellEls&&cellEls[0])?cellEls[0].offsetWidth:44;return Math.max(10,cs*0.30);}
 function cleanupDrag(){window.removeEventListener('pointermove',onPtrMove);window.removeEventListener('pointerup',onPtrUp);window.removeEventListener('pointercancel',onPtrCancel);}
-function onPtrDown(e,i){if(!G||G.over||G.busy||G.paused)return;ensureAudio();dragI=i;dragCell=i;dragX=e.clientX;dragY=e.clientY;moved=false;
+function onPtrDown(e,i){if(!G||G.over||G.busy||G.paused)return;ensureAudio();dragI=i;dragCell=i;dragX=e.clientX;dragY=e.clientY;
  window.addEventListener('pointermove',onPtrMove);window.addEventListener('pointerup',onPtrUp);window.addEventListener('pointercancel',onPtrCancel);}
-function onPtrMove(e){if(dragI<0)return;if(Math.hypot(e.clientX-dragX,e.clientY-dragY)>dragThreshold())moved=true;}
+function onPtrMove(e){}
 function onPtrCancel(){cleanupDrag();dragI=-1;dragCell=-1;}
 function onPtrUp(e){cleanupDrag();var a=dragCell;dragI=-1;dragCell=-1;if(a<0)return;
- var up=cellFromPoint(e);
- if(moved&&up>=0&&up!==a&&isAdj(a,up)){G.sel=-1;trySwap(a,up);}
- else if(up===a||up<0){onCell(a);}
- /* если уехали далеко не на соседа — жест игнорируем (без случайных обменов) */}
+ var ddx=e.clientX-dragX,ddy=e.clientY-dragY;
+ var dist=Math.hypot(ddx,ddy);
+ if(dist<dragThreshold()){onCell(a);return;}
+ var r=Math.floor(a/8),c=a%8,b=-1;
+ if(Math.abs(ddx)>=Math.abs(ddy)){b=(ddx>0)?(c<7?a+1:-1):(c>0?a-1:-1);}
+ else{b=(ddy>0)?(r<7?a+8:-1):(r>0?a-8:-1);}
+ if(b>=0&&isAdj(a,b)){G.sel=-1;trySwap(a,b);}}
 function catSprite(col){return col==='b'?IMG+'cat_black.png':(col==='w'?IMG+'cat_white.png':IMG+'cat.png');}
 function mk(c,s){return{c:c,s:s||0,id:++uid};}
 function colorsNow(){return G?G.colors:DIFFS[set.diff].colors;}
@@ -585,7 +587,7 @@ function startResolve(initClear,initSpawns){G.busy=true;var combo=0;
    if(spawns)spawns.forEach(function(sp){G.grid[sp.idx]=mk(sp.type===4?-1:sp.color,sp.type);});
    deliverCats();
    var g1=applyGravity();var dropSet=g1.fresh;settleBaskets(dropSet);
-   renderBoard(dropSet);updateHud();updateObj();setTimeout(function(){step(null,null,null);},200);},220);}
+   renderBoard(dropSet);updateHud();updateObj();setTimeout(function(){step(null,null,null);},180);},200);}
  step(initClear||null,initSpawns||null,null);}
 function basketsAllDone(){return G.baskets&&G.baskets.length&&G.baskets.every(function(b){return b.count>=b.need;});}
 function objDone(){var o=G.obj;if(!o)return false;
