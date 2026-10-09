@@ -117,6 +117,19 @@
       letter-spacing: 0.5px;
       vertical-align: middle;
     }
+    .tag-new {
+      display: inline-block;
+      margin-left: 6px;
+      padding: 1px 7px;
+      border-radius: 10px;
+      background: rgba(255, 209, 102, 0.15);
+      border: 1px solid rgba(255, 209, 102, 0.45);
+      color: #ffd166;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      vertical-align: middle;
+    }
   </style>
 </head>
 <body>
@@ -125,7 +138,7 @@
 
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
-      <p class="hub-desc">11 игр в одном боте: аркады, головоломки, классика и онлайн-партии с друзьями. Без установки — нажми и играй.</p>
+      <p class="hub-desc">12 игр в одном боте: аркады, головоломки, классика, онлайн‑партии и match‑3 с котиками. Без установки — нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn">
         <span class="game-emoji">🧺</span>
@@ -215,6 +228,14 @@
         </span>
       </button>
 
+      <button class="game-btn" id="crystalsBtn">
+        <span class="game-emoji">💎</span>
+        <span class="game-text">
+          <b>Кристаллы <span class="tag-new">NEW</span></b>
+          <small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small>
+        </span>
+      </button>
+
       <button class="game-btn disabled" disabled>
         <span class="game-emoji">🚧</span>
         <span class="game-text">
@@ -224,12 +245,12 @@
       </button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.1</p>
+      <p class="hub-ver" id="hubVer">hub v3.2</p>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.1';
+    const HUB_VER = '3.2';
 
     const tg = window.Telegram?.WebApp;
 
@@ -281,6 +302,7 @@
     document.getElementById('nardyBtn').addEventListener('click', () => openGame('./nardy/', 'nardy'));
     document.getElementById('shashkiBtn').addEventListener('click', () => openGame('./shashki/', 'shashki'));
     document.getElementById('minesBtn').addEventListener('click', () => openGame('./minesweeper/', 'minesweeper'));
+    document.getElementById('crystalsBtn').addEventListener('click', () => openGame('./crystals/', 'crystals'));
 
     document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
   </script>
