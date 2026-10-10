@@ -138,7 +138,7 @@
 
       <h1>🎮 Игровой центр</h1>
       <p class="hub-subtitle">Мини-игры прямо в Telegram</p>
-      <p class="hub-desc">12 игр в одном боте: аркады, головоломки, классика, онлайн‑партии и match‑3 с котиками. Без установки — нажми и играй.</p>
+      <p class="hub-desc">13 игр в одном боте: аркады, головоломки, классика, онлайн‑партии, match‑3 и пасьянс. Без установки — нажми и играй.</p>
 
       <button class="game-btn" id="trendCatchBtn">
         <span class="game-emoji">🧺</span>
@@ -231,8 +231,16 @@
       <button class="game-btn" id="crystalsBtn">
         <span class="game-emoji">💎</span>
         <span class="game-text">
-          <b>Кристаллы <span class="tag-new">NEW</span></b>
+          <b>Кристаллы</b>
           <small>Match‑3: бонусы, молнии, котики, корзины, 4 режима</small>
+        </span>
+      </button>
+
+      <button class="game-btn" id="solitaireBtn">
+        <span class="game-emoji">♠️</span>
+        <span class="game-text">
+          <b>Косынка <span class="tag-new">NEW</span></b>
+          <small>Классический пасьянс: перетаскивание, подсказки, скины</small>
         </span>
       </button>
 
@@ -245,12 +253,12 @@
       </button>
 
       <p class="hub-foot">Новые игры появляются здесь регулярно</p>
-      <p class="hub-ver" id="hubVer">hub v3.2</p>
+      <p class="hub-ver" id="hubVer">hub v3.3</p>
     </div>
   </div>
 
   <script>
-    const HUB_VER = '3.2';
+    const HUB_VER = '3.3';
 
     const tg = window.Telegram?.WebApp;
 
@@ -303,6 +311,7 @@
     document.getElementById('shashkiBtn').addEventListener('click', () => openGame('./shashki/', 'shashki'));
     document.getElementById('minesBtn').addEventListener('click', () => openGame('./minesweeper/', 'minesweeper'));
     document.getElementById('crystalsBtn').addEventListener('click', () => openGame('./crystals/', 'crystals'));
+    document.getElementById('solitaireBtn').addEventListener('click', () => openGame('./solitaire/', 'solitaire'));
 
     document.getElementById('hubVer').textContent = 'hub v' + HUB_VER;
   </script>
